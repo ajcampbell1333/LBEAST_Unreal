@@ -48,7 +48,7 @@ Ready-to-use complete experiences combining multiple APIs:
 **Use these when:** Rapid deployment of standard LBE configurations.
 
 ### Tier 3: Your Custom Game Logic
-Build your specific experience on top of templates or APIs.
+Build your specific experience (Tier 3) on top of templates (Tier 2) or APIs (Tier 1).
 
 ### When to Use What?
 
