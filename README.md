@@ -1,6 +1,6 @@
 # LBEAST SDK for Unreal Engine
 
-**Location-Based Entertainment Activation Standard**
+**Location-Based Entertainment Activation Standard Toolkit**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Unreal Engine](https://img.shields.io/badge/Unreal%20Engine-5.5.4-blue.svg)](https://www.unrealengine.com/)
@@ -12,7 +12,7 @@ LBEAST is a comprehensive SDK for developing VR and AR Location-Based Entertainm
 The LBEAST SDK democratizes LBE development by providing:
 - **Experience Templates** - Drag-and-drop complete LBE solutions
 - **Low-Level APIs** - Technical modules for custom implementations
-- **AI-Driven Facial Animation** for immersive theater actors
+- **AI-Driven Facial Animation** for immersive theater live actors
 - **Large-Scale Hydraulic Haptics** for motion platforms
 - **Embedded Systems Integration** for costume and prop-mounted hardware
 - **Multi-Player LAN Experiences** with state machine control
@@ -36,7 +36,7 @@ Foundation modules providing core functionality:
 
 ### Tier 2: Experience Templates (Pre-Configured Actors)
 Ready-to-use complete experiences combining multiple APIs:
-- `AAIFacemaskExperience` - Actor-driven multiplayer VR
+- `AAIFacemaskExperience` - Live actor-driven multiplayer VR
 - `AMovingPlatformExperience` - Standing hydraulic platform
 - `AGunshipExperience` - 4-player seated platform
 - `ACarSimExperience` - Racing/driving simulator
@@ -55,7 +55,7 @@ Build your specific experience on top of templates or APIs.
 | Building a racing game | `ACarSimExperience` | Simplified driving API, optimized motion profiles |
 | Building a space combat game | `AFlightSimExperience` | HOTAS integration ready, continuous rotation supported |
 | Custom 3-player standing platform | Low-Level APIs | Need custom configuration not covered by templates |
-| Actor-driven escape room | `AAIFacemaskExperience` | Actor support, multiplayer, and embedded systems ready |
+| Live actor-driven escape room | `AAIFacemaskExperience` | Live actor support, multiplayer, and embedded systems ready |
 | Unique hardware configuration | Low-Level APIs | Full control over all actuators and systems |
 
 **Rule of thumb:** Start with templates, drop to APIs only when you need customization beyond what templates offer.
@@ -108,22 +108,22 @@ Experience Templates are complete, pre-configured Actors that you can drag into 
 #### 🎭 AI Facemask Experience
 **Class:** `AAIFacemaskExperience`
 
-Deploy LAN multiplayer VR experiences where immersive theater actors drive avatars with AI-generated facial expressions. Perfect for narrative experiences requiring human performers.
+Deploy LAN multiplayer VR experiences where immersive theater live actors drive avatars with AI-generated facial expressions. Perfect for narrative experiences requiring human performers.
 
 **Includes:**
 - Pre-configured `UAIFaceController` for facial animation
 - Pre-configured `UEmbeddedDeviceController` for costume controls
-- LAN multiplayer support (configurable actor/player counts)
-- Passthrough mode for actors to help players
+- LAN multiplayer support (configurable live actor/player counts)
+- Passthrough mode for live actors to help players
 - Blueprint-friendly interface for expression control
 
 **Quick Start:**
 ```cpp
 // In your level
 AAIFacemaskExperience* Experience = GetWorld()->SpawnActor<AAIFacemaskExperience>();
-Experience->NumberOfActors = 1;
+Experience->NumberOfLiveActors = 1;
 Experience->NumberOfPlayers = 4;
-Experience->ActorMesh = MyCharacterMesh;
+Experience->LiveActorMesh = MyCharacterMesh;
 Experience->InitializeExperience();
 ```
 
@@ -398,7 +398,7 @@ PublicDependencyModuleNames.AddRange(new string[] {
 
 FLBEASTHMDConfig HMDConfig;
 HMDConfig.HMDType = ELBEASTHMDType::OpenXR;
-HMDConfig.bEnablePassthrough = true;  // For immersive actors
+HMDConfig.bEnablePassthrough = true;  // For immersive live actors
 // Apply to your VR pawn...
 ```
 
@@ -495,7 +495,7 @@ LBEAST is designed for **commercial LBE installations** including:
 - 🎬 **Movie/TV Promotional Activations** (Comic-Con, CES, Sundance, Tribeca)
 - 🎮 **VR Arcades** with motion platforms
 - 🎪 **Theme Park Attractions** with custom haptics
-- 🎭 **Immersive Theater** with actor-driven avatars
+- 🎭 **Immersive Theater** with live actor-driven avatars
 - 🏢 **Corporate Events** and brand experiences
 - 🚀 **Research Labs** and academic projects
 

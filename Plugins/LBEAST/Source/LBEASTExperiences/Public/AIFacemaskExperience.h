@@ -13,14 +13,14 @@ class UEmbeddedDeviceController;
 /**
  * AI Facemask Experience Template
  * 
- * Pre-configured experience for LAN multiplayer VR with immersive theater actors.
+ * Pre-configured experience for LAN multiplayer VR with immersive theater live actors.
  * Combines:
- * - AI facial animation on actor avatars
+ * - AI facial animation on live actor avatars
  * - Embedded systems for costume controls
  * - LAN multiplayer support
  * - Narrative state machine integration
  * 
- * Perfect for experiences where one or more players are professional actors
+ * Perfect for experiences where one or more players are professional live actors
  * driving avatars with AI-generated faces and interactive costume elements.
  */
 UCLASS(Blueprintable, ClassGroup=(LBEAST))
@@ -31,9 +31,9 @@ class LBEASTCORE_API AAIFacemaskExperience : public ALBEASTExperienceBase
 public:
 	AAIFacemaskExperience();
 
-	/** Reference to the actor's skeletal mesh for facial animation */
+	/** Reference to the live actor's skeletal mesh for facial animation */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|AI Facemask")
-	TObjectPtr<USkeletalMeshComponent> ActorMesh;
+	TObjectPtr<USkeletalMeshComponent> LiveActorMesh;
 
 	/** AI Face controller component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LBEAST|AI Facemask")
@@ -43,13 +43,13 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LBEAST|AI Facemask")
 	TObjectPtr<UEmbeddedDeviceController> CostumeController;
 
-	/** Enable passthrough for actors to help players */
+	/** Enable passthrough for live actors to help players */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|AI Facemask")
-	bool bEnableActorPassthrough = true;
+	bool bEnableLiveActorPassthrough = true;
 
-	/** Number of actor roles in this experience */
+	/** Number of live actor roles in this experience */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|AI Facemask", meta = (ClampMin = "1", ClampMax = "4"))
-	int32 NumberOfActors = 1;
+	int32 NumberOfLiveActors = 1;
 
 	/** Number of player roles in this experience */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|AI Facemask", meta = (ClampMin = "1", ClampMax = "8"))
@@ -71,7 +71,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "LBEAST|AI Facemask")
 	void TriggerCostumeHaptic(int32 Channel, float Intensity, float Duration);
 
-	virtual int32 GetMaxPlayers() const override { return NumberOfActors + NumberOfPlayers; }
+	virtual int32 GetMaxPlayers() const override { return NumberOfLiveActors + NumberOfPlayers; }
 
 protected:
 	virtual bool InitializeExperienceImpl() override;

@@ -13,7 +13,7 @@ AAIFacemaskExperience::AAIFacemaskExperience()
 	// Configure for multiplayer by default
 	bMultiplayerEnabled = true;
 
-	// Enable passthrough for actors
+	// Enable passthrough for live actors
 	HMDConfig.bEnablePassthrough = true;
 }
 
@@ -25,10 +25,10 @@ bool AAIFacemaskExperience::InitializeExperienceImpl()
 	}
 
 	// Initialize AI Face Controller
-	if (FaceController && ActorMesh)
+	if (FaceController && LiveActorMesh)
 	{
 		FAIFaceConfig FaceConfig;
-		FaceConfig.TargetMesh = ActorMesh;
+		FaceConfig.TargetMesh = LiveActorMesh;
 		FaceConfig.bUseAIGeneration = true;
 		FaceConfig.UpdateRate = 30.0f;
 
@@ -56,7 +56,7 @@ bool AAIFacemaskExperience::InitializeExperienceImpl()
 		}
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: Initialized with %d actors and %d players"), NumberOfActors, NumberOfPlayers);
+	UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: Initialized with %d live actors and %d players"), NumberOfLiveActors, NumberOfPlayers);
 	return true;
 }
 

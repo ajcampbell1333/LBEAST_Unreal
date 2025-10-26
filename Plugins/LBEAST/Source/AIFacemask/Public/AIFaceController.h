@@ -51,8 +51,8 @@ struct FAIFaceConfig
 /**
  * AI Face Controller Component
  * 
- * Manages AI-driven facial animation for immersive theater actors.
- * Attach this component to an actor to enable AI facial expression control.
+ * Manages AI-driven facial animation for immersive theater live actors (physical performers).
+ * Attach this component to an Unreal Actor to enable AI facial expression control.
  */
 UCLASS(ClassGroup=(LBEAST), meta=(BlueprintSpawnableComponent))
 class AIFACEMASK_API UAIFaceController : public UActorComponent
