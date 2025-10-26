@@ -60,6 +60,38 @@ Build your specific experience on top of templates or APIs.
 
 **Rule of thumb:** Start with templates, drop to APIs only when you need customization beyond what templates offer.
 
+## ⚠️ Terminology: Unreal Actors vs. Live Actors
+
+**Important distinction for clarity:**
+
+### Unreal Actor (AActor)
+An **Unreal Actor** refers to Unreal Engine's base class `AActor` - the fundamental object that can be placed in a level. All Experience Templates (like `AAIFacemaskExperience`, `AMovingPlatformExperience`) inherit from `AActor`.
+
+```cpp
+// This is an Unreal Actor (engine class)
+AAIFacemaskExperience* Experience = GetWorld()->SpawnActor<AAIFacemaskExperience>();
+```
+
+### Live Actor (Physical Performer)
+A **Live Actor** refers to a **physical human performer** wearing VR equipment and/or costumes in the LBE installation. They drive in-game avatars with real-time facial animation and interact with players.
+
+```cpp
+// This configures support for 2 physical performers
+Experience->NumberOfLiveActors = 2;  // Human performers wearing facemasks
+Experience->NumberOfPlayers = 4;     // VR players
+```
+
+### Quick Reference
+- **"Unreal Actor"** = C++ class that exists in the game world (`AActor`)
+- **"Live Actor"** = Physical person performing in the experience
+- **"Avatar"** = The in-game character controlled by a live actor
+- **"Player"** = VR participant (not performing, just experiencing)
+
+**In this documentation:**
+- When we say "Actor" in code context (`AActor`, `SpawnActor`), we mean the Unreal Engine class
+- When we say "Live Actor" or "live actors", we mean physical human performers
+- Context should make it clear, but this distinction is important for the AI Facemask system
+
 ## Philosophy
 
 LBEAST is **not** a no-code solution. It's a professional-grade toolchain designed for teams of programmers and technical artists building commercial LBE installations. 
