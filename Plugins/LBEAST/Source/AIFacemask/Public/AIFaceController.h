@@ -52,7 +52,16 @@ struct FAIFaceConfig
  * AI Face Controller Component
  * 
  * Manages AI-driven facial animation for immersive theater live actors (physical performers).
+ * Designed as a bridge to NVIDIA Audio2Face (Neural Face) technology for autonomous
+ * conversational avatars that can interact with players without manual control.
+ * 
+ * The live actor does NOT manually control facial expressions - the AI does this autonomously
+ * based on conversation, emotion detection, and narrative context. The live actor focuses on
+ * directing the experience through wrist-mounted state machine controls.
+ * 
  * Attach this component to an Unreal Actor to enable AI facial expression control.
+ * 
+ * Future Integration: NVIDIA Omniverse Audio2Face (native in Unreal Engine)
  */
 UCLASS(ClassGroup=(LBEAST), meta=(BlueprintSpawnableComponent))
 class AIFACEMASK_API UAIFaceController : public UActorComponent

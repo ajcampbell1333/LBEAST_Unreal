@@ -140,14 +140,24 @@ Experience Templates are complete, pre-configured Actors that you can drag into 
 #### 🎭 AI Facemask Experience
 **Class:** `AAIFacemaskExperience`
 
-Deploy LAN multiplayer VR experiences where immersive theater live actors drive avatars with AI-generated facial expressions. Perfect for narrative experiences requiring human performers.
+Deploy LAN multiplayer VR experiences where immersive theater live actors drive avatars with **autonomous AI-generated facial expressions**. The AI face operates independently using NVIDIA Audio2Face (Neural Face), while live actors control the experience flow through wrist-mounted buttons.
+
+**Architecture:**
+- **AI Face**: Fully autonomous, driven by NVIDIA Audio2Face for natural conversation
+- **Live Actor Role**: Experience director, NOT puppeteer
+- **Wrist Controls**: 4 buttons (2 left, 2 right) to advance/retreat through experience states
+- **Experience Loop**: Built-in state machine (Intro → Tutorial → Act1 → Act2 → Finale → Credits)
 
 **Includes:**
-- Pre-configured `UAIFaceController` for facial animation
-- Pre-configured `UEmbeddedDeviceController` for costume controls
+- Pre-configured `UAIFaceController` (autonomous facial animation bridge)
+- Pre-configured `UEmbeddedDeviceController` (wrist buttons)
+- Pre-configured `UExperienceStateMachine` (story progression)
 - LAN multiplayer support (configurable live actor/player counts)
 - Passthrough mode for live actors to help players
-- Blueprint-friendly interface for expression control
+
+**Button Layout:**
+- **Left Wrist**: Button 0 (Forward), Button 1 (Backward)
+- **Right Wrist**: Button 2 (Forward), Button 3 (Backward)
 
 **Quick Start:**
 ```cpp
@@ -157,6 +167,25 @@ Experience->NumberOfLiveActors = 1;
 Experience->NumberOfPlayers = 4;
 Experience->LiveActorMesh = MyCharacterMesh;
 Experience->InitializeExperience();
+
+// React to experience state changes
+FName CurrentState = Experience->GetCurrentExperienceState();
+
+// Manually trigger state changes (usually handled by wrist buttons automatically)
+Experience->AdvanceExperience();
+Experience->RetreatExperience();
+```
+
+**Blueprint Events:**
+Override `OnExperienceStateChanged` to trigger game events:
+```cpp
+void OnExperienceStateChanged(FName OldState, FName NewState, int32 NewStateIndex)
+{
+    if (NewState == "Act1")
+    {
+        // Spawn enemies, trigger cutscene, etc.
+    }
+}
 ```
 
 #### 🎢 Moving Platform Experience
