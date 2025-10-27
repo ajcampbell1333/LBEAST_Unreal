@@ -44,7 +44,9 @@ public class LBEASTCore : ModuleRules
 			new string[]
 			{
 				"Slate",
-				"SlateCore"
+				"SlateCore",
+				"EmbeddedSystems",      // For UEmbeddedDeviceController (used in .cpp only)
+				"LBEASTExperiences"     // For ALBEASTExperienceBase (used in .cpp only)
 			}
 		);
 		

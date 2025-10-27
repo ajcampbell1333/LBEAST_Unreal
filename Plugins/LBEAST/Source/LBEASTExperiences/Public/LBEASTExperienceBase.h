@@ -8,6 +8,9 @@
 #include "LBEASTTrackingInterface.h"
 #include "LBEASTExperienceBase.generated.h"
 
+// Forward declarations
+class ULBEASTInputAdapter;
+
 /**
  * Server mode for multiplayer experiences
  */
@@ -74,6 +77,17 @@ public:
 	/** Required server mode (used when bEnforceServerMode is true) */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LBEAST|Experience|Networking")
 	ELBEASTServerMode RequiredServerMode = ELBEASTServerMode::Standalone;
+
+	// ========================================
+	// COMPONENTS
+	// ========================================
+
+	/** 
+	 * Input adapter component for handling all input sources (embedded systems, VR, keyboard, etc.)
+	 * Auto-created in constructor. Configure in InitializeExperienceImpl().
+	 */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LBEAST|Components")
+	TObjectPtr<ULBEASTInputAdapter> InputAdapter;
 
 	/**
 	 * Initialize the experience

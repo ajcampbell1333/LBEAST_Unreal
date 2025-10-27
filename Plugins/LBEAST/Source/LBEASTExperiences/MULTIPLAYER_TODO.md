@@ -7,16 +7,18 @@
 - Client discovery (listening for servers)
 - Server metadata broadcast (player count, state, version)
 - Dedicated server enforcement
-- Experience Loop state machine (local only)
-- Embedded Systems button input (local only)
+- Experience Loop state machine (with authority checks)
+- Embedded Systems button input (authority-only)
+- **Server RPCs for button presses** ✨ NEW
+- **Authority checks for input processing** ✨ NEW
+- **Input-agnostic request system** ✨ NEW
+- **VR controller support (Blueprint override)** ✨ NEW
 
 ### ❌ **NOT Implemented:**
-- Actual client-server connection
-- Game state replication
-- Player spawning/management
-- Button press replication
-- Experience Loop state replication
-- Authority checks
+- Actual client-server connection (Step 1)
+- Game state replication (Step 2)
+- Player spawning/management (Step 5)
+- Experience Loop state replication (Step 2, 6)
 
 ---
 
@@ -92,107 +94,39 @@ void AAIFacemaskExperience::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 
 ---
 
-### **3. Server RPCs for Button Presses**
+### **3. Server RPCs for Button Presses** ✅ **IMPLEMENTED**
 
-**File:** `AIFacemaskExperience.h`
+**Status:** Complete with input-agnostic design
 
-```cpp
-/** Server RPC: Advance experience (called by live actor button press) */
-UFUNCTION(Server, Reliable, WithValidation)
-void ServerAdvanceExperience();
+**Implementation:**
+- `RequestAdvanceExperience()` / `RequestRetreatExperience()` - Public API
+- `ServerAdvanceExperience()` / `ServerRetreatExperience()` - RPCs
+- `AdvanceExperienceInternal()` / `RetreatExperienceInternal()` - Authority-only state changes
 
-/** Server RPC: Retreat experience (called by live actor button press) */
-UFUNCTION(Server, Reliable, WithValidation)
-void ServerRetreatExperience();
-```
+**Key Features:**
+- Input-agnostic: Works with EmbeddedSystems, VR controllers, keyboard, AI, etc.
+- Network-agnostic: Works with dedicated and listen servers
+- Automatic routing: Calls internal functions on authority, sends RPCs on clients
 
-**File:** `AIFacemaskExperience.cpp`
-
-```cpp
-void AAIFacemaskExperience::ServerAdvanceExperience_Implementation()
-{
-    if (ExperienceLoop && ExperienceLoop->AdvanceState())
-    {
-        ReplicatedExperienceState = ExperienceLoop->GetCurrentStateName();
-    }
-}
-
-bool AAIFacemaskExperience::ServerAdvanceExperience_Validation()
-{
-    return true;  // Add validation logic if needed
-}
-
-void AAIFacemaskExperience::ServerRetreatExperience_Implementation()
-{
-    if (ExperienceLoop && ExperienceLoop->RetreatState())
-    {
-        ReplicatedExperienceState = ExperienceLoop->GetCurrentStateName();
-    }
-}
-
-bool AAIFacemaskExperience::ServerRetreatExperience_Validation()
-{
-    return true;
-}
-```
+**See:** `INPUT_ARCHITECTURE.md` for complete documentation
 
 ---
 
-### **4. Authority Checks**
+### **4. Authority Checks** ✅ **IMPLEMENTED**
 
-**File:** `AIFacemaskExperience.cpp`
+**Status:** Complete with flexible input system
 
-Update `ProcessButtonInput()`:
+**Implementation:**
+- `Tick()` checks `HasAuthority()` before processing input
+- `ProcessEmbeddedSystemInput()` - ESP32 wrist buttons (authority-only)
+- `ProcessVRControllerInput()` - VR controllers (Blueprint Native Event, authority-only)
 
-```cpp
-void AAIFacemaskExperience::ProcessButtonInput()
-{
-    // Only read buttons on server (which is connected to the physical microcontroller)
-    if (!HasAuthority())
-    {
-        return;
-    }
+**Key Features:**
+- Only authority (server/listen host) reads input
+- Clients will receive replicated state (Step 2, not yet implemented)
+- Multiple input sources can coexist (EmbeddedSystems + VR + custom)
 
-    if (!CostumeController || !CostumeController->IsDeviceConnected() || !ExperienceLoop)
-    {
-        return;
-    }
-
-    // Read current button states
-    bool CurrentButtonStates[4];
-    for (int32 i = 0; i < 4; i++)
-    {
-        CurrentButtonStates[i] = CostumeController->GetDigitalInput(i);
-    }
-
-    // Button 0 (Left Wrist Forward) or Button 2 (Right Wrist Forward)
-    if ((CurrentButtonStates[0] && !PreviousButtonStates[0]) || 
-        (CurrentButtonStates[2] && !PreviousButtonStates[2]))
-    {
-        ServerAdvanceExperience();  // Use RPC instead of direct call
-    }
-
-    // Button 1 (Left Wrist Backward) or Button 3 (Right Wrist Backward)
-    if ((CurrentButtonStates[1] && !PreviousButtonStates[1]) || 
-        (CurrentButtonStates[3] && !PreviousButtonStates[3]))
-    {
-        ServerRetreatExperience();  // Use RPC instead of direct call
-    }
-
-    // Store current states for next frame
-    for (int32 i = 0; i < 4; i++)
-    {
-        PreviousButtonStates[i] = CurrentButtonStates[i];
-    }
-
-    // Update replicated button states
-    ReplicatedButtonStates.SetNum(4);
-    for (int32 i = 0; i < 4; i++)
-    {
-        ReplicatedButtonStates[i] = CurrentButtonStates[i];
-    }
-}
-```
+**See:** `INPUT_ARCHITECTURE.md` for complete documentation
 
 ---
 
@@ -307,7 +241,23 @@ Once implemented, test:
 
 ---
 
-**Priority:** Medium (Server discovery works, but actual multiplayer gameplay doesn't)
+## Progress Summary
 
-**Estimated Work:** 4-6 hours for basic implementation, 8-12 hours with testing/polish
+### ✅ **Completed (Steps 3 & 4):**
+- Server RPCs for button presses
+- Authority checks
+- Input-agnostic request system
+- Multiple input source support
+- **Time Taken:** ~2 hours
+
+### 🚧 **Remaining (Steps 1, 2, 5, 6):**
+- Client connection (Step 1)
+- State replication (Step 2)
+- Player spawning (Step 5)
+- Experience Loop state sync (Step 6)
+- **Estimated:** 3-5 hours for basic implementation, 6-10 hours with testing/polish
+
+**Priority:** Medium-High (Input system complete, but clients can't see state changes yet)
+
+**Next Up:** Steps 1 & 2 (Client connection + State replication)
 

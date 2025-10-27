@@ -177,18 +177,31 @@ void AAIFacemaskExperience::Tick(float DeltaTime)
 		ServerBeacon->Tick(DeltaTime);
 	}
 
-	// Process button input from wrist-mounted controls
-	ProcessButtonInput();
+	// Only process input on authority (server or listen server host)
+	// Clients receive replicated state changes
+	if (HasAuthority())
+	{
+		// Process embedded system input (ESP32 wrist buttons)
+		ProcessEmbeddedSystemInput();
+
+		// Process VR controller input (for listen server hosts)
+		// Blueprint can override this to add VR controller support
+		ProcessVRControllerInput();
+	}
 }
 
-void AAIFacemaskExperience::ProcessButtonInput()
+void AAIFacemaskExperience::ProcessEmbeddedSystemInput()
 {
+	// Only process if embedded system is connected
 	if (!CostumeController || !CostumeController->IsDeviceConnected() || !ExperienceLoop)
 	{
 		return;
 	}
 
-	// Read current button states
+	// NOTE: This function only runs on authority (server or listen server host)
+	// Authority check is done in Tick() before calling this function
+
+	// Read current button states from ESP32 wrist controls
 	bool CurrentButtonStates[4];
 	for (int32 i = 0; i < 4; i++)
 	{
@@ -196,23 +209,26 @@ void AAIFacemaskExperience::ProcessButtonInput()
 	}
 
 	// Button 0 (Left Wrist Forward) or Button 2 (Right Wrist Forward)
-	if ((CurrentButtonStates[0] && !PreviousButtonStates[0]) || 
-	    (CurrentButtonStates[2] && !PreviousButtonStates[2]))
+	// Edge detection: only trigger on button press (rising edge)
+	if ((CurrentButtonStates[0] && !PreviousEmbeddedButtonStates[0]) || 
+	    (CurrentButtonStates[2] && !PreviousEmbeddedButtonStates[2]))
 	{
-		AdvanceExperience();
+		// Directly call internal function since we're already on authority
+		AdvanceExperienceInternal();
 	}
 
 	// Button 1 (Left Wrist Backward) or Button 3 (Right Wrist Backward)
-	if ((CurrentButtonStates[1] && !PreviousButtonStates[1]) || 
-	    (CurrentButtonStates[3] && !PreviousButtonStates[3]))
+	if ((CurrentButtonStates[1] && !PreviousEmbeddedButtonStates[1]) || 
+	    (CurrentButtonStates[3] && !PreviousEmbeddedButtonStates[3]))
 	{
-		RetreatExperience();
+		// Directly call internal function since we're already on authority
+		RetreatExperienceInternal();
 	}
 
-	// Store current states for next frame
+	// Store current states for next frame (edge detection)
 	for (int32 i = 0; i < 4; i++)
 	{
-		PreviousButtonStates[i] = CurrentButtonStates[i];
+		PreviousEmbeddedButtonStates[i] = CurrentButtonStates[i];
 	}
 }
 
@@ -233,22 +249,108 @@ FName AAIFacemaskExperience::GetCurrentExperienceState() const
 	return NAME_None;
 }
 
-bool AAIFacemaskExperience::AdvanceExperience()
+void AAIFacemaskExperience::RequestAdvanceExperience()
 {
-	if (ExperienceLoop)
+	// Input-agnostic request function
+	// Can be called from any input source: EmbeddedSystems, VR controllers, keyboard, Blueprint, etc.
+	
+	if (HasAuthority())
 	{
-		return ExperienceLoop->AdvanceState();
+		// We're on the server or listen server host - directly call internal function
+		AdvanceExperienceInternal();
 	}
-	return false;
+	else
+	{
+		// We're on a client - send RPC to server
+		ServerAdvanceExperience();
+	}
 }
 
-bool AAIFacemaskExperience::RetreatExperience()
+void AAIFacemaskExperience::RequestRetreatExperience()
 {
-	if (ExperienceLoop)
+	// Input-agnostic request function
+	// Can be called from any input source: EmbeddedSystems, VR controllers, keyboard, Blueprint, etc.
+	
+	if (HasAuthority())
 	{
-		return ExperienceLoop->RetreatState();
+		// We're on the server or listen server host - directly call internal function
+		RetreatExperienceInternal();
 	}
-	return false;
+	else
+	{
+		// We're on a client - send RPC to server
+		ServerRetreatExperience();
+	}
+}
+
+void AAIFacemaskExperience::ServerAdvanceExperience_Implementation()
+{
+	// Server RPC: Called when a client requests to advance the experience
+	// Validation passed, execute on server
+	AdvanceExperienceInternal();
+}
+
+bool AAIFacemaskExperience::ServerAdvanceExperience_Validate()
+{
+	// Validate the RPC request
+	// For now, always allow (could add rate limiting, state checks, etc.)
+	return true;
+}
+
+void AAIFacemaskExperience::ServerRetreatExperience_Implementation()
+{
+	// Server RPC: Called when a client requests to retreat the experience
+	// Validation passed, execute on server
+	RetreatExperienceInternal();
+}
+
+bool AAIFacemaskExperience::ServerRetreatExperience_Validate()
+{
+	// Validate the RPC request
+	// For now, always allow (could add rate limiting, state checks, etc.)
+	return true;
+}
+
+bool AAIFacemaskExperience::AdvanceExperienceInternal()
+{
+	// Internal function: Only called on authority after validation
+	// This is where the actual state change happens
+	
+	if (!ExperienceLoop)
+	{
+		return false;
+	}
+
+	const bool bSuccess = ExperienceLoop->AdvanceState();
+	
+	if (bSuccess)
+	{
+		UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: Experience advanced to '%s'"), 
+			*ExperienceLoop->GetCurrentStateName().ToString());
+	}
+	
+	return bSuccess;
+}
+
+bool AAIFacemaskExperience::RetreatExperienceInternal()
+{
+	// Internal function: Only called on authority after validation
+	// This is where the actual state change happens
+	
+	if (!ExperienceLoop)
+	{
+		return false;
+	}
+
+	const bool bSuccess = ExperienceLoop->RetreatState();
+	
+	if (bSuccess)
+	{
+		UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: Experience retreated to '%s'"), 
+			*ExperienceLoop->GetCurrentStateName().ToString());
+	}
+	
+	return bSuccess;
 }
 
 void AAIFacemaskExperience::OnServerDiscovered(const FLBEASTServerInfo& ServerInfo)

@@ -89,16 +89,32 @@ public:
 	FName GetCurrentExperienceState() const;
 
 	/**
-	 * Manually advance the experience to the next state (usually triggered by buttons)
+	 * Request to advance the experience (input-agnostic, works with any input source)
+	 * Call this from any input source (EmbeddedSystems, VR controllers, keyboard, etc.)
+	 * Automatically handles server RPC if called on client
 	 */
 	UFUNCTION(BlueprintCallable, Category = "LBEAST|AI Facemask|Experience Loop")
-	bool AdvanceExperience();
+	void RequestAdvanceExperience();
 
 	/**
-	 * Manually retreat the experience to the previous state (usually triggered by buttons)
+	 * Request to retreat the experience (input-agnostic, works with any input source)
+	 * Call this from any input source (EmbeddedSystems, VR controllers, keyboard, etc.)
+	 * Automatically handles server RPC if called on client
 	 */
 	UFUNCTION(BlueprintCallable, Category = "LBEAST|AI Facemask|Experience Loop")
-	bool RetreatExperience();
+	void RequestRetreatExperience();
+
+	/**
+	 * Server RPC: Advance experience (called automatically by RequestAdvanceExperience)
+	 */
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerAdvanceExperience();
+
+	/**
+	 * Server RPC: Retreat experience (called automatically by RequestRetreatExperience)
+	 */
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerRetreatExperience();
 
 	virtual int32 GetMaxPlayers() const override { return NumberOfLiveActors + NumberOfPlayers; }
 
@@ -107,9 +123,32 @@ protected:
 	virtual void ShutdownExperienceImpl() override;
 	virtual void Tick(float DeltaTime) override;
 
+	/**
+	 * Process input from VR controllers (for listen server hosts or Blueprint extension)
+	 * Override in Blueprint to add VR controller input support
+	 */
+	UFUNCTION(BlueprintNativeEvent, Category = "LBEAST|AI Facemask|Input")
+	void ProcessVRControllerInput();
+	virtual void ProcessVRControllerInput_Implementation() {}
+
 private:
-	/** Handle button input from wrist-mounted controls */
-	void ProcessButtonInput();
+	/**
+	 * Process input from wrist-mounted embedded system buttons
+	 * Only runs on authority (server or listen server host)
+	 */
+	void ProcessEmbeddedSystemInput();
+
+	/**
+	 * Internal: Advance experience on server authority
+	 * Only called on server after authority check
+	 */
+	bool AdvanceExperienceInternal();
+
+	/**
+	 * Internal: Retreat experience on server authority
+	 * Only called on server after authority check
+	 */
+	bool RetreatExperienceInternal();
 
 	/** Handle state change events */
 	UFUNCTION()
@@ -119,7 +158,7 @@ private:
 	UFUNCTION()
 	void OnServerDiscovered(const FLBEASTServerInfo& ServerInfo);
 
-	/** Previous button states for edge detection */
-	bool PreviousButtonStates[4] = {false, false, false, false};
+	/** Previous button states for edge detection (embedded systems) */
+	bool PreviousEmbeddedButtonStates[4] = {false, false, false, false};
 };
 

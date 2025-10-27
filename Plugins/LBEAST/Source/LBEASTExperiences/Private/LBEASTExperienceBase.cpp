@@ -1,10 +1,14 @@
 // Copyright (c) 2025 AJ Campbell. Licensed under the MIT License.
 
 #include "LBEASTExperienceBase.h"
+#include "Input/LBEASTInputAdapter.h"
 
 ALBEASTExperienceBase::ALBEASTExperienceBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
+
+	// Create input adapter component
+	InputAdapter = CreateDefaultSubobject<ULBEASTInputAdapter>(TEXT("InputAdapter"));
 
 	// Default HMD configuration
 	HMDConfig.HMDType = ELBEASTHMDType::OpenXR;
