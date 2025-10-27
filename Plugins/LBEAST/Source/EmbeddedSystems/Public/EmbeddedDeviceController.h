@@ -53,6 +53,18 @@ enum class ELBEASTOutputType : uint8
 };
 
 /**
+ * Security level for embedded communication
+ */
+UENUM(BlueprintType)
+enum class ELBEASTSecurityLevel : uint8
+{
+	None UMETA(DisplayName = "None (Development Only)"),
+	HMAC UMETA(DisplayName = "HMAC Authentication"),
+	Encrypted UMETA(DisplayName = "AES-128 + HMAC (Recommended)"),
+	DTLS UMETA(DisplayName = "DTLS (Future)")
+};
+
+/**
  * Configuration for embedded device
  */
 USTRUCT(BlueprintType)
@@ -181,18 +193,6 @@ enum class ELBEASTDataType : uint8
 	String = 3 UMETA(DisplayName = "String"),
 	Bytes = 4 UMETA(DisplayName = "Raw Bytes"),
 	Struct = 5 UMETA(DisplayName = "Struct")
-};
-
-/**
- * Security level for embedded communication
- */
-UENUM(BlueprintType)
-enum class ELBEASTSecurityLevel : uint8
-{
-	None UMETA(DisplayName = "None (Development Only)"),
-	HMAC UMETA(DisplayName = "HMAC Authentication"),
-	Encrypted UMETA(DisplayName = "AES-128 + HMAC (Recommended)"),
-	DTLS UMETA(DisplayName = "DTLS (Future)")
 };
 
 /**
@@ -350,6 +350,22 @@ public:
 		FMemory::Memcpy(Bytes.GetData(), &Data, sizeof(T));
 		SendBytes(Channel, Bytes);
 	}
+
+	/**
+	 * Get digital input state (button press)
+	 * @param Channel - Channel/pin number
+	 * @return true if button is pressed, false otherwise
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LBEAST|Embedded|Read")
+	bool GetDigitalInput(int32 Channel) const;
+
+	/**
+	 * Get analog input value (0.0 to 1.0)
+	 * @param Channel - Channel/pin number
+	 * @return Analog value from 0.0 to 1.0
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LBEAST|Embedded|Read")
+	float GetAnalogInput(int32 Channel) const;
 
 protected:
 	virtual void BeginPlay() override;

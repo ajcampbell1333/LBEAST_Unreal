@@ -17,6 +17,79 @@
 
 ---
 
+## 📊 Architecture & Data Flow
+
+### **How Data Moves from Hardware to Unreal**
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│  ESP32/Arduino Microcontroller                                   │
+│  ─────────────────────────────                                   │
+│  • Physical button pressed on costume                            │
+│  • Reads digital pin (HIGH/LOW)                                  │
+│  • Builds packet: [0xAA][Channel][Type][Payload][CRC/HMAC]      │
+│  • Sends via WiFi UDP to Unreal (192.168.1.X:8888)              │
+└──────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼ UDP Packet
+┌──────────────────────────────────────────────────────────────────┐
+│  UEmbeddedDeviceController::TickComponent()                      │
+│  ──────────────────────────────────────                          │
+│  • ReceiveFrom() on UDP socket                                   │
+│  • Validates packet (CRC/HMAC)                                   │
+│  • Calls ParseBinaryPacket() or ParseJSONPacket()                │
+└──────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼ Parsed Data
+┌──────────────────────────────────────────────────────────────────┐
+│  ParseBinaryPacket() / ParseJSONPacket()                         │
+│  ────────────────────────────────────────                        │
+│  • Extracts: Channel=0, Type=Bool, Value=true                    │
+│  • Stores in cache: InputValueCache[0] = 1.0f                    │
+│  • Broadcasts delegate: OnBoolReceived(0, true)                  │
+└──────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼ Cached Value
+┌──────────────────────────────────────────────────────────────────┐
+│  Your Game Code                                                  │
+│  ──────────────                                                  │
+│  bool isPressed = CostumeController->GetDigitalInput(0);         │
+│  // Returns: InputValueCache[0] > 0.5 → true                     │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+### **Key Design Decisions**
+
+1. **Cache-Based Reading** - Input values are cached and updated asynchronously
+   - `GetDigitalInput()` / `GetAnalogInput()` are instant lookups (no network delay)
+   - Cache is populated every frame by `TickComponent()`
+   - All values normalized to `float` (0.0 to 1.0)
+
+2. **Separate from Unreal Networking** - This module is for **hardware I/O only**
+   - Does NOT use Unreal's replication system
+   - Direct UDP/Serial/Bluetooth to microcontrollers
+   - If you need server-client replication, add it in your game code:
+   
+   ```cpp
+   // Example: Replicate button state from server to clients
+   UPROPERTY(Replicated)
+   bool bButton0Pressed;
+   
+   // Server reads from microcontroller
+   if (HasAuthority())
+   {
+       bButton0Pressed = CostumeController->GetDigitalInput(0);
+   }
+   // Clients receive replicated value automatically
+   ```
+
+3. **Event-Driven Alternative** - Use delegates instead of polling:
+   ```cpp
+   Device->OnBoolReceived.AddDynamic(this, &AMyActor::OnButtonPressed);
+   ```
+
+---
+
 ## 🎯 Quick Start
 
 ### **Unreal Engine Side**

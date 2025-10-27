@@ -28,7 +28,9 @@ public class EmbeddedSystems : ModuleRules
 				"Engine",
 				"LBEASTCore",
 				"Sockets",
-				"Networking"
+				"Networking",
+				"Json",
+				"JsonUtilities"
 			}
 		);
 			

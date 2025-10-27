@@ -4,10 +4,11 @@
 #include "AIFaceController.h"
 #include "EmbeddedDeviceController.h"
 #include "ExperienceLoop/ExperienceStateMachine.h"
+#include "Networking/LBEASTServerBeacon.h"
 
 AAIFacemaskExperience::AAIFacemaskExperience()
 {
-	// Enable ticking for button input processing
+	// Enable ticking for button input processing and server beacon
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
 
@@ -18,8 +19,14 @@ AAIFacemaskExperience::AAIFacemaskExperience()
 	// Create Experience Loop state machine
 	ExperienceLoop = CreateDefaultSubobject<UExperienceStateMachine>(TEXT("ExperienceLoop"));
 
-	// Configure for multiplayer by default
+	// Create Server Beacon for automatic discovery
+	ServerBeacon = CreateDefaultSubobject<ULBEASTServerBeacon>(TEXT("ServerBeacon"));
+
+	// Configure for multiplayer with dedicated server (REQUIRED for AI processing offload)
 	bMultiplayerEnabled = true;
+	ServerMode = ELBEASTServerMode::DedicatedServer;
+	bEnforceServerMode = true;
+	RequiredServerMode = ELBEASTServerMode::DedicatedServer;
 
 	// Enable passthrough for live actors
 	HMDConfig.bEnablePassthrough = true;
@@ -88,12 +95,63 @@ bool AAIFacemaskExperience::InitializeExperienceImpl()
 		UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: Experience Loop initialized with %d states"), DefaultStates.Num());
 	}
 
+	// Initialize Server Beacon for automatic discovery/connection
+	if (ServerBeacon)
+	{
+		// Check if we're running as dedicated server or client
+		UWorld* World = GetWorld();
+		if (World && World->GetNetMode() == NM_DedicatedServer)
+		{
+			// Server mode: broadcast presence
+			FLBEASTServerInfo ServerInfo;
+			ServerInfo.ServerIP = TEXT("0.0.0.0");  // Will be overridden by client with actual sender IP
+			ServerInfo.ServerPort = 7777;  // TODO: Get from project settings
+			ServerInfo.ExperienceType = TEXT("AIFacemask");
+			ServerInfo.ServerName = FString::Printf(TEXT("AIFacemask Server %s"), *FDateTime::Now().ToString());
+			ServerInfo.CurrentPlayers = 0;  // TODO: Track actual player count
+			ServerInfo.MaxPlayers = NumberOfLiveActors + NumberOfPlayers;
+			ServerInfo.ExperienceState = TEXT("Lobby");
+			ServerInfo.ServerVersion = TEXT("1.0.0");
+			ServerInfo.bAcceptingConnections = true;
+
+			if (ServerBeacon->StartServerBroadcast(ServerInfo))
+			{
+				UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: Server beacon broadcasting"));
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("AIFacemaskExperience: Failed to start server beacon"));
+			}
+		}
+		else if (World && World->GetNetMode() == NM_Client)
+		{
+			// Client mode: listen for servers
+			if (ServerBeacon->StartClientDiscovery())
+			{
+				UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: Client beacon listening for servers"));
+
+				// Bind to server discovery event for auto-connection
+				ServerBeacon->OnServerDiscovered.AddDynamic(this, &AAIFacemaskExperience::OnServerDiscovered);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("AIFacemaskExperience: Failed to start client beacon"));
+			}
+		}
+	}
+
 	UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: Initialized with %d live actors and %d players"), NumberOfLiveActors, NumberOfPlayers);
 	return true;
 }
 
 void AAIFacemaskExperience::ShutdownExperienceImpl()
 {
+	// Stop server beacon
+	if (ServerBeacon && ServerBeacon->IsActive())
+	{
+		ServerBeacon->Stop();
+	}
+
 	// Stop experience loop
 	if (ExperienceLoop)
 	{
@@ -112,6 +170,12 @@ void AAIFacemaskExperience::ShutdownExperienceImpl()
 void AAIFacemaskExperience::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// Tick server beacon for broadcasts/discovery
+	if (ServerBeacon && ServerBeacon->IsActive())
+	{
+		ServerBeacon->Tick(DeltaTime);
+	}
 
 	// Process button input from wrist-mounted controls
 	ProcessButtonInput();
@@ -185,5 +249,29 @@ bool AAIFacemaskExperience::RetreatExperience()
 		return ExperienceLoop->RetreatState();
 	}
 	return false;
+}
+
+void AAIFacemaskExperience::OnServerDiscovered(const FLBEASTServerInfo& ServerInfo)
+{
+	UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: Discovered server '%s' (%s) at %s:%d - Current players: %d/%d"), 
+		*ServerInfo.ServerName, *ServerInfo.ExperienceType, *ServerInfo.ServerIP, ServerInfo.ServerPort,
+		ServerInfo.CurrentPlayers, ServerInfo.MaxPlayers);
+
+	// Auto-connect to first available AIFacemask server
+	if (ServerInfo.ExperienceType == TEXT("AIFacemask") && ServerInfo.bAcceptingConnections)
+	{
+		UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: Auto-connecting to server at %s:%d"), 
+			*ServerInfo.ServerIP, ServerInfo.ServerPort);
+
+		// TODO: Implement actual connection logic using Unreal's networking API
+		// For now, just log the connection intent
+		// In production, you would do something like:
+		// APlayerController* PC = GetWorld()->GetFirstPlayerController();
+		// if (PC)
+		// {
+		//     FString ConnectCommand = FString::Printf(TEXT("%s:%d"), *ServerInfo.ServerIP, ServerInfo.ServerPort);
+		//     PC->ConsoleCommand(*FString::Printf(TEXT("open %s"), *ConnectCommand));
+		// }
+	}
 }
 

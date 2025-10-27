@@ -23,7 +23,7 @@ class UHapticPlatformController;
  * experiences requiring shared motion simulation.
  */
 UCLASS(Blueprintable, ClassGroup=(LBEAST))
-class LBEASTCORE_API AGunshipExperience : public ALBEASTExperienceBase
+class LBEASTEXPERIENCES_API AGunshipExperience : public ALBEASTExperienceBase
 {
 	GENERATED_BODY()
 	

@@ -145,11 +145,60 @@ Experience Templates are complete, pre-configured Actors that you can drag into 
 
 Deploy LAN multiplayer VR experiences where immersive theater live actors drive avatars with **autonomous AI-generated facial expressions**. The AI face operates independently using NVIDIA Audio2Face (Neural Face), while live actors control the experience flow through wrist-mounted buttons.
 
+**⚠️ DEDICATED SERVER REQUIRED ⚠️**
+
+This template **enforces** dedicated server mode. You **must** run a separate local PC as a headless dedicated server. This is **not optional** - the experience will fail to initialize if ServerMode is changed to Listen Server.
+
+**Network Architecture:**
+```
+┌─────────────────────────────────────┐
+│   Dedicated Server PC (Headless)   │
+│                                     │
+│  ┌───────────────────────────────┐ │
+│  │  Unreal Dedicated Server      │ │ ← Multiplayer networking
+│  │  (No HMD, no rendering)       │ │
+│  └───────────────────────────────┘ │
+│                                     │
+│  ┌───────────────────────────────┐ │
+│  │  NVIDIA Omniverse             │ │ ← AI Workflow:
+│  │  - Speech Recognition         │ │   Speech → NLU → Emotion
+│  │  - NLU (Natural Language)     │ │              ↓
+│  │  - Emotion Detection          │ │        Audio2Face
+│  │  - Audio2Face (Neural Face)   │ │              ↓
+│  └───────────────────────────────┘ │   Facial animation stream
+└─────────────────────────────────────┘
+               │
+        LAN Network (UDP/TCP)
+               │
+        ┌──────┴────────┐
+        │               │
+   VR HMD #1      VR HMD #2      (Live Actors)
+   VR HMD #3      VR HMD #4      (Players)
+```
+
+**Why Dedicated Server?**
+- **Performance**: Offloads heavy AI processing from VR HMDs
+- **Parallelization**: Supports multiple live actors simultaneously
+- **Reliability**: Isolated AI workflow prevents HMD performance degradation
+- **Scalability**: Easy to add more live actors or players
+
+**Automatic Server Discovery:**
+
+LBEAST includes a **zero-configuration UDP broadcast system** for automatic server discovery:
+- **Server**: Broadcasts presence every 2 seconds on port `7778`
+- **Clients**: Automatically discover and connect to available servers
+- **No Manual IP Entry**: Perfect for LBE installations where tech setup should be invisible
+- **Multi-Experience Support**: Discover multiple concurrent experiences on the same LAN
+- **Server Metadata**: Includes experience type, player count, version, current state
+
+When a client HMD boots up, it automatically finds the dedicated server and connects - zero configuration required!
+
 **Architecture:**
 - **AI Face**: Fully autonomous, driven by NVIDIA Audio2Face for natural conversation
 - **Live Actor Role**: Experience director, NOT puppeteer
 - **Wrist Controls**: 4 buttons (2 left, 2 right) to advance/retreat through experience states
 - **Experience Loop**: Built-in state machine (Intro → Tutorial → Act1 → Act2 → Finale → Credits)
+- **Server Mode**: **ENFORCED** to Dedicated Server (attempting to change will fail initialization)
 
 **Includes:**
 - Pre-configured `UAIFaceController` (autonomous facial animation bridge)
@@ -169,7 +218,11 @@ AAIFacemaskExperience* Experience = GetWorld()->SpawnActor<AAIFacemaskExperience
 Experience->NumberOfLiveActors = 1;
 Experience->NumberOfPlayers = 4;
 Experience->LiveActorMesh = MyCharacterMesh;
-Experience->InitializeExperience();
+
+// ServerMode is already set to DedicatedServer by default
+// DO NOT CHANGE IT - initialization will fail if you do
+
+Experience->InitializeExperience();  // Will validate server mode
 
 // React to experience state changes
 FName CurrentState = Experience->GetCurrentExperienceState();
@@ -177,6 +230,18 @@ FName CurrentState = Experience->GetCurrentExperienceState();
 // Manually trigger state changes (usually handled by wrist buttons automatically)
 Experience->AdvanceExperience();
 Experience->RetreatExperience();
+```
+
+**❌ What Happens If You Try to Use Listen Server:**
+```
+========================================
+⚠️  SERVER MODE CONFIGURATION ERROR ⚠️
+========================================
+This experience REQUIRES ServerMode to be set to 'DedicatedServer'
+Current ServerMode is set to 'ListenServer'
+
+Please change ServerMode in the Details panel to 'DedicatedServer'
+========================================
 ```
 
 **Blueprint Events:**
@@ -563,6 +628,139 @@ LBEAST is designed for **commercial LBE installations** including:
 - 🏢 **Corporate Events** and brand experiences
 - 🚀 **Research Labs** and academic projects
 
+## Dedicated Server & Server Manager
+
+The AIFacemask experience (and optionally other multiplayer experiences) uses a **dedicated server architecture** to offload AI processing and enable robust multi-player experiences.
+
+### Architecture Overview
+
+```
+┌─────────────────────────────────────────────────┐
+│  LBEAST Server Manager PC (with monitor)       │
+│  ─────────────────────────────────────────────  │
+│  • Runs Server Manager GUI (UMG interface)     │
+│  • Launches dedicated server process           │
+│  • Processes AI workflow (Speech → NLU →       │
+│    Emotion → Audio2Face)                        │
+│  • Streams facial animation to HMDs            │
+└─────────────────────────────────────────────────┘
+                    │
+                    ├─ UDP Broadcast ──→ LAN (auto-discovery)
+                    │
+        ┌───────────┴───────────┐
+        │                       │
+        ▼                       ▼
+   ┌─────────┐            ┌─────────┐
+   │  HMD 1  │            │  HMD 2  │
+   │ (Client)│            │ (Client)│
+   └─────────┘            └─────────┘
+```
+
+### Building the Dedicated Server
+
+1. **Set Build Configuration** to `Development Server` or `Shipping Server`
+2. **Build** the project in Visual Studio
+3. The server executable will be created: `Binaries/Win64/LBEAST_UnrealServer.exe`
+
+### Option 1: Command-Line Launch (Quick)
+
+Use the provided launch scripts:
+
+**Windows:**
+```batch
+LaunchDedicatedServer.bat -experience AIFacemask -port 7777 -maxplayers 4
+```
+
+**Linux:**
+```bash
+./LaunchDedicatedServer.sh -experience AIFacemask -port 7777 -maxplayers 4
+```
+
+### Option 2: Server Manager GUI (Recommended)
+
+The **LBEAST Server Manager** is a UMG-based application for managing dedicated servers with a graphical interface.
+
+#### Starting the Server Manager
+
+1. **Open** `LBEAST_Unreal.uproject`
+2. **Load** the `ServerManager` map (or create one with `LBEASTServerManagerGameMode`)
+3. **Play** in standalone mode
+
+#### Server Manager Interface
+
+```
+┌────────────────────────────────────────┐
+│  LBEAST Server Manager                 │
+├────────────────────────────────────────┤
+│  Configuration:                        │
+│  Experience: [AIFacemask     ▼]        │
+│  Server Name: [LBEAST Server]          │
+│  Max Players: [4]                      │
+│  Port: [7777]                          │
+│                                         │
+│  [Start Server]  [Stop Server]         │
+├────────────────────────────────────────┤
+│  Status:                               │
+│  ● Running                             │
+│  Players: 2/4                          │
+│  State: Act1                           │
+│  Uptime: 00:15:32                      │
+├────────────────────────────────────────┤
+│  Omniverse Audio2Face:                 │
+│  Status: ● Connected                   │
+│  Face Streams: 1 active                │
+│  [Configure Omniverse]                 │
+├────────────────────────────────────────┤
+│  Logs:                                 │
+│  [Server log output...]                │
+└────────────────────────────────────────┘
+```
+
+#### Key Features
+
+- **Start/Stop Servers** - Launch and manage dedicated server processes
+- **Real-Time Monitoring** - Player count, experience state, uptime
+- **Omniverse Integration** - Configure Audio2Face streaming (coming soon)
+- **Live Logs** - View server output in real-time
+- **Multi-Experience Support** - Switch between different experience types
+- **Process Management** - Automatic detection of crashed servers
+
+#### Creating a Custom Server Manager UI
+
+The Server Manager is built on `ULBEASTServerManagerWidget`, which you can extend in Blueprint:
+
+1. **Create** a new Widget Blueprint
+2. **Parent Class:** `LBEASTServerManagerWidget`
+3. **Design** your UI using UMG
+4. **Bind** buttons to:
+   - `StartServer()`
+   - `StopServer()`
+   - `OpenOmniverseConfig()`
+5. **Set** the widget class in `LBEASTServerManagerGameMode`
+
+### Automatic Server Discovery
+
+Clients automatically discover and connect to dedicated servers on the LAN using UDP broadcast:
+
+- **Server** broadcasts presence every 2 seconds on port `7778`
+- **Clients** listen for broadcasts and auto-connect
+- **No manual IP entry required** for venue deployments
+
+See [Automatic Server Discovery](#automatic-server-discovery) for details.
+
+### Omniverse Audio2Face Integration
+
+The dedicated server PC should also run NVIDIA Omniverse with Audio2Face for real-time facial animation:
+
+1. **Install** [NVIDIA Omniverse](https://www.nvidia.com/en-us/omniverse/)
+2. **Install** Audio2Face from Omniverse Launcher
+3. **Configure** Audio2Face to stream to your HMDs
+4. **Connect** via the Server Manager Omniverse panel
+
+> **Note:** Omniverse integration is in development. Current implementation provides the architecture and UI hooks.
+
+---
+
 ## Roadmap
 
 ### v1.0 (Current)
@@ -574,7 +772,10 @@ LBEAST is designed for **commercial LBE installations** including:
 - ✅ HOTAS integration (Logitech X56, Thrustmaster T.Flight)
 - ✅ Embedded Systems API
 - ✅ **Experience Templates** (5 complete templates)
-- 🔄 LAN multiplayer integration (in progress)
+- ✅ **Dedicated Server** architecture
+- ✅ **Server Manager GUI** (UMG-based)
+- ✅ **Automatic Server Discovery** (UDP broadcast)
+- 🔄 Omniverse Audio2Face integration (in progress)
 - 🔄 Example projects (in progress)
 
 ### v1.1 (Planned)
@@ -590,6 +791,16 @@ LBEAST is designed for **commercial LBE installations** including:
 - Custom tracking system plugins (UWB, optical, ultrasonic)
 - Online multiplayer support
 - AR headset support (if viable hardware emerges)
+
+## Next Steps
+
+Tasks in progress or ready for implementation:
+
+- [ ] **Design the Default Server Manager UI** - Create polished UMG interface for server management
+- [ ] **Omniverse Audio2Face Integration** - Connect to NVIDIA Omniverse for real-time facial animation streaming
+- [ ] **Example Maps** - Create demonstration maps for each experience template
+- [ ] **Blueprint Templates** - Create Blueprint-only versions of experience templates
+- [ ] **Hardware Calibration Tool** - Build utility for calibrating hydraulic platforms
 
 ## Support
 

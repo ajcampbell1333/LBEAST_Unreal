@@ -23,7 +23,7 @@ class UHapticPlatformController;
  * ship decks, moving vehicles, or any standing VR experience with motion.
  */
 UCLASS(Blueprintable, ClassGroup=(LBEAST))
-class LBEASTCORE_API AMovingPlatformExperience : public ALBEASTExperienceBase
+class LBEASTEXPERIENCES_API AMovingPlatformExperience : public ALBEASTExperienceBase
 {
 	GENERATED_BODY()
 	

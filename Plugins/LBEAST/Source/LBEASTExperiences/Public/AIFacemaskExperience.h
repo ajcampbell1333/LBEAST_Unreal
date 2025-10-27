@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "LBEASTExperienceBase.h"
+#include "Networking/LBEASTServerBeacon.h"
 #include "AIFacemaskExperience.generated.h"
 
 // Forward declarations
@@ -16,7 +17,17 @@ class UExperienceStateMachine;
  * 
  * Pre-configured experience for LAN multiplayer VR with immersive theater live actors.
  * 
- * Architecture:
+ * NETWORK ARCHITECTURE (REQUIRED):
+ * This experience REQUIRES a dedicated server setup:
+ * - Separate local PC running headless dedicated server
+ * - Same PC processes AI workflow: Speech Recognition → NLU → Emotion → Audio2Face
+ * - Omniverse Audio2Face streams facial animation to HMDs over network
+ * - Offloads AI processing from HMDs for optimal performance
+ * - Supports parallelization for multiple live actors
+ * 
+ * ServerMode is ENFORCED to DedicatedServer - attempting to use Listen Server will fail.
+ * 
+ * LIVE ACTOR CONTROLS:
  * - AI facial animation operates AUTONOMOUSLY (driven by NVIDIA Audio2Face)
  * - Live actors wear wrist-mounted button controls (4 buttons: 2 left, 2 right)
  * - Buttons control the Experience Loop state machine (not the AI face)
@@ -32,7 +43,7 @@ class UExperienceStateMachine;
  * requiring professional performers to guide players through story beats.
  */
 UCLASS(Blueprintable, ClassGroup=(LBEAST))
-class LBEASTCORE_API AAIFacemaskExperience : public ALBEASTExperienceBase
+class LBEASTEXPERIENCES_API AAIFacemaskExperience : public ALBEASTExperienceBase
 {
 	GENERATED_BODY()
 	
@@ -54,6 +65,10 @@ public:
 	/** Experience Loop state machine */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LBEAST|AI Facemask|Components")
 	TObjectPtr<UExperienceStateMachine> ExperienceLoop;
+
+	/** Server beacon for automatic discovery/connection */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LBEAST|AI Facemask|Components")
+	TObjectPtr<ULBEASTServerBeacon> ServerBeacon;
 
 	/** Enable passthrough for live actors to help players */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|AI Facemask|Config")
@@ -99,6 +114,10 @@ private:
 	/** Handle state change events */
 	UFUNCTION()
 	void OnExperienceStateChanged(FName OldState, FName NewState, int32 NewStateIndex);
+
+	/** Handle server discovery (auto-connect) */
+	UFUNCTION()
+	void OnServerDiscovered(const FLBEASTServerInfo& ServerInfo);
 
 	/** Previous button states for edge detection */
 	bool PreviousButtonStates[4] = {false, false, false, false};

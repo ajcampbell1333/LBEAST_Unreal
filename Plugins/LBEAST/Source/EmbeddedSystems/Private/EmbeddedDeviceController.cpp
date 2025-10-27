@@ -893,10 +893,6 @@ TArray<uint8> UEmbeddedDeviceController::EncryptAES128(const TArray<uint8>& Plai
 		return TArray<uint8>();
 	}
 	
-	// Create AES key from derived key
-	FAES::FAESKey AESKey;
-	FMemory::Memcpy(AESKey.Key, DerivedAESKey, 16);
-	
 	// Prepare counter mode (IV + counter)
 	// For simplicity, we'll use a basic counter starting from IV
 	TArray<uint8> Ciphertext;
@@ -922,9 +918,9 @@ TArray<uint8> UEmbeddedDeviceController::EncryptAES128(const TArray<uint8>& Plai
 		CounterBlock[6] = (BlockIdx >> 16) & 0xFF;
 		CounterBlock[7] = (BlockIdx >> 24) & 0xFF;
 		
-		// Encrypt counter block
+		// Encrypt counter block using derived AES key
 		uint8 EncryptedCounter[16];
-		FAES::EncryptData(CounterBlock, 16, EncryptedCounter, AESKey);
+		FAES::EncryptData(EncryptedCounter, 16, CounterBlock, 16);
 		
 		// XOR with plaintext
 		int32 BytesInBlock = FMath::Min(16, Plaintext.Num() - BlockIdx * 16);
@@ -1022,6 +1018,31 @@ uint32 UEmbeddedDeviceController::GenerateRandomIV()
 	RandomState ^= RandomState >> 17;
 	RandomState ^= RandomState << 5;
 	return RandomState;
+}
+
+// =====================================
+// Input Reading
+// =====================================
+
+bool UEmbeddedDeviceController::GetDigitalInput(int32 Channel) const
+{
+	const float* Value = InputValueCache.Find(Channel);
+	if (Value)
+	{
+		// Digital input: > 0.5 = pressed
+		return (*Value) > 0.5f;
+	}
+	return false;
+}
+
+float UEmbeddedDeviceController::GetAnalogInput(int32 Channel) const
+{
+	const float* Value = InputValueCache.Find(Channel);
+	if (Value)
+	{
+		return *Value;
+	}
+	return 0.0f;
 }
 
 

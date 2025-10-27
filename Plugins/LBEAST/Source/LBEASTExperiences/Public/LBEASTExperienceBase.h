@@ -9,6 +9,25 @@
 #include "LBEASTExperienceBase.generated.h"
 
 /**
+ * Server mode for multiplayer experiences
+ */
+UENUM(BlueprintType)
+enum class ELBEASTServerMode : uint8
+{
+	/** Dedicated server (no local player, headless capable) */
+	DedicatedServer UMETA(DisplayName = "Dedicated Server"),
+	
+	/** Listen server (host player + server) */
+	ListenServer UMETA(DisplayName = "Listen Server"),
+	
+	/** Client only (connect to existing server) */
+	Client UMETA(DisplayName = "Client"),
+	
+	/** Standalone (no networking) */
+	Standalone UMETA(DisplayName = "Standalone")
+};
+
+/**
  * Base class for all LBEAST Experience Templates
  * 
  * Experience Templates are pre-configured, drag-and-drop solutions that combine
@@ -21,7 +40,7 @@
  * Developers can use these as-is or extend them for custom experiences.
  */
 UCLASS(Abstract, Blueprintable, BlueprintType, ClassGroup=(LBEAST))
-class LBEASTCORE_API ALBEASTExperienceBase : public AActor
+class LBEASTEXPERIENCES_API ALBEASTExperienceBase : public AActor
 {
 	GENERATED_BODY()
 	
@@ -43,6 +62,18 @@ public:
 	/** Whether this experience supports multiplayer */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|Experience")
 	bool bMultiplayerEnabled = false;
+
+	/** Server mode (dedicated, listen, client, standalone) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|Experience|Networking")
+	ELBEASTServerMode ServerMode = ELBEASTServerMode::Standalone;
+
+	/** Whether to enforce the required server mode */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|Experience|Networking")
+	bool bEnforceServerMode = false;
+
+	/** Required server mode (used when bEnforceServerMode is true) */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LBEAST|Experience|Networking")
+	ELBEASTServerMode RequiredServerMode = ELBEASTServerMode::Standalone;
 
 	/**
 	 * Initialize the experience

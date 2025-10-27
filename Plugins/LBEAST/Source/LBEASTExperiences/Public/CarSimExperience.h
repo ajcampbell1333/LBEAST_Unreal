@@ -22,7 +22,7 @@ class UHapticPlatformController;
  * Perfect for arcade racing games, driving simulators, and car-themed experiences.
  */
 UCLASS(Blueprintable, ClassGroup=(LBEAST))
-class LBEASTCORE_API ACarSimExperience : public ALBEASTExperienceBase
+class LBEASTEXPERIENCES_API ACarSimExperience : public ALBEASTExperienceBase
 {
 	GENERATED_BODY()
 	

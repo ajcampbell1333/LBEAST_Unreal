@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "LBEASTExperienceBase.h"
+#include "HapticPlatformController.h"
 #include "FlightSimExperience.generated.h"
 
-// Forward declarations
-class UHapticPlatformController;
+// Forward declarations (no longer needed for UHapticPlatformController since we include the header)
+// class UHapticPlatformController;
 
 /**
  * 2DOF Full 360 Flight Sim Experience Template
@@ -23,7 +24,7 @@ class UHapticPlatformController;
  * and any experience requiring full 360° continuous rotation.
  */
 UCLASS(Blueprintable, ClassGroup=(LBEAST))
-class LBEASTCORE_API AFlightSimExperience : public ALBEASTExperienceBase
+class LBEASTEXPERIENCES_API AFlightSimExperience : public ALBEASTExperienceBase
 {
 	GENERATED_BODY()
 	
