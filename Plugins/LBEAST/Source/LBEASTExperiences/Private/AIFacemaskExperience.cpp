@@ -105,10 +105,10 @@ bool AAIFacemaskExperience::InitializeExperienceImpl()
 			// Server mode: broadcast presence
 			FLBEASTServerInfo ServerInfo;
 			ServerInfo.ServerIP = TEXT("0.0.0.0");  // Will be overridden by client with actual sender IP
-			ServerInfo.ServerPort = 7777;  // TODO: Get from project settings
+			ServerInfo.ServerPort = 7777;  // NOOP: TODO - Get from project settings
 			ServerInfo.ExperienceType = TEXT("AIFacemask");
 			ServerInfo.ServerName = FString::Printf(TEXT("AIFacemask Server %s"), *FDateTime::Now().ToString());
-			ServerInfo.CurrentPlayers = 0;  // TODO: Track actual player count
+			ServerInfo.CurrentPlayers = 0;  // NOOP: TODO - Track actual player count
 			ServerInfo.MaxPlayers = NumberOfLiveActors + NumberOfPlayers;
 			ServerInfo.ExperienceState = TEXT("Lobby");
 			ServerInfo.ServerVersion = TEXT("1.0.0");
@@ -365,7 +365,7 @@ void AAIFacemaskExperience::OnServerDiscovered(const FLBEASTServerInfo& ServerIn
 		UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: Auto-connecting to server at %s:%d"), 
 			*ServerInfo.ServerIP, ServerInfo.ServerPort);
 
-		// TODO: Implement actual connection logic using Unreal's networking API
+		// NOOP: TODO - Implement actual connection logic using Unreal's networking API
 		// For now, just log the connection intent
 		// In production, you would do something like:
 		// APlayerController* PC = GetWorld()->GetFirstPlayerController();

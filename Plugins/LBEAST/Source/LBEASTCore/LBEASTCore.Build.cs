@@ -35,7 +35,9 @@ public class LBEASTCore : ModuleRules
 				"OnlineSubsystem",
 				"OnlineSubsystemUtils",
 				"Sockets",
-				"Networking"
+				"Networking",
+				"Json",
+				"JsonUtilities"
 			}
 		);
 			

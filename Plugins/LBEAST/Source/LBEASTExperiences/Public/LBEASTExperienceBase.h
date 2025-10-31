@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "LBEASTHMDInterface.h"
 #include "LBEASTTrackingInterface.h"
+#include "Networking/LBEASTServerCommandProtocol.h"
 #include "LBEASTExperienceBase.generated.h"
 
 // Forward declarations
@@ -90,6 +91,13 @@ public:
 	TObjectPtr<ULBEASTInputAdapter> InputAdapter;
 
 	/**
+	 * Command protocol for receiving remote commands from Command Console
+	 * Auto-created on dedicated server. Processes commands in Tick().
+	 */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LBEAST|Components")
+	TObjectPtr<ULBEASTServerCommandProtocol> CommandProtocol;
+
+	/**
 	 * Initialize the experience
 	 * Called automatically if bAutoInitialize is true, or manually by developer
 	 * @return true if initialization was successful
@@ -131,5 +139,19 @@ protected:
 	 * Override this to perform custom shutdown logic
 	 */
 	virtual void ShutdownExperienceImpl();
+
+	virtual void Tick(float DeltaTime) override;
+
+	/**
+	 * Handle incoming command from Command Console
+	 * Override this to handle custom commands in derived classes
+	 */
+	UFUNCTION()
+	virtual void OnCommandReceived(const FLBEASTServerCommandMessage& Command, ULBEASTServerCommandProtocol* Protocol);
+
+	/**
+	 * Initialize command protocol for dedicated server mode
+	 */
+	void InitializeCommandProtocol();
 };
 

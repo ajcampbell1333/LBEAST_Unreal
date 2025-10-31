@@ -44,7 +44,7 @@ bool UHapticPlatformController::InitializePlatform(const FHapticPlatformConfig& 
 {
 	Config = InConfig;
 
-	// TODO: Establish network connection to hardware controller
+	// NOOP: TODO - Establish network connection to hardware controller
 	// For now, just validate config
 	if (Config.ControllerIPAddress.IsEmpty())
 	{
@@ -199,7 +199,7 @@ void UHapticPlatformController::SetActuatorExtension(FName ActuatorID, float Ext
 		if (Actuator.ActuatorID == ActuatorID)
 		{
 			Actuator.Extension = Extension;
-			// TODO: Send individual actuator command to hardware
+			// NOOP: TODO - Send individual actuator command to hardware
 			break;
 		}
 	}
@@ -216,7 +216,7 @@ void UHapticPlatformController::EmergencyStop()
 	MotionTimeRemaining = 0.0f;
 	TargetState = CurrentState;
 
-	// TODO: Send emergency stop command to hardware
+	// NOOP: TODO - Send emergency stop command to hardware
 	UE_LOG(LogTemp, Warning, TEXT("HapticPlatformController: EMERGENCY STOP"));
 }
 
@@ -249,7 +249,7 @@ FTransform UHapticPlatformController::GetCurrentPlatformTransform() const
 
 void UHapticPlatformController::SendCommandToHardware(const FPlatformMotionCommand& Command)
 {
-	// TODO: Implement network communication with hardware controller
+	// NOOP: TODO - Implement network communication with hardware controller
 	// This would typically use UDP or TCP sockets to send commands to the platform controller
 	// For now, this is a placeholder
 	UE_LOG(LogTemp, Log, TEXT("HapticPlatformController: Sending command - Pitch: %.2f, Roll: %.2f, Y: %.2f, Z: %.2f"),
@@ -326,22 +326,22 @@ bool UHapticPlatformController::InitializeHOTAS()
 		return false;
 	}
 
-	// TODO: Initialize HOTAS SDK connection based on type
+	// NOOP: TODO - Initialize HOTAS SDK connection based on type
 	switch (Config.GyroscopeConfig.HOTASType)
 	{
 	case ELBEASTHOTASType::LogitechX56:
 		UE_LOG(LogTemp, Log, TEXT("HapticPlatformController: Initializing Logitech G X56 HOTAS..."));
-		// TODO: Initialize Logitech G X56 SDK
+		// NOOP: TODO - Initialize Logitech G X56 SDK
 		break;
 
 	case ELBEASTHOTASType::ThrustmasterTFlight:
 		UE_LOG(LogTemp, Log, TEXT("HapticPlatformController: Initializing Thrustmaster T.Flight HOTAS..."));
-		// TODO: Initialize Thrustmaster T.Flight SDK
+		// NOOP: TODO - Initialize Thrustmaster T.Flight SDK
 		break;
 
 	case ELBEASTHOTASType::Custom:
 		UE_LOG(LogTemp, Log, TEXT("HapticPlatformController: Initializing Custom HOTAS..."));
-		// TODO: Initialize custom HOTAS interface
+		// NOOP: TODO - Initialize custom HOTAS interface
 		break;
 
 	default:
@@ -362,7 +362,7 @@ void UHapticPlatformController::UpdateHOTASInput()
 		return;
 	}
 
-	// TODO: Read actual input from HOTAS SDK
+	// NOOP: TODO - Read actual input from HOTAS SDK
 	// For now, we can read from Unreal's generic input system or use the specific SDK
 
 	// Placeholder: Read from Unreal's input system (which can map to HOTAS devices)

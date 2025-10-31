@@ -2,6 +2,7 @@
 
 #include "LBEASTServerManagerWidget.h"
 #include "Networking/LBEASTServerBeacon.h"
+#include "Networking/LBEASTServerCommandProtocol.h"
 #include "Misc/Paths.h"
 #include "HAL/PlatformProcess.h"
 #include "Misc/FileHelper.h"
@@ -17,16 +18,44 @@ void ULBEASTServerManagerWidget::NativeConstruct()
 	ServerConfig.Port = 7777;
 	ServerConfig.MapName = TEXT("/Game/Maps/LBEASTMap");
 
-	// Initialize network beacon for real-time status updates
+	// Initialize network beacon for real-time status updates and server discovery
 	ServerBeacon = NewObject<ULBEASTServerBeacon>(this, TEXT("ServerStatusBeacon"));
 	if (ServerBeacon)
 	{
+		// Bind to status updates
 		ServerBeacon->OnServerDiscovered.AddDynamic(this, &ULBEASTServerManagerWidget::OnServerStatusReceived);
+		
+		// Also bind to discovery for auto-connect (Remote mode)
+		ServerBeacon->OnServerDiscovered.AddDynamic(this, &ULBEASTServerManagerWidget::OnServerDiscoveredForConnection);
+		
 		ServerBeacon->StartClientDiscovery();
 		AddLogMessage(TEXT("Server status beacon initialized (listening on port 7778)"));
 	}
 
-	AddLogMessage(TEXT("Server Manager initialized"));
+	// Initialize command protocol for remote server control
+	CommandProtocol = NewObject<ULBEASTServerCommandProtocol>(this, TEXT("CommandProtocol"));
+	if (CommandProtocol)
+	{
+		// Configure authentication settings (only applies in Remote mode)
+		CommandProtocol->bEnableAuthentication = bEnableAuthentication;
+		CommandProtocol->SharedSecret = SharedSecret;
+		CommandProtocol->CommandPort = RemoteCommandPort;
+		
+		if (bEnableAuthentication)
+		{
+			AddLogMessage(TEXT("Command protocol initialized with authentication enabled (port 7779)"));
+		}
+		else
+		{
+			AddLogMessage(TEXT("Command protocol initialized (port 7779, authentication disabled)"));
+		}
+	}
+
+	// Set default connection mode based on whether we're in editor or standalone
+	ConnectionMode = ELBEASTConnectionMode::Local;
+
+	AddLogMessage(FString::Printf(TEXT("Server Manager initialized (Mode: %s)"), 
+		ConnectionMode == ELBEASTConnectionMode::Local ? TEXT("Local") : TEXT("Remote")));
 }
 
 void ULBEASTServerManagerWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -37,6 +66,12 @@ void ULBEASTServerManagerWidget::NativeTick(const FGeometry& MyGeometry, float I
 	if (ServerBeacon && ServerBeacon->IsActive())
 	{
 		ServerBeacon->Tick(InDeltaTime);
+	}
+
+	// Tick command protocol (for remote mode)
+	if (CommandProtocol && ConnectionMode == ELBEASTConnectionMode::Remote)
+	{
+		CommandProtocol->TickClient(InDeltaTime);
 	}
 
 	// Poll server status
@@ -62,54 +97,89 @@ bool ULBEASTServerManagerWidget::StartServer()
 		return false;
 	}
 
-	// Get server executable path
-	FString ServerPath = GetServerExecutablePath();
-	if (!FPaths::FileExists(ServerPath))
+	// Handle different connection modes
+	if (ConnectionMode == ELBEASTConnectionMode::Remote)
 	{
-		AddLogMessage(FString::Printf(TEXT("ERROR: Server executable not found at %s"), *ServerPath));
-		AddLogMessage(TEXT("Please build the dedicated server target first."));
-		return false;
-	}
+		// Remote mode: Send command to remote server
+		if (!CommandProtocol || !CommandProtocol->IsActive())
+		{
+			AddLogMessage(TEXT("ERROR: Not connected to remote server. Connect first."));
+			return false;
+		}
 
-	// Build command line
-	FString CommandLine = BuildServerCommandLine();
+		// Build command parameter JSON
+		FString CommandParam = FString::Printf(TEXT("{\"ExperienceType\":\"%s\",\"MaxPlayers\":%d,\"Port\":%d,\"MapName\":\"%s\"}"),
+			*ServerConfig.ExperienceType, ServerConfig.MaxPlayers, ServerConfig.Port, *ServerConfig.MapName);
 
-	AddLogMessage(FString::Printf(TEXT("Starting server: %s %s"), *ServerPath, *CommandLine));
-
-	// Launch server process
-	uint32 ProcessID = 0;
-	ServerProcessHandle = FPlatformProcess::CreateProc(
-		*ServerPath,
-		*CommandLine,
-		true,  // bLaunchDetached
-		false, // bLaunchHidden
-		false, // bLaunchReallyHidden
-		&ProcessID,
-		0,     // PriorityModifier
-		nullptr, // OptionalWorkingDirectory
-		nullptr, // PipeWriteChild
-		nullptr  // PipeReadChild
-	);
-	ServerStatus.ProcessID = static_cast<int32>(ProcessID);
-
-	if (ServerProcessHandle.IsValid())
-	{
-		ServerStatus.bIsRunning = true;
-		ServerStatus.Uptime = 0.0f;
-		ServerStatus.ExperienceState = TEXT("Starting...");
+		FLBEASTServerResponseMessage Response = CommandProtocol->SendCommand(ELBEASTServerCommand::StartServer, CommandParam);
 		
-		// Save expected server info for beacon matching
-		ExpectedServerIP = TEXT("127.0.0.1"); // Localhost for local server
-		ExpectedServerPort = ServerConfig.Port;
-		
-		AddLogMessage(FString::Printf(TEXT("Server started successfully (PID: %d)"), ServerStatus.ProcessID));
-		AddLogMessage(TEXT("Listening for server status broadcasts..."));
-		return true;
+		if (Response.bSuccess)
+		{
+			ServerStatus.bIsRunning = true;
+			ServerStatus.Uptime = 0.0f;
+			ServerStatus.ExperienceState = TEXT("Starting...");
+			ExpectedServerIP = RemoteServerIP;
+			ExpectedServerPort = RemoteServerPort;
+			AddLogMessage(FString::Printf(TEXT("Remote server start command sent: %s"), *Response.Message));
+			return true;
+		}
+		else
+		{
+			AddLogMessage(FString::Printf(TEXT("ERROR: Failed to send start command: %s"), *Response.Message));
+			return false;
+		}
 	}
 	else
 	{
-		AddLogMessage(TEXT("ERROR: Failed to start server process"));
-		return false;
+		// Local mode: Launch server process
+		FString ServerPath = GetServerExecutablePath();
+		if (!FPaths::FileExists(ServerPath))
+		{
+			AddLogMessage(FString::Printf(TEXT("ERROR: Server executable not found at %s"), *ServerPath));
+			AddLogMessage(TEXT("Please build the dedicated server target first."));
+			return false;
+		}
+
+		// Build command line
+		FString CommandLine = BuildServerCommandLine();
+
+		AddLogMessage(FString::Printf(TEXT("Starting server: %s %s"), *ServerPath, *CommandLine));
+
+		// Launch server process
+		uint32 ProcessID = 0;
+		ServerProcessHandle = FPlatformProcess::CreateProc(
+			*ServerPath,
+			*CommandLine,
+			true,  // bLaunchDetached
+			false, // bLaunchHidden
+			false, // bLaunchReallyHidden
+			&ProcessID,
+			0,     // PriorityModifier
+			nullptr, // OptionalWorkingDirectory
+			nullptr, // PipeWriteChild
+			nullptr  // PipeReadChild
+		);
+		ServerStatus.ProcessID = static_cast<int32>(ProcessID);
+
+		if (ServerProcessHandle.IsValid())
+		{
+			ServerStatus.bIsRunning = true;
+			ServerStatus.Uptime = 0.0f;
+			ServerStatus.ExperienceState = TEXT("Starting...");
+			
+			// Save expected server info for beacon matching
+			ExpectedServerIP = TEXT("127.0.0.1"); // Localhost for local server
+			ExpectedServerPort = ServerConfig.Port;
+			
+			AddLogMessage(FString::Printf(TEXT("Server started successfully (PID: %d)"), ServerStatus.ProcessID));
+			AddLogMessage(TEXT("Listening for server status broadcasts..."));
+			return true;
+		}
+		else
+		{
+			AddLogMessage(TEXT("ERROR: Failed to start server process"));
+			return false;
+		}
 	}
 }
 
@@ -121,26 +191,58 @@ bool ULBEASTServerManagerWidget::StopServer()
 		return false;
 	}
 
-	if (!ServerProcessHandle.IsValid())
+	// Handle different connection modes
+	if (ConnectionMode == ELBEASTConnectionMode::Remote)
 	{
-		AddLogMessage(TEXT("ERROR: Invalid server process handle"));
-		ServerStatus.bIsRunning = false;
-		return false;
+		// Remote mode: Send stop command
+		if (!CommandProtocol || !CommandProtocol->IsActive())
+		{
+			AddLogMessage(TEXT("ERROR: Not connected to remote server"));
+			ServerStatus.bIsRunning = false;
+			return false;
+		}
+
+		FLBEASTServerResponseMessage Response = CommandProtocol->SendCommand(ELBEASTServerCommand::StopServer);
+		
+		if (Response.bSuccess)
+		{
+			ServerStatus.bIsRunning = false;
+			ServerStatus.CurrentPlayers = 0;
+			ServerStatus.ExperienceState = TEXT("Stopped");
+			ServerStatus.ProcessID = 0;
+			AddLogMessage(FString::Printf(TEXT("Remote server stop command sent: %s"), *Response.Message));
+			return true;
+		}
+		else
+		{
+			AddLogMessage(FString::Printf(TEXT("ERROR: Failed to send stop command: %s"), *Response.Message));
+			return false;
+		}
 	}
+	else
+	{
+		// Local mode: Terminate process
+		if (!ServerProcessHandle.IsValid())
+		{
+			AddLogMessage(TEXT("ERROR: Invalid server process handle"));
+			ServerStatus.bIsRunning = false;
+			return false;
+		}
 
-	AddLogMessage(TEXT("Stopping server..."));
+		AddLogMessage(TEXT("Stopping server..."));
 
-	// Terminate the server process
-	FPlatformProcess::TerminateProc(ServerProcessHandle);
-	FPlatformProcess::CloseProc(ServerProcessHandle);
+		// Terminate the server process
+		FPlatformProcess::TerminateProc(ServerProcessHandle);
+		FPlatformProcess::CloseProc(ServerProcessHandle);
 
-	ServerStatus.bIsRunning = false;
-	ServerStatus.CurrentPlayers = 0;
-	ServerStatus.ExperienceState = TEXT("Stopped");
-	ServerStatus.ProcessID = 0;
+		ServerStatus.bIsRunning = false;
+		ServerStatus.CurrentPlayers = 0;
+		ServerStatus.ExperienceState = TEXT("Stopped");
+		ServerStatus.ProcessID = 0;
 
-	AddLogMessage(TEXT("Server stopped"));
-	return true;
+		AddLogMessage(TEXT("Server stopped"));
+		return true;
+	}
 }
 
 void ULBEASTServerManagerWidget::UpdateServerStatus()
@@ -158,13 +260,13 @@ void ULBEASTServerManagerWidget::UpdateServerStatus()
 		}
 	}
 
-	// TODO: Query actual server status via network beacon or log file parsing
+	// NOOP: TODO - Query actual server status via network beacon or log file parsing
 	// For now, this is just a stub
 }
 
 void ULBEASTServerManagerWidget::UpdateOmniverseStatus()
 {
-	// TODO: Implement Omniverse Audio2Face connection check
+	// NOOP: TODO - Implement Omniverse Audio2Face connection check
 	// This would connect to Omniverse Nucleus or Audio2Face API
 	// For now, this is just a stub
 	
@@ -189,14 +291,14 @@ void ULBEASTServerManagerWidget::AddLogMessage(const FString& Message)
 	// Log to Unreal console
 	UE_LOG(LogTemp, Log, TEXT("[ServerManager] %s"), *Message);
 
-	// TODO: Add to UI log widget
+	// NOOP: TODO - Add to UI log widget
 	// This would be implemented in Blueprint by binding to this function
 	// and appending to a TextBlock or ScrollBox
 }
 
 void ULBEASTServerManagerWidget::OpenOmniverseConfig()
 {
-	// TODO: Open a sub-panel or dialog for Omniverse configuration
+	// NOOP: TODO - Open a sub-panel or dialog for Omniverse configuration
 	// This would include:
 	// - Omniverse Nucleus connection settings
 	// - Audio2Face server address
@@ -294,5 +396,118 @@ void ULBEASTServerManagerWidget::OnServerStatusReceived(const FLBEASTServerInfo&
 			ServerStatus.CurrentPlayers, ServerConfig.MaxPlayers));
 		LastPlayerCount = ServerStatus.CurrentPlayers;
 	}
+}
+
+bool ULBEASTServerManagerWidget::ConnectToRemoteServer()
+{
+	if (ConnectionMode != ELBEASTConnectionMode::Remote)
+	{
+		AddLogMessage(TEXT("ERROR: Connection mode is not set to Remote"));
+		return false;
+	}
+
+	if (CommandProtocol && CommandProtocol->IsActive())
+	{
+		AddLogMessage(TEXT("Already connected to remote server"));
+		return true;
+	}
+
+	if (!CommandProtocol)
+	{
+		CommandProtocol = NewObject<ULBEASTServerCommandProtocol>(this, TEXT("CommandProtocol"));
+		if (!CommandProtocol)
+		{
+			AddLogMessage(TEXT("ERROR: Failed to create command protocol"));
+			return false;
+		}
+	}
+
+	// Sync authentication settings before connecting
+	CommandProtocol->bEnableAuthentication = bEnableAuthentication;
+	CommandProtocol->SharedSecret = SharedSecret;
+	CommandProtocol->CommandPort = RemoteCommandPort;
+
+	// Initialize client connection
+	if (CommandProtocol->InitializeClient(RemoteServerIP, RemoteCommandPort))
+	{
+		ExpectedServerIP = RemoteServerIP;
+		ExpectedServerPort = RemoteServerPort;
+		AddLogMessage(FString::Printf(TEXT("Connected to remote server at %s:%d (command port: %d)"), 
+			*RemoteServerIP, RemoteServerPort, RemoteCommandPort));
+		return true;
+	}
+	else
+	{
+		AddLogMessage(FString::Printf(TEXT("ERROR: Failed to connect to remote server at %s:%d"), 
+			*RemoteServerIP, RemoteCommandPort));
+		return false;
+	}
+}
+
+void ULBEASTServerManagerWidget::DisconnectFromRemoteServer()
+{
+	if (ConnectionMode != ELBEASTConnectionMode::Remote)
+	{
+		return;
+	}
+
+	if (CommandProtocol && CommandProtocol->IsActive())
+	{
+		CommandProtocol->ShutdownClient();
+		AddLogMessage(TEXT("Disconnected from remote server"));
+		
+		// Reset status
+		ServerStatus.bIsRunning = false;
+		ServerStatus.CurrentPlayers = 0;
+		ServerStatus.ExperienceState = TEXT("Disconnected");
+	}
+}
+
+bool ULBEASTServerManagerWidget::IsRemoteConnected() const
+{
+	return CommandProtocol && CommandProtocol->IsActive();
+}
+
+void ULBEASTServerManagerWidget::OnCommandResponse(const FLBEASTServerResponseMessage& Response)
+{
+	if (Response.bSuccess)
+	{
+		AddLogMessage(FString::Printf(TEXT("Command response: %s"), *Response.Message));
+	}
+	else
+	{
+		AddLogMessage(FString::Printf(TEXT("Command error: %s"), *Response.Message));
+	}
+}
+
+void ULBEASTServerManagerWidget::OnServerDiscoveredForConnection(const FLBEASTServerInfo& ServerInfo)
+{
+	// Log discovered server
+	AddLogMessage(FString::Printf(TEXT("Discovered server: %s (%s) at %s:%d"), 
+		*ServerInfo.ServerName, *ServerInfo.ExperienceType, *ServerInfo.ServerIP, ServerInfo.ServerPort));
+
+	// If in remote mode and not connected, offer to connect
+	if (ConnectionMode == ELBEASTConnectionMode::Remote && !IsRemoteConnected())
+	{
+		// Update remote server info from beacon (auto-fill)
+		RemoteServerIP = ServerInfo.ServerIP;
+		RemoteServerPort = ServerInfo.ServerPort;
+		RemoteCommandPort = 7779; // Default command port
+
+		AddLogMessage(FString::Printf(TEXT("Auto-filled remote server info from discovery: %s:%d"), 
+			*RemoteServerIP, RemoteServerPort));
+
+		// Optionally auto-connect (could be made configurable via Blueprint)
+		// ConnectToRemoteServer();
+	}
+}
+
+TArray<FLBEASTServerInfo> ULBEASTServerManagerWidget::GetDiscoveredServers() const
+{
+	if (ServerBeacon && ServerBeacon->IsActive())
+	{
+		return ServerBeacon->GetDiscoveredServers();
+	}
+	return TArray<FLBEASTServerInfo>();
 }
 

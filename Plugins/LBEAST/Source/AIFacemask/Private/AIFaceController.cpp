@@ -35,7 +35,7 @@ void UAIFaceController::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	{
 		UpdateTimer = 0.0f;
 		
-		// TODO: Query AI service for new facial expression data
+		// NOOP: TODO - Query AI service for new facial expression data
 		// For now, this is a placeholder for future AI integration
 	}
 }
@@ -70,7 +70,7 @@ void UAIFaceController::PlayFacialAnimation(const FFacialAnimationData& Animatio
 	{
 		for (const auto& BlendShape : AnimationData.BlendShapeWeights)
 		{
-			// TODO: Apply morph target weights to skeletal mesh
+			// NOOP: TODO - Apply morph target weights to skeletal mesh
 			// This requires mapping blend shape names to morph target names
 		}
 	}
@@ -88,7 +88,7 @@ void UAIFaceController::SetBlendShapeWeight(FName BlendShapeName, float Weight)
 	// Apply to mesh immediately
 	if (Config.TargetMesh)
 	{
-		// TODO: Apply morph target weight
+		// NOOP: TODO - Apply morph target weight
 	}
 }
 
@@ -96,6 +96,7 @@ void UAIFaceController::SetAIGenerationEnabled(bool bEnabled)
 {
 	Config.bUseAIGeneration = bEnabled;
 }
+
 
 
 

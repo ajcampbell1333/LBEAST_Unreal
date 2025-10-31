@@ -175,7 +175,7 @@ bool UEmbeddedDeviceController::InitializeSerialConnection()
 	UE_LOG(LogTemp, Log, TEXT("EmbeddedDeviceController: Initializing Serial connection to %s at %d baud"), 
 		*Config.DeviceAddress, Config.BaudRate);
 
-	// TODO: Implement Windows COM port handling
+	// NOOP: TODO - Implement Windows COM port handling
 	// This requires platform-specific code (Windows: CreateFile, Linux: termios)
 	UE_LOG(LogTemp, Warning, TEXT("EmbeddedDeviceController: Serial communication not yet implemented"));
 	return false;
@@ -189,7 +189,7 @@ void UEmbeddedDeviceController::SendOutputCommand(const FEmbeddedOutputCommand& 
 		return;
 	}
 
-	// TODO: Format and send command to device
+	// NOOP: TODO - Format and send command to device
 	// Command format would depend on the firmware protocol
 	UE_LOG(LogTemp, Log, TEXT("EmbeddedDeviceController: Sending output - Channel: %d, Value: %.2f"), 
 		Command.Channel, Command.Value);
@@ -261,7 +261,7 @@ void UEmbeddedDeviceController::ProcessIncomingData()
 		break;
 
 	case ELBEASTCommProtocol::Serial:
-		// TODO: Implement serial receive
+		// NOOP: TODO - Implement serial receive
 		break;
 
 	default:
@@ -285,7 +285,7 @@ void UEmbeddedDeviceController::SendDataToDevice(const TArray<uint8>& Data)
 		break;
 
 	case ELBEASTCommProtocol::Serial:
-		// TODO: Implement serial send
+		// NOOP: TODO - Implement serial send
 		break;
 
 	default:
