@@ -789,6 +789,54 @@ The dedicated server PC should also run NVIDIA Omniverse with Audio2Face for rea
 
 > **Note:** Omniverse integration is in development. Current implementation provides the architecture and UI hooks.
 
+### **Remote Monitoring & Off-Site Access**
+
+The Command Console supports remote connection to Server Managers over the network, enabling off-site monitoring and control.
+
+#### **Local Network (LAN)**
+
+- ✅ **Auto-Discovery:** Server Beacon automatically discovers servers on the local network (UDP broadcast on port 7778)
+- ✅ **Command Protocol:** Direct UDP connection on port 7779 for remote control
+- ✅ **Real-Time Status:** Status updates via Server Beacon broadcasts
+
+#### **Internet/Off-Site Access**
+
+The Command Protocol (UDP port 7779) **can work over the internet** with proper network configuration:
+
+**What Works:**
+- ✅ Command Protocol connects directly via UDP (not broadcast)
+- ✅ Can send Start/Stop commands to remote servers
+- ✅ Can request status via `RequestStatus` command
+- ✅ Manual IP entry supported for known server addresses
+
+**What Doesn't Work:**
+- ❌ **Auto-Discovery:** Server Beacon (UDP broadcast) is LAN-only - routers don't forward broadcasts
+- ❌ **Real-Time Status:** Server Beacon status updates won't work over internet
+- ⚠️ **Workaround:** Use `RequestStatus` command for periodic status polling
+
+**Security Considerations:**
+- ⚠️ **Authentication:** Enable authentication for off-site connections (shared secret in Command Console settings)
+- ⚠️ **Firewall:** Must open UDP port 7779 inbound on server firewall
+- ⚠️ **Production:** For public operation, use VPN or full internet isolation
+- ⚠️ **Debugging Only:** Off-site monitoring recommended for debugging/testing only
+
+**Recommended Setup for Off-Site:**
+1. **VPN Connection:** Connect via VPN between Command Console and Server Manager
+2. **Manual IP Entry:** Enter server IP address manually (no auto-discovery over internet)
+3. **Enable Authentication:** Configure shared secret in both Command Console and Server Manager
+4. **Status Polling:** Use `RequestStatus` command for periodic status updates
+5. **For Production:** Use full internet isolation - off-site monitoring is for debugging only
+
+**Network Requirements:**
+- Server must have public IP or port-forwarded private IP
+- Firewall must allow UDP port 7779 inbound
+- NAT traversal may require port forwarding or UPnP configuration
+
+**Port Usage:**
+- **7777:** Game server port (Unreal networking)
+- **7778:** Server Beacon port (UDP discovery broadcasts - LAN only)
+- **7779:** Command Protocol port (UDP command/control - works over internet)
+
 ---
 
 ## Roadmap
