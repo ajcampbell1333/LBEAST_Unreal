@@ -468,6 +468,47 @@ DeviceController->InitializeDevice(Config);
 DeviceController->TriggerHapticPulse(0, 0.8f, 0.5f);
 ```
 
+#### 🎛️ ProAudio API
+**Module:** `ProAudio`
+
+Hardware-agnostic professional audio console control via OSC. Uses Unreal Engine's built-in OSC plugin (no external dependencies).
+
+**Example:**
+```cpp
+UProAudioController* AudioController = CreateDefaultSubobject<UProAudioController>(TEXT("AudioController"));
+FLBEASTProAudioConfig Config;
+Config.ConsoleType = ELBEASTProAudioConsole::BehringerX32;
+Config.BoardIPAddress = TEXT("192.168.1.100");
+Config.OSCPort = 10023;  // X32 default OSC port
+
+AudioController->InitializeConsole(Config);
+
+// Control channel fader (0.0 = -inf, 1.0 = 0dB)
+AudioController->SetChannelFader(1, 0.75f);  // Channel 1 to 75%
+
+// Mute/unmute channel
+AudioController->SetChannelMute(2, true);   // Mute channel 2
+
+// Set bus send (e.g., reverb send)
+AudioController->SetChannelBusSend(1, 1, 0.5f);  // Channel 1 → Bus 1 at 50%
+
+// Control master fader
+AudioController->SetMasterFader(0.9f);  // Master to 90%
+```
+
+**Supported Consoles:**
+- ✅ Behringer X32, M32, Wing
+- ✅ Yamaha QL, CL, TF, DM7
+- ✅ Allen & Heath SQ, dLive
+- ✅ Soundcraft Si
+- ✅ PreSonus StudioLive
+- ✅ Custom (manual OSC paths)
+
+**Benefits:**
+- ✅ **No Max for Live** - Direct OSC to console (no intermediate software)
+- ✅ **Native Unreal** - Uses built-in OSC plugin (no external dependencies)
+- ✅ **Cross-Manufacturer** - Same API works with all supported boards
+
 ## Installation
 
 ### Prerequisites
@@ -550,6 +591,7 @@ LBEAST components are available in the **Add Component** menu:
 - **AI Face Controller**
 - **Haptic Platform Controller**
 - **Embedded Device Controller**
+- **Pro Audio Controller**
 
 All components are fully Blueprint-compatible with exposed properties and functions.
 
@@ -563,6 +605,7 @@ LBEAST/
 ├── AIFacemask          # AI facial animation API
 ├── LargeHaptics        # Hydraulic platform & gyroscope control API
 ├── EmbeddedSystems     # Microcontroller integration API
+├── ProAudio            # Professional audio console control via OSC
 └── LBEASTExperiences   # Pre-configured experience templates
     ├── AIFacemaskExperience
     ├── MovingPlatformExperience
@@ -874,6 +917,7 @@ The Command Protocol (UDP port 7779) **can work over the internet** with proper 
 
 Tasks in progress or ready for implementation:
 
+- [ ] **Pro Audio UMG Templates for Command Console** - Create drag-and-drop UMG widget templates (channel faders, mute buttons, bus sends) that auto-map to physical mixer channels on Behringer X32/M32/Wing, Yamaha QL/CL/TF, and other OSC-enabled consoles. Templates will use ProAudioController's bidirectional sync delegates to stay synchronized with physical console state.
 - [ ] **Design the Default Server Manager UI** - Create polished UMG interface for server management
 - [ ] **Omniverse Audio2Face Integration** - Connect to NVIDIA Omniverse for real-time facial animation streaming
 - [ ] **Example Maps** - Create demonstration maps for each experience template
