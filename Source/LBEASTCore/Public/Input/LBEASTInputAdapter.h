@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "LBEASTEmbeddedDeviceInterface.h"
 #include "LBEASTInputAdapter.generated.h"
 
 // Forward declarations
-class UEmbeddedDeviceController;
+class ILBEASTEmbeddedDeviceInterface;
 
 /**
  * Input Event Delegates
@@ -80,7 +81,7 @@ public:
 
 	/** Reference to embedded device controller (ESP32, Arduino, etc.) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|Input|Embedded Systems")
-	TObjectPtr<UEmbeddedDeviceController> EmbeddedDeviceController;
+	TScriptInterface<ILBEASTEmbeddedDeviceInterface> EmbeddedDeviceController;
 
 	/** Enable embedded system input (ESP32 wrist buttons, etc.) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|Input|Embedded Systems")

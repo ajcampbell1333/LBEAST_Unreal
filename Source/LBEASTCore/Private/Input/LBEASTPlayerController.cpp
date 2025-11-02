@@ -2,7 +2,7 @@
 
 #include "Input/LBEASTPlayerController.h"
 #include "Input/LBEASTInputAdapter.h"
-#include "LBEASTExperienceBase.h"
+#include "LBEASTExperienceInterface.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputAction.h"
@@ -22,16 +22,21 @@ void ALBEASTPlayerController::BeginPlay()
 	Super::BeginPlay();
 
 	// Auto-find experience if not already assigned
-	if (bAutoFindExperience && !CurrentExperience)
+	if (bAutoFindExperience && !CurrentExperience.GetInterface())
 	{
-		for (TActorIterator<ALBEASTExperienceBase> It(GetWorld()); It; ++It)
+		// Search for any actor implementing ILBEASTExperienceInterface
+		for (TActorIterator<AActor> It(GetWorld()); It; ++It)
 		{
-			CurrentExperience = *It;
-			UE_LOG(LogTemp, Log, TEXT("[LBEASTPlayerController] Auto-assigned CurrentExperience: %s"), *CurrentExperience->GetName());
-			break; // Use first experience found
+			AActor* Actor = *It;
+			if (Actor && Actor->GetClass()->ImplementsInterface(ULBEASTExperienceInterface::StaticClass()))
+			{
+				CurrentExperience = TScriptInterface<ILBEASTExperienceInterface>(Actor);
+				UE_LOG(LogTemp, Log, TEXT("[LBEASTPlayerController] Auto-assigned CurrentExperience: %s"), *Actor->GetName());
+				break; // Use first experience found
+			}
 		}
 
-		if (!CurrentExperience)
+		if (!CurrentExperience.GetInterface())
 		{
 			UE_LOG(LogTemp, Warning, TEXT("[LBEASTPlayerController] No experience found in world. Enhanced Input will not work."));
 		}
@@ -154,13 +159,14 @@ void ALBEASTPlayerController::OnAxis3Changed(const FInputActionValue& Value) { I
 
 void ALBEASTPlayerController::InjectButton(int32 ButtonIndex, bool bPressed)
 {
-	if (!CurrentExperience)
+	if (!CurrentExperience.GetInterface())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("[LBEASTPlayerController] CurrentExperience is null. Cannot inject button input."));
 		return;
 	}
 
-	if (!CurrentExperience->InputAdapter)
+	ULBEASTInputAdapter* InputAdapter = CurrentExperience->GetInputAdapter();
+	if (!InputAdapter)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("[LBEASTPlayerController] Experience has no InputAdapter. Cannot inject button input."));
 		return;
@@ -172,20 +178,21 @@ void ALBEASTPlayerController::InjectButton(int32 ButtonIndex, bool bPressed)
 	}
 
 	if (bPressed)
-		CurrentExperience->InputAdapter->InjectButtonPress(ButtonIndex);
+		InputAdapter->InjectButtonPress(ButtonIndex);
 	else
-		CurrentExperience->InputAdapter->InjectButtonRelease(ButtonIndex);
+		InputAdapter->InjectButtonRelease(ButtonIndex);
 }
 
 void ALBEASTPlayerController::InjectAxis(int32 AxisIndex, float Value)
 {
-	if (!CurrentExperience)
+	if (!CurrentExperience.GetInterface())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("[LBEASTPlayerController] CurrentExperience is null. Cannot inject axis input."));
 		return;
 	}
 
-	if (!CurrentExperience->InputAdapter)
+	ULBEASTInputAdapter* InputAdapter = CurrentExperience->GetInputAdapter();
+	if (!InputAdapter)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("[LBEASTPlayerController] Experience has no InputAdapter. Cannot inject axis input."));
 		return;
@@ -196,6 +203,6 @@ void ALBEASTPlayerController::InjectAxis(int32 AxisIndex, float Value)
 		UE_LOG(LogTemp, Log, TEXT("[LBEASTPlayerController] Axis %d = %.2f"), AxisIndex, Value);
 	}
 
-	CurrentExperience->InputAdapter->InjectAxisValue(AxisIndex, Value);
+	InputAdapter->InjectAxisValue(AxisIndex, Value);
 }
 

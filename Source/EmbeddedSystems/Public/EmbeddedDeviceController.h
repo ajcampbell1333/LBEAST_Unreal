@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "LBEASTEmbeddedDeviceInterface.h"
 #include "EmbeddedDeviceController.generated.h"
 
 /**
@@ -205,7 +206,7 @@ enum class ELBEASTDataType : uint8
  * - Wireless and wired communication protocols
  */
 UCLASS(ClassGroup=(LBEAST), meta=(BlueprintSpawnableComponent))
-class EMBEDDEDSYSTEMS_API UEmbeddedDeviceController : public UActorComponent
+class EMBEDDEDSYSTEMS_API UEmbeddedDeviceController : public UActorComponent, public ILBEASTEmbeddedDeviceInterface
 {
 	GENERATED_BODY()
 

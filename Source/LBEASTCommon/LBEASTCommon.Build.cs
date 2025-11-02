@@ -2,9 +2,9 @@
 
 using UnrealBuildTool;
 
-public class EmbeddedSystems : ModuleRules
+public class LBEASTCommon : ModuleRules
 {
-	public EmbeddedSystems(ReadOnlyTargetRules Target) : base(Target)
+	public LBEASTCommon(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		
@@ -25,12 +25,7 @@ public class EmbeddedSystems : ModuleRules
 			{
 				"Core",
 				"CoreUObject",
-				"Engine",
-				"Sockets",
-				"Networking",
-				"Json",
-				"JsonUtilities",
-				"LBEASTCommon"  // Required for ILBEASTEmbeddedDeviceInterface
+				"Engine"
 			}
 		);
 			
@@ -44,5 +39,4 @@ public class EmbeddedSystems : ModuleRules
 		);
 	}
 }
-
 

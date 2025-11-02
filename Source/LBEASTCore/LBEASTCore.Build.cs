@@ -10,7 +10,6 @@ public class LBEASTCore : ModuleRules
 		
 		PublicIncludePaths.AddRange(
 			new string[] {
-				// ... add public include paths required here ...
 			}
 		);
 				
@@ -37,7 +36,8 @@ public class LBEASTCore : ModuleRules
 				"Sockets",
 				"Networking",
 				"Json",
-				"JsonUtilities"
+				"JsonUtilities",
+				"LBEASTCommon"  // Interfaces and shared types
 			}
 		);
 			
@@ -46,9 +46,7 @@ public class LBEASTCore : ModuleRules
 			new string[]
 			{
 				"Slate",
-				"SlateCore",
-				"EmbeddedSystems",      // For UEmbeddedDeviceController (used in .cpp only)
-				"LBEASTExperiences"     // For ALBEASTExperienceBase (used in .cpp only)
+				"SlateCore"
 			}
 		);
 		

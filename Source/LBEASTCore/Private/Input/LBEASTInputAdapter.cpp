@@ -1,7 +1,7 @@
 // Copyright (c) 2025 AJ Campbell. Licensed under the MIT License.
 
 #include "Input/LBEASTInputAdapter.h"
-#include "EmbeddedDeviceController.h"
+#include "LBEASTEmbeddedDeviceInterface.h"
 #include "Net/UnrealNetwork.h"
 
 ULBEASTInputAdapter::ULBEASTInputAdapter()
@@ -52,7 +52,8 @@ void ULBEASTInputAdapter::TickComponent(float DeltaTime, ELevelTick TickType, FA
 void ULBEASTInputAdapter::ProcessEmbeddedSystemInput()
 {
 	// Only process if embedded device is connected
-	if (!EmbeddedDeviceController || !EmbeddedDeviceController->IsDeviceConnected())
+	ILBEASTEmbeddedDeviceInterface* Device = EmbeddedDeviceController.GetInterface();
+	if (!Device || !Device->IsDeviceConnected())
 	{
 		return;
 	}
@@ -63,7 +64,7 @@ void ULBEASTInputAdapter::ProcessEmbeddedSystemInput()
 	// Read button states from embedded device
 	for (int32 i = 0; i < ButtonCount; i++)
 	{
-		bool bCurrentState = EmbeddedDeviceController->GetDigitalInput(i);
+		bool bCurrentState = Device->GetDigitalInput(i);
 		bool bPreviousState = (PreviousButtonStates & (1 << i)) != 0;
 
 		// Edge detection: trigger on state change
@@ -76,7 +77,7 @@ void ULBEASTInputAdapter::ProcessEmbeddedSystemInput()
 	// Read axis values from embedded device
 	for (int32 i = 0; i < AxisCount; i++)
 	{
-		float CurrentValue = EmbeddedDeviceController->GetAnalogInput(i);
+		float CurrentValue = Device->GetAnalogInput(i);
 		float PreviousValue = PreviousAxisValues[i];
 
 		// Only update if value changed significantly (prevent noise)

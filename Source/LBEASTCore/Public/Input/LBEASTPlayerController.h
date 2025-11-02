@@ -5,12 +5,13 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "InputActionValue.h"
+#include "LBEASTExperienceInterface.h"
 #include "LBEASTPlayerController.generated.h"
 
 // Forward declarations
 class UInputAction;
 class UInputMappingContext;
-class ALBEASTExperienceBase;
+class ILBEASTExperienceInterface;
 class ULBEASTInputAdapter;
 
 /**
@@ -49,7 +50,7 @@ public:
 
 	/** Reference to the current experience (auto-assigned in BeginPlay if not set) */
 	UPROPERTY(BlueprintReadWrite, Category = "LBEAST|Input")
-	TObjectPtr<ALBEASTExperienceBase> CurrentExperience;
+	TScriptInterface<ILBEASTExperienceInterface> CurrentExperience;
 
 	// ========================================
 	// INPUT MAPPING CONTEXT

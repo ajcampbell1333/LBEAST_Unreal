@@ -7,6 +7,7 @@
 #include "LBEASTHMDInterface.h"
 #include "LBEASTTrackingInterface.h"
 #include "Networking/LBEASTServerCommandProtocol.h"
+#include "LBEASTExperienceInterface.h"
 #include "LBEASTExperienceBase.generated.h"
 
 // Forward declarations
@@ -44,7 +45,7 @@ enum class ELBEASTServerMode : uint8
  * Developers can use these as-is or extend them for custom experiences.
  */
 UCLASS(Abstract, Blueprintable, BlueprintType, ClassGroup=(LBEAST))
-class LBEASTEXPERIENCES_API ALBEASTExperienceBase : public AActor
+class LBEASTEXPERIENCES_API ALBEASTExperienceBase : public AActor, public ILBEASTExperienceInterface
 {
 	GENERATED_BODY()
 	
@@ -122,6 +123,13 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LBEAST|Experience")
 	virtual int32 GetMaxPlayers() const { return 1; }
+
+	// ========================================
+	// ILBEASTExperienceInterface Implementation
+	// ========================================
+
+	/** Get the InputAdapter component (implements ILBEASTExperienceInterface) */
+	virtual ULBEASTInputAdapter* GetInputAdapter() const override;
 
 protected:
 	virtual void BeginPlay() override;

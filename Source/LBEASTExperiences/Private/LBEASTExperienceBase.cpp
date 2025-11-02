@@ -111,6 +111,11 @@ void ALBEASTExperienceBase::Tick(float DeltaTime)
 	}
 }
 
+ULBEASTInputAdapter* ALBEASTExperienceBase::GetInputAdapter() const
+{
+	return InputAdapter;
+}
+
 void ALBEASTExperienceBase::InitializeCommandProtocol()
 {
 	UWorld* World = GetWorld();

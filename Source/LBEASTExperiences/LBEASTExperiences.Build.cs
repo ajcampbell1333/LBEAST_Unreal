@@ -26,10 +26,8 @@ public class LBEASTExperiences : ModuleRules
 				"Core",
 				"CoreUObject",
 				"Engine",
-				"LBEASTCore",
-				"AIFacemask",
-				"LargeHaptics",
-				"EmbeddedSystems"
+				"LBEASTCommon",  // Interfaces and shared types
+				"LBEASTCore"      // Implementation classes (InputAdapter, ServerCommandProtocol, etc.)
 			}
 		);
 			
@@ -38,7 +36,10 @@ public class LBEASTExperiences : ModuleRules
 			new string[]
 			{
 				"Slate",
-				"SlateCore"
+				"SlateCore",
+				"AIFacemask",      // Implementation details - not exposed in public API
+				"LargeHaptics",    // Implementation details - not exposed in public API
+				"EmbeddedSystems"  // Implementation details - not exposed in public API
 			}
 		);
 	}

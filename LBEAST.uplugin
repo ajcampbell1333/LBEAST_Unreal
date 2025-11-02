@@ -16,6 +16,14 @@
 	"Installed": false,
 	"Modules": [
 		{
+			"Name": "LBEASTCommon",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Win64"
+			]
+		},
+		{
 			"Name": "LBEASTCore",
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
