@@ -509,7 +509,7 @@ AudioController->SetMasterFader(0.9f);  // Master to 90%
 - ✅ **Native Unreal** - Uses built-in OSC plugin (no external dependencies)
 - ✅ **Cross-Manufacturer** - Same API works with all supported boards
 
-## Installation
+## 📦 Installation
 
 ### Prerequisites
 
@@ -518,20 +518,124 @@ AudioController->SetMasterFader(0.9f);  // Master to 90%
 - **SteamVR** (for VR features)
 - **OpenXR Runtime** (Meta Quest, Windows Mixed Reality, etc.)
 
-### Option 1: Install as Plugin (Recommended)
+### Installation Methods
 
-1. Clone this repository
-2. Copy the `LBEAST_Unreal/Plugins/LBEAST` folder to your project's `Plugins` directory
-3. Regenerate Visual Studio project files (right-click `.uproject` → Generate Visual Studio project files)
-4. Build your project
-5. Enable the plugin in Unreal Editor: **Edit → Plugins → LBEAST**
+> **⚠️ Important:** The LBEAST repository contains project files (`Source/`, `Content/`, `.uproject`) in addition to the plugin. You **only need the `Plugins/LBEAST/` folder**. Do not clone the entire repository into your project's `Plugins/` directory.
 
-### Option 2: Use This Project Directly
+#### **Option 1: Git Submodule (Recommended for Git-based Projects)**
+
+Use Git sparse-checkout to get only the plugin folder:
+
+```bash
+# From your Unreal project root
+cd Plugins
+
+# Initialize sparse-checkout submodule
+git submodule add -f https://github.com/ajcampbell1333/LBEAST_Unreal.git LBEAST_Temp
+cd LBEAST_Temp
+git sparse-checkout init --cone
+git sparse-checkout set Plugins/LBEAST
+cd ..
+
+# Copy only the plugin folder
+cp -r LBEAST_Temp/Plugins/LBEAST ./LBEAST
+rm -rf LBEAST_Temp
+```
+
+**Windows PowerShell alternative:**
+```powershell
+# From your Unreal project root
+cd Plugins
+git clone --filter=blob:none --sparse https://github.com/ajcampbell1333/LBEAST_Unreal.git LBEAST_Temp
+cd LBEAST_Temp
+git sparse-checkout init --cone
+git sparse-checkout set Plugins/LBEAST
+cd ..
+Copy-Item -Path "LBEAST_Temp\Plugins\LBEAST" -Destination "." -Recurse -Force
+Remove-Item -Path "LBEAST_Temp" -Recurse -Force
+```
+
+Then:
+1. Regenerate Visual Studio project files (right-click `.uproject` → Generate Visual Studio project files)
+2. Build your project
+3. Enable the plugin in Unreal Editor: **Edit → Plugins → LBEAST**
+
+**To update the plugin later:**
+```bash
+cd Plugins
+git clone --filter=blob:none --sparse https://github.com/ajcampbell1333/LBEAST_Unreal.git LBEAST_Temp
+cd LBEAST_Temp
+git sparse-checkout set Plugins/LBEAST
+cd ..
+# Copy updated plugin folder
+cp -r LBEAST_Temp/Plugins/LBEAST ./LBEAST
+rm -rf LBEAST_Temp
+```
+
+#### **Option 2: Clone Elsewhere, Copy Plugin Folder (Simplest)**
+
+Clone the repository to a temporary location, then copy only the plugin:
+
+```bash
+# Clone to a temporary location (not in your project)
+cd ~/Downloads  # or any temp folder
+git clone https://github.com/ajcampbell1333/LBEAST_Unreal.git
+
+# Copy only the plugin folder to your project
+cp -r LBEAST_Unreal/Plugins/LBEAST /path/to/YourProject/Plugins/LBEAST
+
+# Clean up
+rm -rf LBEAST_Unreal
+```
+
+**Windows:**
+```powershell
+# Clone to a temporary location
+cd $env:USERPROFILE\Downloads
+git clone https://github.com/ajcampbell1333/LBEAST_Unreal.git
+
+# Copy only the plugin folder to your project
+Copy-Item -Path "LBEAST_Unreal\Plugins\LBEAST" -Destination "F:\YourProject\Plugins\LBEAST" -Recurse
+
+# Clean up
+Remove-Item -Path "LBEAST_Unreal" -Recurse
+```
+
+Then:
+1. Regenerate Visual Studio project files
+2. Build and enable the plugin
+
+#### **Option 3: Manual Installation (Traditional Method)**
+
+1. **Clone or download** this repository to a temporary location (not in your project)
+2. **Navigate** to `LBEAST_Unreal/Plugins/LBEAST`
+3. **Copy the entire `LBEAST` folder** to your project's `Plugins/` directory:
+   ```
+   YourProject/
+   └── Plugins/
+       └── LBEAST/          ← Copy ONLY this folder
+           ├── LBEAST.uplugin
+           ├── Source/
+           └── Content/
+   ```
+   **Do NOT copy:**
+   - ❌ `LBEAST_Unreal/Source/` (project source - not part of plugin)
+   - ❌ `LBEAST_Unreal/Content/` (project content - not part of plugin)
+   - ❌ `LBEAST_Unreal.uproject` (project file - not part of plugin)
+   - ✅ **Only copy** `Plugins/LBEAST/` folder
+
+4. Regenerate Visual Studio project files (right-click `.uproject` → Generate Visual Studio project files)
+5. Build your project
+6. Enable the plugin in Unreal Editor: **Edit → Plugins → LBEAST**
+
+#### **Option 4: Use This Project Directly**
 
 1. Clone this repository
 2. Right-click `LBEAST_Unreal.uproject` → Generate Visual Studio project files
 3. Open `LBEAST_Unreal.sln` in Visual Studio
 4. Build and run
+
+> **📌 Note:** Unlike Unity's Package Manager, Unreal Engine doesn't have native "add plugin from Git URL" functionality in the editor. The methods above provide Git-based distribution alternatives. Git submodules are the most common approach for version-controlled plugin distribution.
 
 ## Quick Start
 

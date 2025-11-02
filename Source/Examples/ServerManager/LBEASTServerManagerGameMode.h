@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "Examples.h"
 #include "LBEASTServerManagerGameMode.generated.h"
 
 /**
@@ -19,7 +20,7 @@
  * This runs on the dedicated server PC with a monitor/GUI.
  */
 UCLASS()
-class LBEAST_UNREAL_API ALBEASTServerManagerGameMode : public AGameModeBase
+class EXAMPLES_API ALBEASTServerManagerGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 

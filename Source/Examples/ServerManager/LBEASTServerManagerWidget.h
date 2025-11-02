@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Networking/LBEASTServerCommandProtocol.h"
 #include "Networking/LBEASTServerBeacon.h"
+#include "Examples.h"
 #include "LBEASTServerManagerWidget.generated.h"
 
 // Forward declarations
@@ -121,7 +122,7 @@ struct FOmniverseStatus
  * └────────────────────────────────────────┘
  */
 UCLASS()
-class LBEAST_UNREAL_API ULBEASTServerManagerWidget : public UUserWidget
+class EXAMPLES_API ULBEASTServerManagerWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
