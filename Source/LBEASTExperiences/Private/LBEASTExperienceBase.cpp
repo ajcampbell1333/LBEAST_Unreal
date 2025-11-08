@@ -3,6 +3,7 @@
 #include "LBEASTExperienceBase.h"
 #include "Input/LBEASTInputAdapter.h"
 #include "Networking/LBEASTServerCommandProtocol.h"
+#include "ExperienceLoop/ExperienceStateMachine.h"
 #include "GameFramework/GameStateBase.h"
 
 ALBEASTExperienceBase::ALBEASTExperienceBase()
@@ -16,6 +17,9 @@ ALBEASTExperienceBase::ALBEASTExperienceBase()
 
 	// Create command protocol component (will be initialized on dedicated server)
 	CommandProtocol = CreateDefaultSubobject<ULBEASTServerCommandProtocol>(TEXT("CommandProtocol"));
+
+	// Narrative state machine will be created in InitializeExperienceImpl if bUseNarrativeStateMachine is true
+	NarrativeStateMachine = nullptr;
 
 	// Default HMD configuration
 	HMDConfig.HMDType = ELBEASTHMDType::OpenXR;
@@ -84,6 +88,18 @@ bool ALBEASTExperienceBase::InitializeExperienceImpl()
 {
 	// Initialize command protocol if running as dedicated server
 	InitializeCommandProtocol();
+
+	// Initialize narrative state machine if enabled
+	if (bUseNarrativeStateMachine && !NarrativeStateMachine)
+	{
+		NarrativeStateMachine = NewObject<UExperienceStateMachine>(this, UExperienceStateMachine::StaticClass());
+		if (NarrativeStateMachine)
+		{
+		// Bind to state change events
+		NarrativeStateMachine->OnStateChanged.AddUObject(this, &ALBEASTExperienceBase::HandleNarrativeStateChanged);
+			UE_LOG(LogTemp, Log, TEXT("LBEASTExperienceBase: Narrative state machine created"));
+		}
+	}
 
 	// Base implementation - override in derived classes
 	return true;
@@ -208,5 +224,56 @@ void ALBEASTExperienceBase::OnCommandReceived(const FLBEASTServerCommandMessage&
 		// Other commands handled by derived classes
 		break;
 	}
+}
+
+// ========================================
+// NARRATIVE STATE MACHINE API
+// ========================================
+
+UExperienceStateMachine* ALBEASTExperienceBase::GetNarrativeStateMachine() const
+{
+	return NarrativeStateMachine;
+}
+
+FName ALBEASTExperienceBase::GetCurrentNarrativeState() const
+{
+	if (NarrativeStateMachine && NarrativeStateMachine->bIsRunning)
+	{
+		return NarrativeStateMachine->GetCurrentStateName();
+	}
+	return NAME_None;
+}
+
+bool ALBEASTExperienceBase::AdvanceNarrativeState()
+{
+	if (!NarrativeStateMachine || !NarrativeStateMachine->bIsRunning)
+	{
+		return false;
+	}
+	return NarrativeStateMachine->AdvanceState();
+}
+
+bool ALBEASTExperienceBase::RetreatNarrativeState()
+{
+	if (!NarrativeStateMachine || !NarrativeStateMachine->bIsRunning)
+	{
+		return false;
+	}
+	return NarrativeStateMachine->RetreatState();
+}
+
+bool ALBEASTExperienceBase::JumpToNarrativeState(FName StateName)
+{
+	if (!NarrativeStateMachine || !NarrativeStateMachine->bIsRunning)
+	{
+		return false;
+	}
+	return NarrativeStateMachine->JumpToState(StateName);
+}
+
+void ALBEASTExperienceBase::HandleNarrativeStateChanged(FName OldState, FName NewState, int32 NewStateIndex)
+{
+	// Call Blueprint implementable event
+	OnNarrativeStateChanged(OldState, NewState, NewStateIndex);
 }
 

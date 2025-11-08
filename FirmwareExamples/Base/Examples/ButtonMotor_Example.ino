@@ -1,16 +1,32 @@
 /*
- * LBEAST ESP32 Example Firmware
+ * LBEAST Button & Motor Example Firmware
  * 
  * This example demonstrates bidirectional communication between
- * Unreal Engine (LBEAST SDK) and an ESP32 over WiFi (UDP).
+ * Unreal Engine (LBEAST SDK) and a microcontroller over WiFi (UDP).
+ * 
+ * Functionality:
+ * - Reads 4 tactile buttons and sends state changes to Unreal
+ * - Receives motor control commands from Unreal and drives 6 vibration motors
+ * - Demonstrates basic input/output integration with LBEAST EmbeddedSystems API
+ * 
+ * Supported Platforms:
+ * - ESP32 (built-in WiFi) - GPIO pins: 2, 4, 5, 12, 13, 14, 18, 25, 26, 27
+ * - ESP8266 (built-in WiFi) - GPIO pins: 2, 4, 5, 12, 13, 14, 16
+ * - Arduino + WiFi Shield (ESP8266-based) - Standard Arduino GPIO pins
+ * - STM32 + WiFi Module (ESP8266/ESP32-based) - STM32 GPIO pins
+ * - Raspberry Pi (built-in WiFi) - GPIO via WiringPi or pigpio
+ * - Jetson Nano (built-in WiFi) - GPIO via Jetson GPIO library
  * 
  * Hardware Requirements:
- * - ESP32 DevKit (any variant with WiFi)
- * - 4 tactile buttons connected to GPIO 2, 4, 5, 18 (with pull-up resistors)
- * - 6 vibration motors connected to GPIO 12, 13, 14, 25, 26, 27 (with driver transistors)
+ * - Microcontroller with WiFi capability (see supported platforms above)
+ * - 4 tactile buttons connected to GPIO pins (with pull-up resistors)
+ * - 6 vibration motors connected to GPIO pins (with driver transistors)
  * 
  * Protocol: Binary (matches LBEAST EmbeddedDeviceController)
  * Packet Format: [0xAA][Type][Channel][Payload...][CRC]
+ * 
+ * Note: GPIO pin assignments vary by platform. Adjust pin numbers in the
+ * Configuration section below to match your hardware.
  * 
  * Copyright (c) 2025 AJ Campbell. Licensed under the MIT License.
  */
@@ -32,12 +48,15 @@ uint16_t unrealPort = 8888;
 uint16_t localPort = 8888;
 
 // Button pins (INPUT_PULLUP)
-const int buttonPins[4] = {2, 4, 5, 18};
+// Note: GPIO pin assignments vary by platform. For ESP8266, use pins: {2, 4, 5, 16}
+// ESP8266 has fewer GPIO pins - avoid GPIO 0, 15, 16 for some functions
+const int buttonPins[4] = {2, 4, 5, 18};  // ESP32 example
 bool buttonStates[4] = {false, false, false, false};
 bool lastButtonStates[4] = {false, false, false, false};
 
 // Vibration motor pins (PWM)
-const int motorPins[6] = {12, 13, 14, 25, 26, 27};
+// Note: For ESP8266, use pins: {12, 13, 14, 15, 0, 1}
+const int motorPins[6] = {12, 13, 14, 25, 26, 27};  // ESP32 example
 
 // UDP
 WiFiUDP udp;
@@ -59,7 +78,7 @@ enum DataType {
 
 void setup() {
   Serial.begin(115200);
-  Serial.println("\n\nLBEAST ESP32 Firmware Starting...");
+  Serial.println("\n\nLBEAST Button & Motor Example Starting...");
 
   // Configure button pins
   for (int i = 0; i < 4; i++) {
@@ -89,7 +108,7 @@ void setup() {
   udp.begin(localPort);
   Serial.printf("UDP listening on port %d\n", localPort);
 
-  Serial.println("ESP32 ready!");
+  Serial.println("Button & Motor Example ready!");
 }
 
 // =====================================
@@ -299,6 +318,4 @@ uint8_t calculateCRC(uint8_t* data, int length) {
   }
   return crc;
 }
-
-
 

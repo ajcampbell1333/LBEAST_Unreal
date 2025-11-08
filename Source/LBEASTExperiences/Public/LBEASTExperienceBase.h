@@ -12,6 +12,7 @@
 
 // Forward declarations
 class ULBEASTInputAdapter;
+class UExperienceStateMachine;
 
 /**
  * Server mode for multiplayer experiences
@@ -99,6 +100,25 @@ public:
 	TObjectPtr<ULBEASTServerCommandProtocol> CommandProtocol;
 
 	/**
+	 * Optional narrative state machine for experience flow control
+	 * Auto-created if bUseNarrativeStateMachine is true.
+	 * Provides discrete state progression (Intro -> Act1 -> Act2 -> Finale, etc.)
+	 * Perfect for escape rooms, narrative experiences, and story-driven LBE.
+	 * 
+	 * Usage:
+	 * - Set bUseNarrativeStateMachine = true to enable
+	 * - Define states in InitializeExperienceImpl() or Blueprint
+	 * - Subscribe to OnNarrativeStateChanged to trigger game events
+	 * - Use AdvanceNarrativeState() / RetreatNarrativeState() to control flow
+	 */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LBEAST|Components|Narrative")
+	TObjectPtr<UExperienceStateMachine> NarrativeStateMachine;
+
+	/** Whether to enable narrative state machine for this experience */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|Experience|Narrative")
+	bool bUseNarrativeStateMachine = false;
+
+	/**
 	 * Initialize the experience
 	 * Called automatically if bAutoInitialize is true, or manually by developer
 	 * @return true if initialization was successful
@@ -123,6 +143,57 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LBEAST|Experience")
 	virtual int32 GetMaxPlayers() const { return 1; }
+
+	// ========================================
+	// NARRATIVE STATE MACHINE API
+	// ========================================
+
+	/**
+	 * Get the narrative state machine (if enabled)
+	 * @return State machine component, or nullptr if not enabled
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LBEAST|Experience|Narrative")
+	UExperienceStateMachine* GetNarrativeStateMachine() const;
+
+	/**
+	 * Get the current narrative state name
+	 * @return Current state name, or NAME_None if state machine not enabled
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LBEAST|Experience|Narrative")
+	FName GetCurrentNarrativeState() const;
+
+	/**
+	 * Advance to the next narrative state
+	 * @return true if successfully advanced
+	 */
+	UFUNCTION(BlueprintCallable, Category = "LBEAST|Experience|Narrative")
+	bool AdvanceNarrativeState();
+
+	/**
+	 * Retreat to the previous narrative state
+	 * @return true if successfully retreated
+	 */
+	UFUNCTION(BlueprintCallable, Category = "LBEAST|Experience|Narrative")
+	bool RetreatNarrativeState();
+
+	/**
+	 * Jump to a specific narrative state by name
+	 * @param StateName - Name of the state to jump to
+	 * @return true if successfully jumped
+	 */
+	UFUNCTION(BlueprintCallable, Category = "LBEAST|Experience|Narrative")
+	bool JumpToNarrativeState(FName StateName);
+
+	/**
+	 * Event fired when narrative state changes
+	 * Override in Blueprint or C++ to handle state transitions
+	 * 
+	 * @param OldState - Previous state name
+	 * @param NewState - New state name
+	 * @param NewStateIndex - Index of the new state
+	 */
+	UFUNCTION(BlueprintImplementableEvent, Category = "LBEAST|Experience|Narrative")
+	void OnNarrativeStateChanged(FName OldState, FName NewState, int32 NewStateIndex);
 
 	// ========================================
 	// ILBEASTExperienceInterface Implementation
@@ -161,5 +232,11 @@ protected:
 	 * Initialize command protocol for dedicated server mode
 	 */
 	void InitializeCommandProtocol();
+
+	/**
+	 * Internal handler for narrative state changes (binds to state machine delegate)
+	 */
+	UFUNCTION()
+	void HandleNarrativeStateChanged(FName OldState, FName NewState, int32 NewStateIndex);
 };
 

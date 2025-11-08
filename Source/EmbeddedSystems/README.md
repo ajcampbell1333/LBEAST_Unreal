@@ -134,7 +134,7 @@ void AMyActor::OnButtonPressed(int32 Channel, bool Value)
 ### **ESP32 Side (Arduino)**
 
 ```cpp
-// See: Resources/ESP32_Example_Firmware.ino for complete example
+// See: FirmwareExamples/Base/Examples/ButtonMotor_Example.ino for complete example
 
 #include <WiFi.h>
 #include <WiFiUdp.h>
@@ -613,8 +613,8 @@ Look for `0xAA` start markers in hex dump.
 
 ## 📚 Additional Resources
 
-- **ESP32 Firmware (Unsecured):** `Resources/ESP32_Example_Firmware.ino` (Development only)
-- **ESP32 Firmware (Secured):** `Resources/ESP32_Example_Firmware_Secured.ino` (**Production**)
+- **Firmware Examples:** `FirmwareExamples/Base/Examples/` - Platform-agnostic examples
+- **Escape Room Examples:** `FirmwareExamples/EscapeRoom/` - Door lock and prop control examples
 - **Protocol Spec:** This README, "Binary Protocol Specification" section
 - **Security Guide:** This README, "Security (AES-128 + HMAC)" section
 - **Arduino Libraries:** WiFiUdp, mbedtls (both built-in to ESP32 core)
