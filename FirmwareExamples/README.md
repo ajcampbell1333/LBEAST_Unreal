@@ -11,15 +11,22 @@ FirmwareExamples/
 ├── Base/                          # Generic examples and templates for all experiences
 │   ├── Templates/                  # Reusable header templates
 │   │   ├── LBEAST_Wireless_TX.h   # Wireless transmission template
-│   │   └── LBEAST_Wireless_RX.h   # Wireless reception template
+│   │   ├── LBEAST_Wireless_RX.h   # Wireless reception template
+│   │   ├── LBEAST_CAN.h           # CAN bus communication template
+│   │   ├── ScissorLift_Controller.h  # Scissor lift control (CAN or GPIO)
+│   │   └── ActuatorSystem_Controller.h  # Actuator system control
 │   └── Examples/                   # Functionality-based examples
 │       ├── ButtonMotor_Example.ino              # Main example (all platforms)
-│       └── ButtonMotor_Example_ESP8266.ino      # ESP8266 variant
+│       ├── ScissorLift_Controller.ino          # Scissor lift standalone
+│       └── ActuatorSystem_Controller.ino       # Actuator system standalone
 │
-└── EscapeRoom/                     # Escape room specific examples
-    └── DoorLock/                   # Door lock control examples
-        ├── DoorLock_Example.ino                 # Main example (all platforms)
-        └── DoorLock_Example_ESP8266.ino        # ESP8266 variant
+├── EscapeRoom/                     # Escape room specific examples
+│   └── DoorLock/                   # Door lock control examples
+│       └── DoorLock_Example.ino                 # Main example (all platforms)
+│
+└── GunshipExperience/              # Gunship experience specific examples
+    ├── GunshipExperience_ECU.ino   # Combined ECU for 5DOF motion platform
+    └── README.md                    # GunshipExperience firmware documentation
 ```
 
 ---
@@ -64,6 +71,7 @@ FirmwareExamples/
 - **[Base/Templates/README.md](Base/Templates/README.md)** - Template usage guide
 - **[Base/Examples/README.md](Base/Examples/README.md)** - Base example documentation
 - **[EscapeRoom/README.md](EscapeRoom/README.md)** - Escape room examples guide
+- **[GunshipExperience/README.md](GunshipExperience/README.md)** - Gunship experience examples guide
 
 ---
 
@@ -73,14 +81,14 @@ All examples support multiple platforms. The main examples work on all platforms
 
 | Platform | Wireless | Example File | Notes |
 |----------|----------|--------------|-------|
-| **ESP32** | ✅ Built-in | `ButtonMotor_Example.ino` | Full support, recommended |
-| **ESP8266** | ✅ Built-in | `ButtonMotor_Example_ESP8266.ino` | Limited GPIO pins, variant provided |
-| **Arduino + WiFi Shield** | ✅ Via shield | `ButtonMotor_Example.ino` | Adjust GPIO pins, use shield library |
-| **STM32 + WiFi Module** | ✅ Via module | `ButtonMotor_Example.ino` | Adjust GPIO pins, use module library |
-| **Raspberry Pi** | ✅ Built-in | `ButtonMotor_Example.ino` | Adjust GPIO pins, use Linux sockets |
-| **Jetson Nano** | ✅ Built-in | `ButtonMotor_Example.ino` | Adjust GPIO pins, use Linux sockets |
+| **ESP32** | ✅ Built-in | All examples | Full support, recommended |
+| **ESP8266** | ✅ Built-in | All examples | Limited GPIO pins, adjust pin assignments |
+| **Arduino + WiFi Shield** | ✅ Via shield | All examples | Adjust GPIO pins, use shield library |
+| **STM32 + WiFi Module** | ✅ Via module | All examples | Adjust GPIO pins, use module library |
+| **Raspberry Pi** | ✅ Built-in | All examples | Adjust GPIO pins, use Linux sockets |
+| **Jetson Nano** | ✅ Built-in | All examples | Adjust GPIO pins, use Linux sockets |
 
-**Note:** Platform-specific variants (like `*_ESP8266.ino`) are provided as reference implementations showing platform-specific pin configurations. The main examples work on all platforms with configuration adjustments.
+**Note:** All examples are platform-agnostic. Adjust GPIO pin assignments in the Configuration section to match your hardware. See comments in each example for platform-specific pin recommendations.
 
 ---
 
@@ -97,6 +105,8 @@ All examples support multiple platforms. The main examples work on all platforms
 
 **Note:** We use `FirmwareExamples/` instead of `Resources/` to avoid Unity's special `Resources/` folder behavior (which includes all assets in builds). Firmware examples are not Unity assets and should not be included in game builds.
 
+**Organization:** All embedded hardware firmware examples are located in `FirmwareExamples/`, organized by experience type. Game engine code references these examples in documentation but does not depend on their location.
+
 ---
 
 ## 🚀 Experience-Specific Examples
@@ -104,9 +114,23 @@ All examples support multiple platforms. The main examples work on all platforms
 Examples are organized by experience type:
 
 - **Base/** - Generic examples usable by any experience
+  - `ScissorLift_Controller.ino` - Standalone scissor lift control (CAN bus or GPIO)
+  - `ActuatorSystem_Controller.ino` - Standalone 4-actuator hydraulic control
+  - `ButtonMotor_Example.ino` - Generic button & motor example
 - **EscapeRoom/** - Escape room specific (door locks, props, sensors)
+- **GunshipExperience/** - Gunship experience (5DOF motion platform ECU)
 - **AIFacemask/** - (Future) Live actor costume examples
 - **MovingPlatform/** - (Future) Motion platform sensor examples
+
+## 🔌 CAN Bus Support
+
+The scissor lift controller supports **CAN bus communication** for manufacturer ECUs (e.g., Genie/Skyjack lifts):
+
+- **CAN Bus Mode (default):** Sends joystick commands to manufacturer ECU via CAN bus
+- **Direct GPIO Mode:** Direct motor control for custom builds or testing
+- **Platform Support:** ESP32 (native TWAI), Arduino (MCP2515), STM32 (native), Linux (SocketCAN)
+
+See `GunshipExperience/README.md` for CAN bus configuration instructions.
 
 ---
 

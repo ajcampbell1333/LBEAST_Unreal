@@ -615,6 +615,7 @@ Look for `0xAA` start markers in hex dump.
 
 - **Firmware Examples:** `FirmwareExamples/Base/Examples/` - Platform-agnostic examples
 - **Escape Room Examples:** `FirmwareExamples/EscapeRoom/` - Door lock and prop control examples
+- **Gunship Experience Examples:** `FirmwareExamples/GunshipExperience/` - Motion platform ECU examples
 - **Protocol Spec:** This README, "Binary Protocol Specification" section
 - **Security Guide:** This README, "Security (AES-128 + HMAC)" section
 - **Arduino Libraries:** WiFiUdp, mbedtls (both built-in to ESP32 core)

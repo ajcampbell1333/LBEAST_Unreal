@@ -11,6 +11,8 @@ These examples are **platform-agnostic** in functionality but **platform-specifi
 | File | Description | Supported Platforms |
 |------|-------------|---------------------|
 | **`ButtonMotor_Example.ino`** | Button & motor controller (platform-agnostic) | ESP32, ESP8266, Arduino+WiFi, STM32+WiFi, Raspberry Pi, Jetson Nano |
+| **`ScissorLift_Controller.ino`** | Scissor lift control (CAN bus or GPIO mode) | ESP32, ESP8266, Arduino, STM32, Raspberry Pi, Jetson Nano |
+| **`ActuatorSystem_Controller.ino`** | 4-actuator hydraulic system control | ESP32, ESP8266, Arduino, STM32, Raspberry Pi, Jetson Nano |
 
 **Supported Platforms:**
 - ✅ **ESP32** - Full GPIO support, built-in WiFi (recommended)
@@ -26,13 +28,28 @@ These examples are **platform-agnostic** in functionality but **platform-specifi
 
 ## 🎯 Features Demonstrated
 
-All examples include:
-
+### **ButtonMotor_Example.ino**
 - ✅ **4 buttons** - Digital input reading and transmission
 - ✅ **6 vibration motors** - PWM output control via commands
 - ✅ **Bidirectional communication** - Send button states, receive motor commands
 - ✅ **Binary protocol** - Low-latency LBEAST protocol
 - ✅ **CRC validation** - Packet integrity checking
+
+### **ScissorLift_Controller.ino**
+- ✅ **CAN Bus Mode** - Communicate with manufacturer ECUs (Genie/Skyjack)
+- ✅ **Direct GPIO Mode** - Direct motor control for custom builds
+- ✅ **Vertical Translation** - Lift up/down control
+- ✅ **Forward/Reverse Drive** - Optional lateral movement (can be disabled)
+- ✅ **Position Feedback** - GPIO analog input or CAN bus feedback
+- ✅ **Calibration** - Automatic zero-point calibration
+- ✅ **Safety Limits** - Hardware and software limits
+
+### **ActuatorSystem_Controller.ino**
+- ✅ **4-Actuator Control** - Independent control of 4 hydraulic actuators
+- ✅ **Pitch/Roll Control** - Platform tilt control
+- ✅ **Closed-Loop Control** - PID control with position sensors
+- ✅ **Calibration** - Automatic calibration with limit switches
+- ✅ **Safety Limits** - Hardware and software limits
 
 ---
 
