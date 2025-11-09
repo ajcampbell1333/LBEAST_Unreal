@@ -24,7 +24,7 @@ The LBEAST SDK democratizes LBE development by providing:
 - **HMD Abstraction** supporting OpenXR, SteamVR, and Meta Quest
 - **6DOF Tracking** with SteamVR trackers and future extensibility
 
-> **Unity Version:** Also available at [github.com/ajcampbell1333/LBEAST_Unity](https://github.com/ajcampbell1333/LBEAST_Unity)
+> **🔗 Unity Version:** Also available at [github.com/ajcampbell1333/lbeast_unity](https://github.com/ajcampbell1333/lbeast_unity)
 
 ## Three-Tier Architecture
 
@@ -669,7 +669,7 @@ Use Git sparse-checkout to get only the plugin folder:
 cd Plugins
 
 # Initialize sparse-checkout submodule
-git submodule add -f https://github.com/ajcampbell1333/LBEAST_Unreal.git LBEAST_Temp
+git submodule add -f https://github.com/ajcampbell1333/lbeast_unreal.git LBEAST_Temp
 cd LBEAST_Temp
 git sparse-checkout init --cone
 git sparse-checkout set Plugins/LBEAST
@@ -684,7 +684,7 @@ rm -rf LBEAST_Temp
 ```powershell
 # From your Unreal project root
 cd Plugins
-git clone --filter=blob:none --sparse https://github.com/ajcampbell1333/LBEAST_Unreal.git LBEAST_Temp
+git clone --filter=blob:none --sparse https://github.com/ajcampbell1333/lbeast_unreal.git LBEAST_Temp
 cd LBEAST_Temp
 git sparse-checkout init --cone
 git sparse-checkout set Plugins/LBEAST
@@ -701,7 +701,7 @@ Then:
 **To update the plugin later:**
 ```bash
 cd Plugins
-git clone --filter=blob:none --sparse https://github.com/ajcampbell1333/LBEAST_Unreal.git LBEAST_Temp
+git clone --filter=blob:none --sparse https://github.com/ajcampbell1333/lbeast_unreal.git LBEAST_Temp
 cd LBEAST_Temp
 git sparse-checkout set Plugins/LBEAST
 cd ..
@@ -717,7 +717,7 @@ Clone the repository to a temporary location, then copy only the plugin:
 ```bash
 # Clone to a temporary location (not in your project)
 cd ~/Downloads  # or any temp folder
-git clone https://github.com/ajcampbell1333/LBEAST_Unreal.git
+git clone https://github.com/ajcampbell1333/lbeast_unreal.git
 
 # Copy only the plugin folder to your project
 cp -r LBEAST_Unreal/Plugins/LBEAST /path/to/YourProject/Plugins/LBEAST
@@ -730,7 +730,7 @@ rm -rf LBEAST_Unreal
 ```powershell
 # Clone to a temporary location
 cd $env:USERPROFILE\Downloads
-git clone https://github.com/ajcampbell1333/LBEAST_Unreal.git
+git clone https://github.com/ajcampbell1333/lbeast_unreal.git
 
 # Copy only the plugin folder to your project
 Copy-Item -Path "LBEAST_Unreal\Plugins\LBEAST" -Destination "F:\YourProject\Plugins\LBEAST" -Recurse
@@ -1171,9 +1171,9 @@ Tasks in progress or ready for implementation:
 
 ## Support
 
-- **Issues:** [github.com/ajcampbell1333/LBEAST_Unreal/issues](https://github.com/ajcampbell1333/LBEAST_Unreal/issues)
-- **Discussions:** [github.com/ajcampbell1333/LBEAST_Unreal/discussions](https://github.com/ajcampbell1333/LBEAST_Unreal/discussions)
-- **Unity Version:** [github.com/ajcampbell1333/LBEAST_Unity](https://github.com/ajcampbell1333/LBEAST_Unity)
+- **Issues:** [github.com/ajcampbell1333/lbeast_unreal/issues](https://github.com/ajcampbell1333/lbeast_unreal/issues)
+- **Discussions:** [github.com/ajcampbell1333/lbeast_unreal/discussions](https://github.com/ajcampbell1333/lbeast_unreal/discussions)
+- **Unity Version:** [github.com/ajcampbell1333/lbeast_unity](https://github.com/ajcampbell1333/lbeast_unity)
 
 ## License
 
