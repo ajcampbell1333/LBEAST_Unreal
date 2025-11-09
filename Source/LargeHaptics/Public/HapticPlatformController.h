@@ -13,7 +13,7 @@ UENUM(BlueprintType)
 enum class ELBEASTPlatformType : uint8
 {
 	MovingPlatform_SinglePlayer UMETA(DisplayName = "5DOF Moving Platform (Single Player)"),
-	Gunship_FourPlayer UMETA(DisplayName = "5DOF Gunship (Four Player)"),
+	Gunship_FourPlayer UMETA(DisplayName = "4DOF Gunship (Four Player)"),
 	CarSim_SinglePlayer UMETA(DisplayName = "5DOF Car Sim (Single Player)"),
 	FlightSim_2DOF UMETA(DisplayName = "2DOF Full 360 Flight Sim"),
 	Custom UMETA(DisplayName = "Custom Configuration")
@@ -162,19 +162,19 @@ struct FPlatformMotionCommand
 {
 	GENERATED_BODY()
 
-	/** Target pitch angle in degrees (for 2DOF gyroscope: unlimited; for 5DOF: clamped to MaxPitchDegrees) */
+	/** Target pitch angle in degrees (for 2DOF gyroscope: unlimited; for 4DOF platforms: clamped to MaxPitchDegrees) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|Haptics")
 	float Pitch = 0.0f;
 
-	/** Target roll angle in degrees (for 2DOF gyroscope: unlimited; for 5DOF: clamped to MaxRollDegrees) */
+	/** Target roll angle in degrees (for 2DOF gyroscope: unlimited; for 4DOF platforms: clamped to MaxRollDegrees) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|Haptics")
 	float Roll = 0.0f;
 
-	/** Target Y translation in cm (5DOF platforms only) */
+	/** Target Y translation in cm (4DOF platforms only - scissor lift forward/reverse, positive = forward) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|Haptics")
 	float TranslationY = 0.0f;
 
-	/** Target Z translation in cm (5DOF platforms only) */
+	/** Target Z translation in cm (4DOF platforms only - scissor lift up/down, positive = up) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|Haptics")
 	float TranslationZ = 0.0f;
 
@@ -191,9 +191,9 @@ struct FPlatformMotionCommand
  * Haptic Platform Controller Component
  * 
  * Controls large-scale motion platforms including:
- * - 5DOF Moving Platform (single player standing)
- * - 5DOF Gunship (four player seated)
- * - 5DOF Car Sim (single player seated racing/driving simulator)
+ * - 4DOF Moving Platform (single player standing)
+ * - 4DOF Gunship (four player seated)
+ * - 4DOF Car Sim (single player seated racing/driving simulator)
  * - 2DOF Full 360 Flight Sim (single player gyroscope with continuous rotation)
  * 
  * Provides both high-level motion commands and low-level actuator control.
@@ -228,13 +228,14 @@ public:
 	/**
 	 * Send normalized platform motion (recommended for game code)
 	 * Uses joystick-style input that automatically scales to hardware capabilities
-	 * @param TiltX - Left/Right tilt (-1.0 = full left, +1.0 = full right, 0.0 = level)
-	 * @param TiltY - Forward/Backward tilt (-1.0 = full backward, +1.0 = full forward, 0.0 = level)
-	 * @param VerticalOffset - Vertical translation (-1.0 to +1.0, normalized to max capability)
+	 * @param TiltX - Left/Right roll (-1.0 = full left, +1.0 = full right, 0.0 = level)
+	 * @param TiltY - Forward/Backward pitch (-1.0 = full backward, +1.0 = full forward, 0.0 = level)
+	 * @param ForwardOffset - Scissor lift forward/reverse (-1.0 = full reverse, +1.0 = full forward, 0.0 = neutral)
+	 * @param VerticalOffset - Scissor lift up/down (-1.0 = full down, +1.0 = full up, 0.0 = neutral)
 	 * @param Duration - Time to reach target position (seconds)
 	 */
 	UFUNCTION(BlueprintCallable, Category = "LBEAST|Haptics")
-	void SendNormalizedMotion(float TiltX, float TiltY, float VerticalOffset = 0.0f, float Duration = 1.0f);
+	void SendNormalizedMotion(float TiltX, float TiltY, float ForwardOffset = 0.0f, float VerticalOffset = 0.0f, float Duration = 1.0f);
 
 	/**
 	 * Set a specific actuator extension

@@ -13,7 +13,7 @@
  * - Control individual hydraulic actuators for pitch and roll motion
  * - Control scissor lift for Y/Z translation
  * - Configure 5DOF moving platforms (single player standing)
- * - Configure 5DOF gunship platforms (4-player seated)
+ * - Configure 4DOF gunship platforms (4-player seated)
  * - Integrate motion profiles with VR experiences
  */
 class FLargeHapticsModule : public IModuleInterface

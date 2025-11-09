@@ -193,6 +193,27 @@ void UVOIPManager::OnMumbleAudioReceived(int32 UserId, const TArray<uint8>& Opus
 
 	// Broadcast event
 	OnRemotePlayerAudioReceived.Broadcast(UserId, Position);
+
+	// NOOP: TODO - Decode Opus to PCM for visitors
+	// For now, visitors will need to decode themselves or we need to decode here
+	// Decode Opus to PCM (Mumble uses 48kHz, 16-bit PCM)
+	TArray<float> PCMData;
+	// TODO: Decode OpusData to PCMData
+	// For now, create empty array - visitors will need to handle Opus decoding or we decode here
+	
+	// Notify all registered visitors
+	for (TScriptInterface<IVOIPAudioVisitor> Visitor : AudioVisitors)
+	{
+		if (Visitor.GetInterface())
+		{
+			// NOOP: TODO - Decode Opus to PCM before passing to visitor
+			// For now, pass empty PCM data - visitor will need to decode Opus themselves
+			// Or we decode here and pass PCM
+			TArray<float> DecodedPCM;
+			// TODO: Decode OpusData to DecodedPCM
+			Visitor->OnPlayerAudioReceived(UserId, DecodedPCM, 48000, Position);  // Mumble uses 48kHz
+		}
+	}
 }
 
 void UVOIPManager::OnMumbleConnectionStateChanged(EVOIPConnectionState NewState)
@@ -288,5 +309,30 @@ void UVOIPManager::UpdateAudioSourcePositions()
 			Pair.Value->UpdatePosition(RemotePlayerPosition, LocalPlayerPosition, LocalPlayerRotation);
 		}
 	}
+}
+
+void UVOIPManager::RegisterAudioVisitor(TScriptInterface<IVOIPAudioVisitor> Visitor)
+{
+	if (!Visitor.GetInterface())
+	{
+		UE_LOG(LogVOIP, Warning, TEXT("VOIPManager: Attempted to register invalid audio visitor"));
+		return;
+	}
+
+	// Check if already registered
+	if (AudioVisitors.Contains(Visitor))
+	{
+		UE_LOG(LogVOIP, Warning, TEXT("VOIPManager: Audio visitor already registered"));
+		return;
+	}
+
+	AudioVisitors.Add(Visitor);
+	UE_LOG(LogVOIP, Log, TEXT("VOIPManager: Registered audio visitor"));
+}
+
+void UVOIPManager::UnregisterAudioVisitor(TScriptInterface<IVOIPAudioVisitor> Visitor)
+{
+	AudioVisitors.Remove(Visitor);
+	UE_LOG(LogVOIP, Log, TEXT("VOIPManager: Unregistered audio visitor"));
 }
 

@@ -131,7 +131,7 @@ void UHapticPlatformController::SendMotionCommand(const FPlatformMotionCommand& 
 	}
 	else
 	{
-		// 5DOF platforms: Clamp to configured limits
+		// 4DOF platforms: Clamp to configured limits
 		TargetState.Pitch = FMath::Clamp(Command.Pitch, -Config.MaxPitchDegrees, Config.MaxPitchDegrees);
 		TargetState.Roll = FMath::Clamp(Command.Roll, -Config.MaxRollDegrees, Config.MaxRollDegrees);
 		TargetState.TranslationY = FMath::Clamp(Command.TranslationY, -Config.MaxTranslationY, Config.MaxTranslationY);
@@ -144,7 +144,7 @@ void UHapticPlatformController::SendMotionCommand(const FPlatformMotionCommand& 
 	SendCommandToHardware(TargetState);
 }
 
-void UHapticPlatformController::SendNormalizedMotion(float TiltX, float TiltY, float VerticalOffset, float Duration)
+void UHapticPlatformController::SendNormalizedMotion(float TiltX, float TiltY, float ForwardOffset, float VerticalOffset, float Duration)
 {
 	if (!bIsInitialized)
 	{
@@ -155,6 +155,7 @@ void UHapticPlatformController::SendNormalizedMotion(float TiltX, float TiltY, f
 	// Clamp inputs to valid range
 	TiltX = FMath::Clamp(TiltX, -1.0f, 1.0f);
 	TiltY = FMath::Clamp(TiltY, -1.0f, 1.0f);
+	ForwardOffset = FMath::Clamp(ForwardOffset, -1.0f, 1.0f);
 	VerticalOffset = FMath::Clamp(VerticalOffset, -1.0f, 1.0f);
 
 	// Map normalized inputs to hardware capabilities
@@ -168,9 +169,9 @@ void UHapticPlatformController::SendNormalizedMotion(float TiltX, float TiltY, f
 	// -1.0 = full backward tilt (negative pitch), +1.0 = full forward tilt (positive pitch)
 	Command.Pitch = TiltY * Config.MaxPitchDegrees;
 	
-	// Vertical translation
-	Command.TranslationZ = VerticalOffset * Config.MaxTranslationZ;
-	Command.TranslationY = 0.0f; // Lateral translation not typically used for tilt
+	// Scissor lift translations
+	Command.TranslationY = ForwardOffset * Config.MaxTranslationY;  // Forward/reverse (scissor lift)
+	Command.TranslationZ = VerticalOffset * Config.MaxTranslationZ;  // Up/down (scissor lift)
 	
 	// Set duration
 	Command.Duration = FMath::Max(Duration, 0.01f); // Minimum 10ms to prevent instant snapping
@@ -181,8 +182,8 @@ void UHapticPlatformController::SendNormalizedMotion(float TiltX, float TiltY, f
 	// Send the command through the standard pipeline
 	SendMotionCommand(Command);
 	
-	UE_LOG(LogTemp, Verbose, TEXT("HapticPlatformController: Normalized motion sent - TiltX: %.2f (Roll: %.2f°), TiltY: %.2f (Pitch: %.2f°)"), 
-		TiltX, Command.Roll, TiltY, Command.Pitch);
+	UE_LOG(LogTemp, Verbose, TEXT("HapticPlatformController: Normalized motion sent - TiltX: %.2f (Roll: %.2f°), TiltY: %.2f (Pitch: %.2f°), Forward: %.2f, Vertical: %.2f"), 
+		TiltX, Command.Roll, TiltY, Command.Pitch, ForwardOffset, VerticalOffset);
 }
 
 void UHapticPlatformController::SetActuatorExtension(FName ActuatorID, float Extension)

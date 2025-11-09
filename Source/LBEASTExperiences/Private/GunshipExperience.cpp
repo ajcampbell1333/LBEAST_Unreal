@@ -58,7 +58,7 @@ void AGunshipExperience::ShutdownExperienceImpl()
 	Super::ShutdownExperienceImpl();
 }
 
-void AGunshipExperience::SendGunshipTilt(float TiltX, float TiltY, float VerticalOffset, float Duration)
+void AGunshipExperience::SendGunshipTilt(float TiltX, float TiltY, float ForwardOffset, float VerticalOffset, float Duration)
 {
 	if (!PlatformController)
 	{
@@ -66,10 +66,11 @@ void AGunshipExperience::SendGunshipTilt(float TiltX, float TiltY, float Vertica
 	}
 
 	// Use the normalized API - automatically scales to hardware capabilities
-	PlatformController->SendNormalizedMotion(TiltX, TiltY, VerticalOffset, Duration);
+	// TiltX = roll, TiltY = pitch, ForwardOffset = scissor lift forward/reverse, VerticalOffset = scissor lift up/down
+	PlatformController->SendNormalizedMotion(TiltX, TiltY, ForwardOffset, VerticalOffset, Duration);
 }
 
-void AGunshipExperience::SendGunshipMotion(float Pitch, float Roll, float LateralOffset, float VerticalOffset, float Duration)
+void AGunshipExperience::SendGunshipMotion(float Pitch, float Roll, float ForwardOffset, float VerticalOffset, float Duration)
 {
 	if (!PlatformController)
 	{
@@ -79,7 +80,8 @@ void AGunshipExperience::SendGunshipMotion(float Pitch, float Roll, float Latera
 	FPlatformMotionCommand Command;
 	Command.Pitch = Pitch;
 	Command.Roll = Roll;
-	Command.TranslationY = LateralOffset;
+	// TranslationY = forward/reverse (scissor lift), TranslationZ = up/down (scissor lift)
+	Command.TranslationY = ForwardOffset;
 	Command.TranslationZ = VerticalOffset;
 	Command.Duration = Duration;
 

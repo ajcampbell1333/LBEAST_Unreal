@@ -2,9 +2,9 @@
 
 **Embedded firmware examples for GunshipExperience motion platform control.**
 
-These examples demonstrate how to control a complete 5DOF motion platform system consisting of:
-- **Scissor Lift:** Electric lift for vertical translation (TranslationZ)
-- **Actuator System:** 4-gang hydraulic actuators for pitch, roll, and lateral translation (TranslationY)
+These examples demonstrate how to control a complete 4DOF motion platform system consisting of:
+- **Scissor Lift:** Electric lift for vertical translation (TranslationZ) and forward/reverse (TranslationY)
+- **Actuator System:** 4-gang hydraulic actuators for pitch and roll only (yaw restricted)
 
 ---
 
@@ -25,13 +25,13 @@ Located in `GunshipExperience/`:
 
 | File | Description | Use Case |
 |------|-------------|----------|
-| **`GunshipExperience_ECU.ino`** | Combined ECU for complete 5DOF control | Use for GunshipExperience (combines both modules) |
+| **`GunshipExperience_ECU.ino`** | Combined ECU for complete 4DOF control | Use for GunshipExperience (combines both modules) |
 
 ---
 
 ## 🎯 Quick Start
 
-### **For GunshipExperience (Complete 5DOF)**
+### **For GunshipExperience (Complete 4DOF)**
 
 1. **Open** `GunshipExperience/GunshipExperience_ECU.ino`
 2. **Configure WiFi credentials:**
@@ -160,12 +160,10 @@ Matches `FPlatformMotionCommand` from Unreal/Unity:
 AGunshipExperience* Gunship = GetWorld()->SpawnActor<AGunshipExperience>();
 
 // Send normalized motion (RECOMMENDED)
-Gunship->SendGunshipTilt(0.5f, 0.8f, 0.2f, 1.5f);
-// TiltX (right), TiltY (forward), Vertical, Duration
+Gunship->SendGunshipTilt(0.5f, 0.8f, 0.2f, 0.1f, 1.5f);  // TiltX (roll), TiltY (pitch), ForwardOffset, VerticalOffset, Duration
 
 // Advanced: Use absolute angles
-Gunship->SendGunshipMotion(8.0f, 5.0f, 10.0f, 15.0f, 1.5f);
-// Pitch, Roll, Lateral, Vertical, Duration
+Gunship->SendGunshipMotion(8.0f, 5.0f, 10.0f, 15.0f, 1.5f);  // pitch, roll, forwardOffset (cm), verticalOffset (cm), duration
 
 // Emergency stop
 Gunship->EmergencyStop();
@@ -181,12 +179,10 @@ Gunship->ReturnToNeutral(2.0f);
 GunshipExperience gunship = FindObjectOfType<GunshipExperience>();
 
 // Send normalized motion (RECOMMENDED)
-gunship.SendGunshipTilt(0.5f, 0.8f, 0.2f, 1.5f);
-// TiltX (right), TiltY (forward), Vertical, Duration
+gunship.SendGunshipTilt(0.5f, 0.8f, 0.2f, 0.1f, 1.5f);  // TiltX (roll), TiltY (pitch), ForwardOffset, VerticalOffset, Duration
 
 // Advanced: Use absolute angles
-gunship.SendGunshipMotion(8.0f, 5.0f, 10.0f, 15.0f, 1.5f);
-// Pitch, Roll, Lateral, Vertical, Duration
+gunship.SendGunshipMotion(8.0f, 5.0f, 10.0f, 15.0f, 1.5f);  // pitch, roll, forwardOffset (cm), verticalOffset (cm), duration
 
 // Emergency stop
 gunship.EmergencyStop();

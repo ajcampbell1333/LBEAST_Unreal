@@ -4,19 +4,28 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Engine/Texture2D.h"
 #include "AIFaceController.generated.h"
 
 /**
- * Facial animation data structure
+ * Facial animation data structure - receives output from NVIDIA ACE
+ * 
+ * This structure receives facial textures and blend shapes from NVIDIA ACE pipeline.
+ * The AI facial animation is fully automated - no manual control or keyframe animation.
+ * NVIDIA ACE determines facial expressions based on audio track and state machine context.
  */
 USTRUCT(BlueprintType)
 struct FFacialAnimationData
 {
 	GENERATED_BODY()
 
-	/** Blend shape weights for facial animation (normalized 0-1) */
+	/** Blend shape weights from NVIDIA ACE (normalized 0-1) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|AI Face")
 	TMap<FName, float> BlendShapeWeights;
+
+	/** Facial texture data from NVIDIA ACE (if applicable) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|AI Face")
+	TObjectPtr<UTexture2D> FacialTexture = nullptr;
 
 	/** Timestamp of this animation frame */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|AI Face")
@@ -31,37 +40,41 @@ struct FAIFaceConfig
 {
 	GENERATED_BODY()
 
-	/** Target skeletal mesh for facial animation */
+	/** Target skeletal mesh component attached to live actor's HMD/head */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|AI Face")
 	TObjectPtr<USkeletalMeshComponent> TargetMesh = nullptr;
 
-	/** Whether to use AI-generated expressions (vs. manual control) */
+	/** NVIDIA ACE endpoint URL for receiving facial animation data */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|AI Face")
-	bool bUseAIGeneration = true;
+	FString NVIDIAACEEndpointURL;
 
-	/** AI model endpoint URL (for future AI integration) */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|AI Face")
-	FString AIEndpointURL;
-
-	/** Update rate for facial animation (Hz) */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|AI Face")
+	/** Update rate for receiving facial animation data from NVIDIA ACE (Hz) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|AI Face", meta = (ClampMin = "1", ClampMax = "120"))
 	float UpdateRate = 30.0f;
 };
 
 /**
  * AI Face Controller Component
  * 
- * Manages AI-driven facial animation for immersive theater live actors (physical performers).
- * Designed as a bridge to NVIDIA Audio2Face (Neural Face) technology for autonomous
- * conversational avatars that can interact with players without manual control.
+ * Receives and applies NVIDIA ACE facial animation output to a live actor's HMD-mounted mesh.
  * 
- * The live actor does NOT manually control facial expressions - the AI does this autonomously
- * based on conversation, emotion detection, and narrative context. The live actor focuses on
- * directing the experience through wrist-mounted state machine controls.
+ * ARCHITECTURE:
+ * - Live actor wears HMD with AIFace mesh tracked on top of their face (like a mask)
+ * - NVIDIA ACE pipeline (Audio → NLU → Emotion → Facial Animation) generates facial textures
+ *   and blend shapes automatically based on audio track and state machine context
+ * - This component receives NVIDIA ACE output and applies it to the mesh in real-time
+ * - NO manual control, keyframe animation, rigging, or blend shape tools required
  * 
- * Attach this component to an Unreal Actor to enable AI facial expression control.
+ * USAGE:
+ * - Attach to live actor's HMD/head actor
+ * - Configure TargetMesh to point to the AIFace skeletal mesh component
+ * - NVIDIA ACE streams facial animation data to this component
+ * - Component applies received data to mesh automatically
  * 
- * Future Integration: NVIDIA Omniverse Audio2Face (native in Unreal Engine)
+ * IMPORTANT:
+ * - This is a RECEIVER/DISPLAY system, not a control system
+ * - Facial expressions are determined by NVIDIA ACE, not manually configured
+ * - Live actor controls experience flow via wrist buttons, not facial animation
  */
 UCLASS(ClassGroup=(LBEAST), meta=(BlueprintSpawnableComponent))
 class AIFACEMASK_API UAIFaceController : public UActorComponent
@@ -84,38 +97,31 @@ public:
 	bool InitializeAIFace(const FAIFaceConfig& InConfig);
 
 	/**
-	 * Play facial animation data
-	 * @param AnimationData - The facial animation data to play
+	 * Receive and apply facial animation data from NVIDIA ACE
+	 * Called automatically when NVIDIA ACE sends new facial animation data
+	 * @param AnimationData - Facial animation data from NVIDIA ACE (blend shapes + textures)
 	 */
 	UFUNCTION(BlueprintCallable, Category = "LBEAST|AI Face")
-	void PlayFacialAnimation(const FFacialAnimationData& AnimationData);
-
-	/**
-	 * Set a specific blend shape weight
-	 * @param BlendShapeName - Name of the blend shape
-	 * @param Weight - Weight value (0-1)
-	 */
-	UFUNCTION(BlueprintCallable, Category = "LBEAST|AI Face")
-	void SetBlendShapeWeight(FName BlendShapeName, float Weight);
-
-	/**
-	 * Enable or disable AI generation
-	 */
-	UFUNCTION(BlueprintCallable, Category = "LBEAST|AI Face")
-	void SetAIGenerationEnabled(bool bEnabled);
+	void ReceiveFacialAnimationData(const FFacialAnimationData& AnimationData);
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
-	/** Current facial animation state */
+	/** Apply received blend shapes to target mesh */
+	void ApplyBlendShapesToMesh(const TMap<FName, float>& BlendShapeWeights);
+
+	/** Apply received facial texture to target mesh */
+	void ApplyFacialTextureToMesh(UTexture2D* FacialTexture);
+
+	/** Current facial animation data from NVIDIA ACE */
 	FFacialAnimationData CurrentAnimationData;
 
 	/** Whether the system is initialized */
 	bool bIsInitialized = false;
 
-	/** Timer for AI update tick */
+	/** Timer for receiving updates from NVIDIA ACE */
 	float UpdateTimer = 0.0f;
 };
 

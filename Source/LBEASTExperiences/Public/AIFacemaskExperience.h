@@ -10,7 +10,9 @@
 // Forward declarations
 class UAIFaceController;
 class UEmbeddedDeviceController;
-class UExperienceStateMachine;
+class UAIFacemaskACEScriptManager;
+class UAIFacemaskACEImprovManager;
+class UAIFacemaskASRManager;
 
 /**
  * AI Facemask Experience Template
@@ -20,24 +22,31 @@ class UExperienceStateMachine;
  * NETWORK ARCHITECTURE (REQUIRED):
  * This experience REQUIRES a dedicated server setup:
  * - Separate local PC running headless dedicated server
- * - Same PC processes AI workflow: Speech Recognition → NLU → Emotion → Audio2Face
- * - Omniverse Audio2Face streams facial animation to HMDs over network
+ * - Same PC runs NVIDIA ACE pipeline: Audio → NLU → Emotion → Facial Animation
+ * - NVIDIA ACE streams facial textures and blend shapes to HMDs over network
  * - Offloads AI processing from HMDs for optimal performance
  * - Supports parallelization for multiple live actors
  * 
  * ServerMode is ENFORCED to DedicatedServer - attempting to use Listen Server will fail.
  * 
+ * AI FACIAL ANIMATION:
+ * - Fully automated by NVIDIA ACE - NO manual control, keyframe animation, or rigging
+ * - Live actor wears HMD with AIFace mesh tracked on top of their face (like a mask)
+ * - NVIDIA ACE determines facial expressions based on:
+ *   - Audio track (speech recognition)
+ *   - NLU (natural language understanding)
+ *   - Emotion detection
+ *   - State machine context
+ * - AIFaceController receives NVIDIA ACE output and applies it to mesh in real-time
+ * 
  * LIVE ACTOR CONTROLS:
- * - AI facial animation operates AUTONOMOUSLY (driven by NVIDIA Audio2Face)
  * - Live actors wear wrist-mounted button controls (4 buttons: 2 left, 2 right)
- * - Buttons control the Experience Loop state machine (not the AI face)
+ * - Buttons control the Experience Loop state machine (NOT facial animation)
+ * - Live actor directs experience flow, AI face handles expressions autonomously
  * 
  * Button Layout:
  * - Left Wrist:  Button 0 (Forward), Button 1 (Backward)
  * - Right Wrist: Button 2 (Forward), Button 3 (Backward)
- * 
- * The live actor directs the experience flow, while the AI face handles
- * natural conversation and emotional responses autonomously.
  * 
  * Perfect for interactive theater, escape rooms, and narrative-driven LBE experiences
  * requiring professional performers to guide players through story beats.
@@ -58,13 +67,21 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LBEAST|AI Facemask|Components")
 	TObjectPtr<UAIFaceController> FaceController;
 
-	/** Embedded systems controller for wrist-mounted buttons */
+	/** Embedded systems controller for wireless trigger buttons embedded in costume/clothes */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LBEAST|AI Facemask|Components")
 	TObjectPtr<UEmbeddedDeviceController> CostumeController;
 
-	/** Experience Loop state machine */
+	/** ACE Script Manager for pre-baked script collections and automatic script triggering */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LBEAST|AI Facemask|Components")
-	TObjectPtr<UExperienceStateMachine> ExperienceLoop;
+	TObjectPtr<UAIFacemaskACEScriptManager> ACEScriptManager;
+
+	/** ACE Improv Manager for real-time improvised responses (local LLM + TTS + Audio2Face) */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LBEAST|AI Facemask|Components")
+	TObjectPtr<UAIFacemaskACEImprovManager> ACEImprovManager;
+
+	/** ACE ASR Manager for converting player voice to text (Automatic Speech Recognition) */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LBEAST|AI Facemask|Components")
+	TObjectPtr<UAIFacemaskASRManager> ACEASRManager;
 
 	/** Server beacon for automatic discovery/connection */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LBEAST|AI Facemask|Components")
@@ -83,25 +100,28 @@ public:
 	int32 NumberOfPlayers = 1;
 
 	/**
-	 * Get the current experience state
+	 * Get the current narrative state (from base class narrative state machine)
+	 * This is the same as GetCurrentNarrativeState() from the base class
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LBEAST|AI Facemask|Experience Loop")
-	FName GetCurrentExperienceState() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LBEAST|AI Facemask|Narrative")
+	FName GetCurrentExperienceState() const { return GetCurrentNarrativeState(); }
 
 	/**
-	 * Request to advance the experience (input-agnostic, works with any input source)
+	 * Request to advance the narrative state (input-agnostic, works with any input source)
 	 * Call this from any input source (EmbeddedSystems, VR controllers, keyboard, etc.)
 	 * Automatically handles server RPC if called on client
+	 * Advances the narrative state machine, which triggers automated AI facemask performances
 	 */
-	UFUNCTION(BlueprintCallable, Category = "LBEAST|AI Facemask|Experience Loop")
+	UFUNCTION(BlueprintCallable, Category = "LBEAST|AI Facemask|Narrative")
 	void RequestAdvanceExperience();
 
 	/**
-	 * Request to retreat the experience (input-agnostic, works with any input source)
+	 * Request to retreat the narrative state (input-agnostic, works with any input source)
 	 * Call this from any input source (EmbeddedSystems, VR controllers, keyboard, etc.)
 	 * Automatically handles server RPC if called on client
+	 * Retreats the narrative state machine, which triggers automated AI facemask performances
 	 */
-	UFUNCTION(BlueprintCallable, Category = "LBEAST|AI Facemask|Experience Loop")
+	UFUNCTION(BlueprintCallable, Category = "LBEAST|AI Facemask|Narrative")
 	void RequestRetreatExperience();
 
 	/**
@@ -139,20 +159,26 @@ private:
 	void ProcessEmbeddedSystemInput();
 
 	/**
-	 * Internal: Advance experience on server authority
+	 * Internal: Advance narrative state on server authority
 	 * Only called on server after authority check
+	 * Uses base class AdvanceNarrativeState() method
 	 */
 	bool AdvanceExperienceInternal();
 
 	/**
-	 * Internal: Retreat experience on server authority
+	 * Internal: Retreat narrative state on server authority
 	 * Only called on server after authority check
+	 * Uses base class RetreatNarrativeState() method
 	 */
 	bool RetreatExperienceInternal();
 
-	/** Handle state change events */
-	UFUNCTION()
-	void OnExperienceStateChanged(FName OldState, FName NewState, int32 NewStateIndex);
+	/**
+	 * Handle narrative state changes (implements base class BlueprintImplementableEvent)
+	 * Called when live actor advances/retreats narrative state via wireless trigger buttons
+	 * Each state change triggers automated AI facemask performances
+	 * Override in Blueprint to trigger game events based on state changes
+	 */
+	void OnNarrativeStateChanged(FName OldState, FName NewState, int32 NewStateIndex);
 
 	/** Handle server discovery (auto-connect) */
 	UFUNCTION()

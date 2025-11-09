@@ -27,6 +27,7 @@ public class AIFacemask : ModuleRules
 				"CoreUObject",
 				"Engine",
 				"LBEASTCore",
+				"VOIP",  // For IVOIPAudioVisitor interface (visitor pattern for decoupled integration)
 				"HeadMountedDisplay",
 				"AnimGraphRuntime",
 				"AnimationCore"

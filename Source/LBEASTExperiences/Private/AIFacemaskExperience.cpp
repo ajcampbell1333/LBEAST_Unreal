@@ -3,6 +3,9 @@
 #include "AIFacemaskExperience.h"
 #include "AIFaceController.h"
 #include "EmbeddedDeviceController.h"
+#include "AIFacemaskACEScriptManager.h"
+#include "AIFacemaskACEImprov.h"
+#include "AIFacemaskASRManager.h"
 #include "ExperienceLoop/ExperienceStateMachine.h"
 #include "Networking/LBEASTServerBeacon.h"
 
@@ -15,12 +18,16 @@ AAIFacemaskExperience::AAIFacemaskExperience()
 	// Create components
 	FaceController = CreateDefaultSubobject<UAIFaceController>(TEXT("FaceController"));
 	CostumeController = CreateDefaultSubobject<UEmbeddedDeviceController>(TEXT("CostumeController"));
-
-	// Create Experience Loop state machine
-	ExperienceLoop = CreateDefaultSubobject<UExperienceStateMachine>(TEXT("ExperienceLoop"));
+	ACEScriptManager = CreateDefaultSubobject<UAIFacemaskACEScriptManager>(TEXT("ACEScriptManager"));
+	ACEImprovManager = CreateDefaultSubobject<UAIFacemaskACEImprovManager>(TEXT("ACEImprovManager"));
+	ACEASRManager = CreateDefaultSubobject<UAIFacemaskASRManager>(TEXT("ACEASRManager"));
 
 	// Create Server Beacon for automatic discovery
 	ServerBeacon = CreateDefaultSubobject<ULBEASTServerBeacon>(TEXT("ServerBeacon"));
+
+	// Enable narrative state machine (uses base class NarrativeStateMachine component)
+	// This provides the narrative state progression that triggers automated AI facemask performances
+	bUseNarrativeStateMachine = true;
 
 	// Configure for multiplayer with dedicated server (REQUIRED for AI processing offload)
 	bMultiplayerEnabled = true;
@@ -39,12 +46,12 @@ bool AAIFacemaskExperience::InitializeExperienceImpl()
 		return false;
 	}
 
-	// Initialize AI Face Controller (autonomous)
+	// Initialize AI Face Controller (receives NVIDIA ACE output)
 	if (FaceController && LiveActorMesh)
 	{
 		FAIFaceConfig FaceConfig;
 		FaceConfig.TargetMesh = LiveActorMesh;
-		FaceConfig.bUseAIGeneration = true;  // Autonomous AI-driven
+		FaceConfig.NVIDIAACEEndpointURL = TEXT("");  // NOOP: TODO - Configure NVIDIA ACE endpoint URL
 		FaceConfig.UpdateRate = 30.0f;
 
 		if (!FaceController->InitializeAIFace(FaceConfig))
@@ -53,7 +60,7 @@ bool AAIFacemaskExperience::InitializeExperienceImpl()
 			return false;
 		}
 		
-		UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: AI Face initialized (autonomous mode)"));
+		UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: AI Face initialized (NVIDIA ACE receiver mode)"));
 	}
 
 	// Initialize Costume Controller (wrist-mounted buttons + haptics)
@@ -77,8 +84,9 @@ bool AAIFacemaskExperience::InitializeExperienceImpl()
 		}
 	}
 
-	// Initialize Experience Loop with default states
-	if (ExperienceLoop)
+	// Initialize narrative state machine with default states (uses base class NarrativeStateMachine)
+	// Base class creates NarrativeStateMachine automatically when bUseNarrativeStateMachine is true
+	if (NarrativeStateMachine && bUseNarrativeStateMachine)
 	{
 		TArray<FExperienceState> DefaultStates;
 		DefaultStates.Add(FExperienceState(FName("Intro"), TEXT("Introduction sequence")));
@@ -88,11 +96,61 @@ bool AAIFacemaskExperience::InitializeExperienceImpl()
 		DefaultStates.Add(FExperienceState(FName("Finale"), TEXT("Finale sequence")));
 		DefaultStates.Add(FExperienceState(FName("Credits"), TEXT("End credits")));
 
-		ExperienceLoop->Initialize(DefaultStates);
-		ExperienceLoop->OnStateChanged.AddDynamic(this, &AAIFacemaskExperience::OnExperienceStateChanged);
-		ExperienceLoop->StartExperience();
+		NarrativeStateMachine->Initialize(DefaultStates);
+		NarrativeStateMachine->StartExperience();
 		
-		UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: Experience Loop initialized with %d states"), DefaultStates.Num());
+		UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: Narrative state machine initialized with %d states"), DefaultStates.Num());
+	}
+
+	// Initialize ACE Script Manager (pre-baked script collections for NVIDIA ACE)
+	if (ACEScriptManager)
+	{
+		// NOOP: TODO - Configure NVIDIA ACE server base URL from project settings or config
+		FString ACEServerBaseURL = TEXT("http://localhost:8000");  // Default to localhost
+		
+		if (ACEScriptManager->InitializeScriptManager(ACEServerBaseURL))
+		{
+			UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: ACE Script Manager initialized"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("AIFacemaskExperience: ACE Script Manager initialization failed, continuing without script automation"));
+		}
+	}
+
+	// Initialize ACE Improv Manager (real-time improvised responses using local LLM + TTS + Audio2Face)
+	if (ACEImprovManager)
+	{
+		if (ACEImprovManager->InitializeImprovManager())
+		{
+			UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: ACE Improv Manager initialized (local LLM + TTS + Audio2Face)"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("AIFacemaskExperience: ACE Improv Manager initialization failed, continuing without improv responses"));
+		}
+	}
+
+	// Initialize ACE ASR Manager (converts player voice to text for improv responses)
+	if (ACEASRManager)
+	{
+		if (ACEASRManager->InitializeASRManager())
+		{
+			UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: ACE ASR Manager initialized (player voice → text for improv)"));
+			
+			// NOOP: TODO - Register ASR Manager as visitor with VOIPManager
+			// Find VOIPManager component and register ASRManager as audio visitor
+			// This keeps AIFacemask module decoupled from VOIP module
+			// Example:
+			// if (UVOIPManager* VOIPManager = FindComponentByClass<UVOIPManager>())
+			// {
+			//     VOIPManager->RegisterAudioVisitor(ACEASRManager);
+			// }
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("AIFacemaskExperience: ACE ASR Manager initialization failed, continuing without voice input"));
+		}
 	}
 
 	// Initialize Server Beacon for automatic discovery/connection
@@ -152,10 +210,10 @@ void AAIFacemaskExperience::ShutdownExperienceImpl()
 		ServerBeacon->Stop();
 	}
 
-	// Stop experience loop
-	if (ExperienceLoop)
+	// Stop narrative state machine (uses base class NarrativeStateMachine)
+	if (NarrativeStateMachine)
 	{
-		ExperienceLoop->StopExperience();
+		NarrativeStateMachine->StopExperience();
 	}
 
 	// Disconnect embedded systems
@@ -193,7 +251,7 @@ void AAIFacemaskExperience::Tick(float DeltaTime)
 void AAIFacemaskExperience::ProcessEmbeddedSystemInput()
 {
 	// Only process if embedded system is connected
-	if (!CostumeController || !CostumeController->IsDeviceConnected() || !ExperienceLoop)
+	if (!CostumeController || !CostumeController->IsDeviceConnected() || !NarrativeStateMachine)
 	{
 		return;
 	}
@@ -232,21 +290,24 @@ void AAIFacemaskExperience::ProcessEmbeddedSystemInput()
 	}
 }
 
-void AAIFacemaskExperience::OnExperienceStateChanged(FName OldState, FName NewState, int32 NewStateIndex)
+void AAIFacemaskExperience::OnNarrativeStateChanged(FName OldState, FName NewState, int32 NewStateIndex)
 {
-	UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: State changed from '%s' to '%s' (Index: %d)"), 
+	// Note: OnNarrativeStateChanged is a BlueprintImplementableEvent in the base class,
+	// so we can't call Super::. This C++ implementation handles AI facemask-specific logic.
+	// Blueprint can still override this if needed.
+	
+	UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: Narrative state changed from '%s' to '%s' (Index: %d)"), 
 		*OldState.ToString(), *NewState.ToString(), NewStateIndex);
 	
-	// Override this function in Blueprint to trigger game events based on state changes
-}
-
-FName AAIFacemaskExperience::GetCurrentExperienceState() const
-{
-	if (ExperienceLoop)
+	// State changes are triggered by live actor's wireless trigger buttons
+	// Each state change triggers automated AI facemask performances via NVIDIA ACE
+	// Trigger ACE script for the new state (if script manager is available and auto-trigger is enabled)
+	if (ACEScriptManager && ACEScriptManager->bAutoTriggerOnStateChange)
 	{
-		return ExperienceLoop->GetCurrentStateName();
+		ACEScriptManager->HandleNarrativeStateChanged(OldState, NewState, NewStateIndex);
 	}
-	return NAME_None;
+	
+	// Override this function in Blueprint to trigger additional game events based on state changes
 }
 
 void AAIFacemaskExperience::RequestAdvanceExperience()
@@ -314,19 +375,14 @@ bool AAIFacemaskExperience::ServerRetreatExperience_Validate()
 bool AAIFacemaskExperience::AdvanceExperienceInternal()
 {
 	// Internal function: Only called on authority after validation
-	// This is where the actual state change happens
+	// Uses base class AdvanceNarrativeState() method to prevent code duplication
 	
-	if (!ExperienceLoop)
-	{
-		return false;
-	}
-
-	const bool bSuccess = ExperienceLoop->AdvanceState();
+	const bool bSuccess = AdvanceNarrativeState();
 	
 	if (bSuccess)
 	{
-		UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: Experience advanced to '%s'"), 
-			*ExperienceLoop->GetCurrentStateName().ToString());
+		UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: Narrative state advanced to '%s'"), 
+			*GetCurrentNarrativeState().ToString());
 	}
 	
 	return bSuccess;
@@ -335,19 +391,14 @@ bool AAIFacemaskExperience::AdvanceExperienceInternal()
 bool AAIFacemaskExperience::RetreatExperienceInternal()
 {
 	// Internal function: Only called on authority after validation
-	// This is where the actual state change happens
+	// Uses base class RetreatNarrativeState() method to prevent code duplication
 	
-	if (!ExperienceLoop)
-	{
-		return false;
-	}
-
-	const bool bSuccess = ExperienceLoop->RetreatState();
+	const bool bSuccess = RetreatNarrativeState();
 	
 	if (bSuccess)
 	{
-		UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: Experience retreated to '%s'"), 
-			*ExperienceLoop->GetCurrentStateName().ToString());
+		UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: Narrative state retreated to '%s'"), 
+			*GetCurrentNarrativeState().ToString());
 	}
 	
 	return bSuccess;

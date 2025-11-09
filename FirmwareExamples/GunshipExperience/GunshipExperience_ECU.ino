@@ -3,7 +3,7 @@
  * 
  * Combined embedded control unit for GunshipExperience motion platform.
  * Integrates both scissor lift control and 4-gang actuator system control
- * into a single ECU for complete 5DOF motion platform control.
+ * into a single ECU for complete 4DOF motion platform control.
  * 
  * This ECU uses the ActuatorSystem_Controller.h and ScissorLift_Controller.h headers
  * to eliminate code duplication and provide modular, reusable controllers.
@@ -51,9 +51,9 @@
  * - Channel 8: Return to neutral (bool, true = return all to calibrated zero)
  * 
  * DOF Mapping:
- * - Actuators: Pitch and Roll only (2 DOF)
+ * - Actuators: Pitch and Roll only (2 DOF, yaw restricted)
  * - Scissor Lift: Vertical (TranslationZ) and Forward/Reverse (TranslationY) (2 DOF)
- * - Total: 5 DOF motion platform
+ * - Total: 4 DOF motion platform
  * 
  * This example uses the LBEAST_Wireless_RX.h template for receiving commands.
  * Copy LBEAST_Wireless_RX.h from FirmwareExamples/Base/Templates/ to your sketch directory.

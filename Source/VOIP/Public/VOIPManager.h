@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "VOIPTypes.h"
+#include "IVOIPAudioVisitor.h"
 #include "VOIPManager.generated.h"
 
 class UMumbleClient;
@@ -123,6 +124,21 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LBEAST|VOIP")
 	float GetOutputVolume() const { return OutputVolume; }
 
+	/**
+	 * Register an audio visitor to receive audio events
+	 * Visitors are notified when player audio is received
+	 * @param Visitor - Visitor implementing IVOIPAudioVisitor interface
+	 */
+	UFUNCTION(BlueprintCallable, Category = "LBEAST|VOIP")
+	void RegisterAudioVisitor(TScriptInterface<IVOIPAudioVisitor> Visitor);
+
+	/**
+	 * Unregister an audio visitor
+	 * @param Visitor - Visitor to remove
+	 */
+	UFUNCTION(BlueprintCallable, Category = "LBEAST|VOIP")
+	void UnregisterAudioVisitor(TScriptInterface<IVOIPAudioVisitor> Visitor);
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -135,6 +151,10 @@ protected:
 	/** Map of user IDs to audio source components */
 	UPROPERTY()
 	TMap<int32, TObjectPtr<USteamAudioSourceComponent>> AudioSourceMap;
+
+	/** Registered audio visitors (for decoupled module integration) */
+	UPROPERTY()
+	TArray<TScriptInterface<IVOIPAudioVisitor>> AudioVisitors;
 
 	/** Microphone mute state */
 	bool bMicrophoneMuted = false;

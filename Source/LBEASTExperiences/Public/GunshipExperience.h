@@ -10,11 +10,13 @@
 class UHapticPlatformController;
 
 /**
- * 5DOF Gunship Experience Template
+ * 4DOF Gunship Experience Template
  * 
  * Pre-configured four-player seated VR experience on hydraulic platform.
  * Combines:
- * - 5DOF hydraulic platform (pitch, roll, Y/Z translation)
+ * - 4DOF motion platform:
+ *   - Hydraulic platform: pitch, roll (yaw restricted)
+ *   - Scissor lift: forward/reverse, up/down
  * - Four player seated positions
  * - LAN multiplayer support
  * - Synchronized motion for all players
@@ -47,23 +49,30 @@ public:
 	float MaxRoll = 10.0f;
 
 	/**
-	 * Send normalized gunship tilt (RECOMMENDED FOR GAME CODE)
+	 * Send normalized gunship motion (RECOMMENDED FOR GAME CODE)
 	 * Uses joystick-style input that automatically scales to hardware capabilities.
 	 * 
-	 * @param TiltX - Left/Right tilt (-1.0 = full left, +1.0 = full right, 0.0 = level)
-	 * @param TiltY - Forward/Backward tilt (-1.0 = full backward, +1.0 = full forward, 0.0 = level)
-	 * @param VerticalOffset - Vertical translation (-1.0 to +1.0)
+	 * @param TiltX - Left/Right roll (-1.0 = full left, +1.0 = full right, 0.0 = level)
+	 * @param TiltY - Forward/Backward pitch (-1.0 = full backward, +1.0 = full forward, 0.0 = level)
+	 * @param ForwardOffset - Scissor lift forward/reverse (-1.0 = full reverse, +1.0 = full forward, 0.0 = neutral)
+	 * @param VerticalOffset - Scissor lift up/down (-1.0 = full down, +1.0 = full up, 0.0 = neutral)
 	 * @param Duration - Time to reach target (seconds)
 	 */
 	UFUNCTION(BlueprintCallable, Category = "LBEAST|Gunship")
-	void SendGunshipTilt(float TiltX, float TiltY, float VerticalOffset = 0.0f, float Duration = 1.0f);
+	void SendGunshipTilt(float TiltX, float TiltY, float ForwardOffset = 0.0f, float VerticalOffset = 0.0f, float Duration = 1.0f);
 
 	/**
 	 * Send motion command to platform (ADVANCED - uses absolute angles)
 	 * For most game code, use SendGunshipTilt() instead.
+	 * 
+	 * @param Pitch - Platform pitch angle in degrees
+	 * @param Roll - Platform roll angle in degrees
+	 * @param ForwardOffset - Scissor lift forward/reverse translation in cm (positive = forward)
+	 * @param VerticalOffset - Scissor lift up/down translation in cm (positive = up)
+	 * @param Duration - Time to reach target (seconds)
 	 */
 	UFUNCTION(BlueprintCallable, Category = "LBEAST|Gunship|Advanced")
-	void SendGunshipMotion(float Pitch, float Roll, float LateralOffset, float VerticalOffset, float Duration = 1.0f);
+	void SendGunshipMotion(float Pitch, float Roll, float ForwardOffset, float VerticalOffset, float Duration = 1.0f);
 
 	/**
 	 * Return platform to neutral
