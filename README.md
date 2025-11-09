@@ -1,5 +1,7 @@
 # LBEAST SDK for Unreal Engine
 
+<img src="Source/images/lbeast-logo.png" alt="LBEAST Logo" width="100%">
+
 **Location-Based Entertainment Activation Standard Toolkit**
 
 **Author Disclaimer**
@@ -34,6 +36,9 @@ Foundation modules providing core functionality:
 - `AIFacemask` - Facial animation control
 - `LargeHaptics` - Platform/gyroscope control
 - `EmbeddedSystems` - Microcontroller integration
+- `ProAudio` - Professional audio console control via OSC
+- `ProLighting` - DMX lighting control (Art-Net, USB DMX)
+- `VOIP` - Low-latency voice communication with 3D HRTF spatialization
 
 **Use these when:** Building custom experiences from scratch with full control.
 
@@ -44,6 +49,7 @@ Ready-to-use complete experiences combining multiple APIs:
 - `AGunshipExperience` - 4-player seated platform
 - `ACarSimExperience` - Racing/driving simulator
 - `AFlightSimExperience` - Flight sim with HOTAS
+- `AEscapeRoomExperience` - Puzzle-based escape room with embedded door locks and prop sensors
 
 **Use these when:** Rapid deployment of standard LBE configurations.
 
@@ -59,6 +65,7 @@ Build your specific experience (Tier 3) on top of templates (Tier 2) or APIs (Ti
 | Building a space combat game | `AFlightSimExperience` | HOTAS integration ready, continuous rotation supported |
 | Custom 3-player standing platform | Low-Level APIs | Need custom configuration not covered by templates |
 | Live actor-driven escape room | `AAIFacemaskExperience` | Live actor support, multiplayer, and embedded systems ready |
+| Puzzle-based escape room | `AEscapeRoomExperience` | Narrative state machine, door locks, prop sensors, embedded systems |
 | Unique hardware configuration | Low-Level APIs | Full control over all actuators and systems |
 
 **Rule of thumb:** Start with templates, drop to APIs only when you need customization beyond what templates offer.
@@ -165,20 +172,20 @@ This template **enforces** dedicated server mode. You **must** run a separate lo
 **Network Architecture:**
 ```
 ┌─────────────────────────────────────┐
-│   Dedicated Server PC (Headless)   │
+│   Dedicated Server PC (Headless)    │
 │                                     │
-│  ┌───────────────────────────────┐ │
-│  │  Unreal Dedicated Server      │ │ ← Multiplayer networking
-│  │  (No HMD, no rendering)       │ │
-│  └───────────────────────────────┘ │
+│  ┌───────────────────────────────┐  │
+│  │  Unreal Dedicated Server      │  │ ← Multiplayer networking
+│  │  (No HMD, no rendering)       │  │
+│  └───────────────────────────────┘  │
 │                                     │
-│  ┌───────────────────────────────┐ │
-│  │  NVIDIA Omniverse             │ │ ← AI Workflow:
-│  │  - Speech Recognition         │ │   Speech → NLU → Emotion
-│  │  - NLU (Natural Language)     │ │              ↓
-│  │  - Emotion Detection          │ │        Audio2Face
-│  │  - Audio2Face (Neural Face)   │ │              ↓
-│  └───────────────────────────────┘ │   Facial animation stream
+│  ┌───────────────────────────────┐  │
+│  │  NVIDIA Omniverse             │  │ ← AI Workflow:
+│  │  - Speech Recognition         │  │   Speech → NLU → Emotion
+│  │  - NLU (Natural Language)     │  │              ↓
+│  │  - Emotion Detection          │  │        Audio2Face
+│  │  - Audio2Face (Neural Face)   │  │              ↓
+│  └───────────────────────────────┘  │   Facial animation stream
 └─────────────────────────────────────┘
                │
         LAN Network (UDP/TCP)
@@ -382,6 +389,55 @@ float Throttle = FlightSim->GetThrottleInput();
 FlightSim->SendContinuousRotation(720.0f, 360.0f, 4.0f);  // Two barrel rolls!
 ```
 
+#### 🚪 Escape Room Experience
+
+**Class:** `AEscapeRoomExperience`
+
+Puzzle-based escape room experience with narrative state machine, embedded door locks, and prop sensors. Perfect for interactive puzzle experiences with physical hardware integration.
+
+**Includes:**
+- Pre-configured narrative state machine (puzzle progression)
+- Embedded door lock control (unlock/lock doors via microcontroller)
+- Prop sensor integration (read sensor values from embedded devices)
+- Automatic door unlocking based on puzzle state
+- Door state callbacks (confirm when doors actually unlock)
+
+**Quick Start:**
+```cpp
+AEscapeRoomExperience* EscapeRoom = GetWorld()->SpawnActor<AEscapeRoomExperience>();
+EscapeRoom->InitializeExperience();
+
+// Unlock a specific door (by index)
+EscapeRoom->UnlockDoor(0);  // Unlock door 0
+
+// Lock a door
+EscapeRoom->LockDoor(0);
+
+// Check if door is unlocked
+bool bIsUnlocked = EscapeRoom->IsDoorUnlocked(0);
+
+// Trigger a prop action (e.g., activate a sensor)
+EscapeRoom->TriggerPropAction(0, 1.0f);  // Prop 0, value 1.0
+
+// Read prop sensor value
+float SensorValue = EscapeRoom->ReadPropSensor(0);
+
+// Get current puzzle state
+FName CurrentState = EscapeRoom->GetCurrentPuzzleState();
+```
+
+**Blueprint Events:**
+Override `OnNarrativeStateChanged` to trigger game events:
+```cpp
+void OnNarrativeStateChanged(FName OldState, FName NewState, int32 NewStateIndex)
+{
+    if (NewState == "Puzzle1_Complete")
+    {
+        // Unlock next door, play sound, etc.
+    }
+}
+```
+
 ---
 
 ### Low-Level APIs (Advanced/Custom Usage)
@@ -508,6 +564,88 @@ AudioController->SetMasterFader(0.9f);  // Master to 90%
 - ✅ **No Max for Live** - Direct OSC to console (no intermediate software)
 - ✅ **Native Unreal** - Uses built-in OSC plugin (no external dependencies)
 - ✅ **Cross-Manufacturer** - Same API works with all supported boards
+
+#### 💡 ProLighting API
+**Module:** `ProLighting`
+
+Hardware-agnostic DMX lighting control via Art-Net (UDP) or USB DMX interfaces. Provides fixture management, fade engine, and RDM discovery.
+
+**Example:**
+```cpp
+UProLightingController* LightingController = CreateDefaultSubobject<UProLightingController>(TEXT("LightingController"));
+FLBEASTProLightingConfig Config;
+Config.TransportType = ELBEASTDMXTransport::ArtNet;
+Config.ArtNetIPAddress = TEXT("192.168.1.200");
+Config.ArtNetPort = 6454;  // Art-Net default port
+Config.ArtNetUniverse = 0;
+
+LightingController->InitializeLighting(Config);
+
+// Register a fixture
+FLBEASTDMXFixture Fixture;
+Fixture.FixtureType = ELBEASTDMXFixtureType::RGBW;
+Fixture.DMXAddress = 1;
+Fixture.Universe = 0;
+int32 FixtureId = LightingController->RegisterFixture(Fixture);
+
+// Control fixture intensity (0.0 to 1.0)
+LightingController->SetFixtureIntensity(FixtureId, 0.75f);
+
+// Set RGBW color
+LightingController->SetFixtureColorRGBW(FixtureId, 1.0f, 0.5f, 0.0f, 0.0f);  // Orange
+
+// Start a fade
+LightingController->StartFixtureFade(FixtureId, 0.0f, 1.0f, 2.0f);  // Fade from 0 to 1 over 2 seconds
+```
+
+**Supported Transports:**
+- ✅ Art-Net (UDP) - Full support with auto-discovery
+- ✅ USB DMX - Stubbed (coming soon)
+
+**Features:**
+- ✅ **Fixture Registry** - Virtual fixture management by ID
+- ✅ **Fade Engine** - Time-based intensity fades
+- ✅ **RDM Discovery** - Automatic fixture discovery (stubbed)
+- ✅ **Art-Net Discovery** - Auto-detect Art-Net nodes on network
+- ✅ **Multiple Fixture Types** - Dimmable, RGB, RGBW, Moving Head, Custom
+
+#### 🎤 VOIP API
+**Module:** `VOIP`
+
+Low-latency voice communication with 3D HRTF spatialization using Mumble protocol and Steam Audio.
+
+**Example:**
+```cpp
+UVOIPManager* VOIPManager = CreateDefaultSubobject<UVOIPManager>(TEXT("VOIPManager"));
+VOIPManager->ServerIP = TEXT("192.168.1.100");
+VOIPManager->ServerPort = 64738;  // Mumble default port
+VOIPManager->bAutoConnect = true;
+VOIPManager->PlayerName = TEXT("Player_1");
+
+// Connect to Mumble server
+VOIPManager->Connect();
+
+// Mute/unmute microphone
+VOIPManager->SetMicrophoneMuted(false);
+
+// Set output volume (0.0 to 1.0)
+VOIPManager->SetOutputVolume(0.8f);
+
+// Listen to connection events
+VOIPManager->OnConnectionStateChanged.AddDynamic(this, &AMyActor::OnVOIPConnectionChanged);
+```
+
+**Features:**
+- ✅ **Mumble Protocol** - Low-latency VOIP (< 50ms on LAN)
+- ✅ **Steam Audio** - 3D HRTF spatialization for positional audio
+- ✅ **Per-User Audio Sources** - Automatic spatialization for each remote player
+- ✅ **HMD-Agnostic** - Works with any HMD's microphone and headphones
+- ✅ **Blueprint-Friendly** - Easy integration via ActorComponent
+
+**Prerequisites:**
+- Murmur server running on LAN
+- Steam Audio plugin (git submodule)
+- MumbleLink plugin (git submodule)
 
 ## 📦 Installation
 
@@ -710,12 +848,15 @@ LBEAST/
 ├── LargeHaptics        # Hydraulic platform & gyroscope control API
 ├── EmbeddedSystems     # Microcontroller integration API
 ├── ProAudio            # Professional audio console control via OSC
+├── ProLighting         # DMX lighting control (Art-Net, USB DMX)
+├── VOIP                # Low-latency voice communication with 3D HRTF
 └── LBEASTExperiences   # Pre-configured experience templates
     ├── AIFacemaskExperience
     ├── MovingPlatformExperience
     ├── GunshipExperience
     ├── CarSimExperience
-    └── FlightSimExperience
+    ├── FlightSimExperience
+    └── EscapeRoomExperience
 ```
 
 ### Networking
@@ -802,14 +943,14 @@ The AIFacemask experience (and optionally other multiplayer experiences) uses a 
 
 ```
 ┌─────────────────────────────────────────────────┐
-│  LBEAST Server Manager PC (Dedicated Server)   │
+│  LBEAST Server Manager PC (Dedicated Server)    │
 │  ─────────────────────────────────────────────  │
-│  • Handles all network traffic                 │
-│  • Decision-making & game state logic          │
+│  • Handles all network traffic                  │
+│  • Decision-making & game state logic           │
 │  • Graphics processing offloaded from VR        │
-│  • AI workflow (Speech → NLU → Emotion →       │
+│  • AI workflow (Speech → NLU → Emotion →        │
 │    Audio2Face)                                  │
-│  • Streams facial animation to HMDs            │
+│  • Streams facial animation to HMDs             │
 └─────────────────────────────────────────────────┘
                     │
                     ├─ UDP Broadcast ──→ LAN (auto-discovery)
@@ -823,11 +964,11 @@ The AIFacemask experience (and optionally other multiplayer experiences) uses a 
    └─────────┘            └─────────┘
 
 ┌─────────────────────────────────────────────────┐
-│  Command Console PC (Optional - May be same)   │
+│  Command Console PC (Optional - May be same)    │
 │  ─────────────────────────────────────────────  │
-│  • Server Manager GUI (UMG interface)         │
-│  • Admin Panel for Ops Tech monitoring        │
-│  • Experience control interface                │
+│  • Server Manager GUI (UMG interface)           │
+│  • Admin Panel for Ops Tech monitoring          │
+│  • Experience control interface                 │
 └─────────────────────────────────────────────────┘
          │ (May share same CPU/PC as Server Manager)
          │ OR networked separately
@@ -874,7 +1015,7 @@ The **Command Console** (the admin UI Panel) is a UMG-based application for mana
 │  Server Name: [LBEAST Server]          │
 │  Max Players: [4]                      │
 │  Port: [7777]                          │
-│                                         │
+│                                        │
 │  [Start Server]  [Stop Server]         │
 ├────────────────────────────────────────┤
 │  Status:                               │
