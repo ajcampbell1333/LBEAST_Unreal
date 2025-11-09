@@ -140,9 +140,11 @@ protected:
 	virtual void ShutdownExperienceImpl() override;
 
 	/**
-	 * Override to handle narrative state changes and unlock doors based on puzzle completion
+	 * Handle narrative state changes and unlock doors based on puzzle completion
+	 * This implements the BlueprintImplementableEvent from the base class
+	 * Note: No UFUNCTION macro needed - inherits from base class declaration
 	 */
-	virtual void OnNarrativeStateChanged(FName OldState, FName NewState, int32 NewStateIndex) override;
+	void OnNarrativeStateChanged(FName OldState, FName NewState, int32 NewStateIndex);
 
 	/**
 	 * Initialize embedded device controllers for doors and props

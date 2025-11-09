@@ -1,7 +1,7 @@
 // Copyright (c) 2025 AJ Campbell. Licensed under the MIT License.
 
 #include "EscapeRoomExperience.h"
-#include "EmbeddedSystems/EmbeddedDeviceController.h"
+#include "EmbeddedDeviceController.h"
 #include "ExperienceLoop/ExperienceStateMachine.h"
 
 AEscapeRoomExperience::AEscapeRoomExperience()
@@ -237,7 +237,9 @@ FName AEscapeRoomExperience::GetCurrentPuzzleState() const
 
 void AEscapeRoomExperience::OnNarrativeStateChanged(FName OldState, FName NewState, int32 NewStateIndex)
 {
-	Super::OnNarrativeStateChanged(OldState, NewState, NewStateIndex);
+	// Note: OnNarrativeStateChanged is a BlueprintImplementableEvent in the base class,
+	// so we can't call Super::. This C++ implementation handles the door unlocking logic.
+	// Blueprint can still override this if needed.
 
 	UE_LOG(LogTemp, Log, TEXT("EscapeRoomExperience: Narrative state changed from %s to %s"), 
 		*OldState.ToString(), *NewState.ToString());

@@ -95,8 +95,8 @@ bool ALBEASTExperienceBase::InitializeExperienceImpl()
 		NarrativeStateMachine = NewObject<UExperienceStateMachine>(this, UExperienceStateMachine::StaticClass());
 		if (NarrativeStateMachine)
 		{
-		// Bind to state change events
-		NarrativeStateMachine->OnStateChanged.AddUObject(this, &ALBEASTExperienceBase::HandleNarrativeStateChanged);
+			// Bind to state change events (dynamic delegate uses AddDynamic)
+			NarrativeStateMachine->OnStateChanged.AddDynamic(this, &ALBEASTExperienceBase::HandleNarrativeStateChanged);
 			UE_LOG(LogTemp, Log, TEXT("LBEASTExperienceBase: Narrative state machine created"));
 		}
 	}
