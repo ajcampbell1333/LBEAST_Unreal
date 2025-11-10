@@ -4,11 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "LBEASTExperienceBase.h"
-#include "HapticPlatformController.h"
+#include "2DOFGyroPlatformController.h"
 #include "FlightSimExperience.generated.h"
-
-// Forward declarations (no longer needed for UHapticPlatformController since we include the header)
-// class UHapticPlatformController;
 
 /**
  * 2DOF Full 360 Flight Sim Experience Template
@@ -22,6 +19,18 @@
  * 
  * Perfect for realistic flight arcade games, space combat simulators,
  * and any experience requiring full 360° continuous rotation.
+ * 
+ * ⚠️ IMPORTANT: Space Reset Feature Tracking Requirements
+ * 
+ * If using the Space Reset feature (bSpaceReset), you MUST use outside-in tracking
+ * with trackers mounted to the cockpit frame. LBEAST does NOT provide HMD correction
+ * for Space Reset - this is a complex problem that requires cockpit-relative tracking.
+ * 
+ * Recommended: Bigscreen Beyond 2 + SteamVR Lighthouse with base stations mounted
+ * to the cockpit frame (not room walls).
+ * 
+ * See: FirmwareExamples/FlightSimExperience/README.md for detailed tracking setup
+ * instructions and warnings about HMD correction complexity.
  */
 UCLASS(Blueprintable, ClassGroup=(LBEAST))
 class LBEASTEXPERIENCES_API AFlightSimExperience : public ALBEASTExperienceBase
@@ -33,7 +42,7 @@ public:
 
 	/** Gyroscope platform controller */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LBEAST|Flight Sim")
-	TObjectPtr<UHapticPlatformController> GyroscopeController;
+	TObjectPtr<U2DOFGyroPlatformController> GyroscopeController;
 
 	/** HOTAS controller type */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|Flight Sim|HOTAS")
@@ -62,6 +71,45 @@ public:
 	/** Maximum rotation speed in degrees per second */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|Flight Sim", meta = (ClampMin = "10.0", ClampMax = "180.0"))
 	float MaxRotationSpeed = 90.0f;
+
+	/**
+	 * If true, the ECU will smoothstep the gyros toward world-up (0° pitch, 0° roll).
+	 * Intended for gravity-based reset when input is idle. Sent to ECU on connect.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|Flight Sim|Reset")
+	bool bGravityReset = true;
+
+	/**
+	 * Speed used by ECU for gravity reset smoothing (degrees/second equivalency).
+	 * Exposed as a slider for tech artists to calibrate. Sent to ECU on connect.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|Flight Sim|Reset", meta = (ClampMin = "1.0", ClampMax = "180.0", UIMin = "1.0", UIMax = "180.0"))
+	float ResetSpeed = 45.0f;
+
+	/**
+	 * Idle timeout (seconds). If HOTAS input is idle for this duration, ECU smoothsteps back to zero.
+	 * Sent to ECU on connect.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|Flight Sim|Reset", meta = (ClampMin = "0.0", ClampMax = "10.0", UIMin = "0.0", UIMax = "10.0"))
+	float ResetIdleTimeout = 1.5f;
+
+	/**
+	 * If true, virtual cockpit transform decouples from physical cockpit during gravity reset.
+	 * This simulates zero-gravity space by smoothly interpolating physical back to zero without
+	 * rotating the player's virtual cockpit. The cockpit visual remains fixed (assuming no stick input)
+	 * until the ECU reports the platform is back at zero and gravityReset is turned off.
+	 * NOTE: This does not yet apply HMD correction; that will be handled separately.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|Flight Sim|Reset")
+	bool bSpaceReset = false;
+
+	/** Cockpit actor to decouple/recouple during space reset (assigned by tech art) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|Flight Sim|Reset")
+	AActor* CockpitActor = nullptr;
+
+	/** Degrees threshold near zero to consider the physical platform reset */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|Flight Sim|Reset", meta = (ClampMin = "0.1", ClampMax = "10.0"))
+	float ZeroThresholdDegrees = 2.0f;
 
 	/**
 	 * Send continuous rotation command
@@ -111,5 +159,16 @@ public:
 protected:
 	virtual bool InitializeExperienceImpl() override;
 	virtual void ShutdownExperienceImpl() override;
+	virtual void Tick(float DeltaSeconds) override;
+
+private:
+	/** Maintain cockpit transform sync/decouple behavior for space reset */
+	void UpdateCockpitTransform(float DeltaSeconds);
+
+	/** Cached cockpit rotation used while decoupled */
+	FRotator DecoupledCockpitRotation = FRotator::ZeroRotator;
+
+	/** Whether cockpit is currently decoupled from physical platform */
+	bool bCockpitDecoupled = false;
 };
 

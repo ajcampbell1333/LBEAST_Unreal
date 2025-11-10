@@ -28,7 +28,9 @@ public class LargeHaptics : ModuleRules
 				"Engine",
 				"LBEASTCore",
 				"Sockets",
-				"Networking"
+				"Networking",
+				"EnhancedInput",
+				"InputCore"
 			}
 		);
 			

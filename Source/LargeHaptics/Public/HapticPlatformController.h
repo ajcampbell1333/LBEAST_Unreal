@@ -107,6 +107,23 @@ struct FGyroscopeConfig
 	/** Throttle sensitivity multiplier */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|Haptics|HOTAS", meta = (ClampMin = "0.1", ClampMax = "5.0"))
 	float ThrottleSensitivity = 1.0f;
+
+	/** 
+	 * Axis mapping configuration (for GenericUSBController axes)
+	 * These can be adjusted if your HOTAS device uses different axis numbers
+	 * Default: Axis0=Roll, Axis1=Pitch, Axis2=Throttle, Axis3=Pedals
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|Haptics|HOTAS|Advanced", meta = (ClampMin = "0", ClampMax = "15"))
+	int32 RollAxisIndex = 0;  // GenericUSBController_Axis0
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|Haptics|HOTAS|Advanced", meta = (ClampMin = "0", ClampMax = "15"))
+	int32 PitchAxisIndex = 1;  // GenericUSBController_Axis1
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|Haptics|HOTAS|Advanced", meta = (ClampMin = "0", ClampMax = "15"))
+	int32 ThrottleAxisIndex = 2;  // GenericUSBController_Axis2
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|Haptics|HOTAS|Advanced", meta = (ClampMin = "0", ClampMax = "15"))
+	int32 PedalsAxisIndex = 3;  // GenericUSBController_Axis3
 };
 
 /**
@@ -265,38 +282,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "LBEAST|Haptics")
 	FTransform GetCurrentPlatformTransform() const;
 
-	/**
-	 * Get HOTAS joystick input (X, Y axes)
-	 * @return Vector2D with X (roll) and Y (pitch) input from joystick (-1.0 to 1.0)
-	 */
-	UFUNCTION(BlueprintCallable, Category = "LBEAST|Haptics|HOTAS")
-	FVector2D GetHOTASJoystickInput() const;
-
-	/**
-	 * Get HOTAS throttle input
-	 * @return Throttle value (0.0 to 1.0)
-	 */
-	UFUNCTION(BlueprintCallable, Category = "LBEAST|Haptics|HOTAS")
-	float GetHOTASThrottleInput() const;
-
-	/**
-	 * Get HOTAS pedal input (if enabled)
-	 * @return Pedal value (-1.0 to 1.0, left to right)
-	 */
-	UFUNCTION(BlueprintCallable, Category = "LBEAST|Haptics|HOTAS")
-	float GetHOTASPedalInput() const;
-
-	/**
-	 * Check if HOTAS is connected and responding
-	 */
-	UFUNCTION(BlueprintCallable, Category = "LBEAST|Haptics|HOTAS")
-	bool IsHOTASConnected() const;
-
-	/**
-	 * Get the currently configured HOTAS type
-	 */
-	UFUNCTION(BlueprintCallable, Category = "LBEAST|Haptics|HOTAS")
-	ELBEASTHOTASType GetHOTASType() const;
+	// Note: HOTAS methods are implemented in subclasses (e.g., U2DOFGyroPlatformController)
+	// Base class does not handle HOTAS - it's platform-specific
 
 	// =====================================
 	// Channel-Based IO API (Generic - Experience-Agnostic)
@@ -333,17 +320,8 @@ private:
 	/** Total duration of current motion */
 	float MotionTotalDuration = 0.0f;
 
-	/** HOTAS joystick input cache */
-	FVector2D HOTASJoystickInput = FVector2D::ZeroVector;
-
-	/** HOTAS throttle input cache */
-	float HOTASThrottleInput = 0.0f;
-
-	/** HOTAS pedal input cache */
-	float HOTASPedalInput = 0.0f;
-
-	/** Whether HOTAS is connected */
-	bool bHOTASConnected = false;
+	// Note: HOTAS member variables are in subclasses (e.g., U2DOFGyroPlatformController)
+	// Base class does not handle HOTAS - it's platform-specific
 
 	// UDP socket and protocol management now handled by base class (ULBEASTUDPTransport)
 
@@ -361,15 +339,8 @@ private:
 	 */
 	void UpdateMotionInterpolation(float DeltaTime);
 
-	/**
-	 * Update HOTAS input state
-	 */
-	void UpdateHOTASInput();
-
-	/**
-	 * Initialize HOTAS controller connection
-	 */
-	bool InitializeHOTAS();
+	// Note: HOTAS methods are implemented in subclasses (e.g., U2DOFGyroPlatformController)
+	// Base class does not handle HOTAS - it's platform-specific
 };
 
 

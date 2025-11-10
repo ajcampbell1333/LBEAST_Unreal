@@ -37,11 +37,8 @@ void UHapticPlatformController::TickComponent(float DeltaTime, ELevelTick TickTy
 	// Receive data from hardware (bidirectional IO) - handled by base class
 	// Base class TickComponent already calls ProcessIncomingUDPData()
 
-	// Update HOTAS input if enabled
-	if (bHOTASConnected)
-	{
-		UpdateHOTASInput();
-	}
+	// Note: HOTAS input processing is handled by subclasses (e.g., U2DOFGyroPlatformController)
+	// Base class does not handle HOTAS - it's platform-specific
 
 	// Update motion interpolation if we're in motion
 	if (MotionTimeRemaining > 0.0f)
@@ -111,14 +108,8 @@ bool UHapticPlatformController::InitializePlatform(const FHapticPlatformConfig& 
 		return false;
 	}
 
-	// Initialize HOTAS if this is a flight sim
-	if (Config.PlatformType == ELBEASTPlatformType::FlightSim_2DOF && Config.GyroscopeConfig.HOTASType != ELBEASTHOTASType::None)
-	{
-		if (!InitializeHOTAS())
-		{
-			UE_LOG(LogTemp, Warning, TEXT("HapticPlatformController: HOTAS initialization failed, continuing without HOTAS"));
-		}
-	}
+	// Note: HOTAS initialization is handled by subclasses (e.g., U2DOFGyroPlatformController)
+	// Base class does not handle HOTAS - it's platform-specific
 
 	bIsInitialized = true;
 	UE_LOG(LogTemp, Log, TEXT("HapticPlatformController: Initialized successfully with %d actuators"), Config.Actuators.Num());
@@ -325,108 +316,8 @@ void UHapticPlatformController::UpdateMotionInterpolation(float DeltaTime)
 	CurrentState.TranslationZ = FMath::Lerp(CurrentState.TranslationZ, TargetState.TranslationZ, Alpha);
 }
 
-FVector2D UHapticPlatformController::GetHOTASJoystickInput() const
-{
-	if (!bHOTASConnected || !Config.GyroscopeConfig.bEnableJoystick)
-	{
-		return FVector2D::ZeroVector;
-	}
-	return HOTASJoystickInput * Config.GyroscopeConfig.JoystickSensitivity;
-}
-
-float UHapticPlatformController::GetHOTASThrottleInput() const
-{
-	if (!bHOTASConnected || !Config.GyroscopeConfig.bEnableThrottle)
-	{
-		return 0.0f;
-	}
-	return HOTASThrottleInput * Config.GyroscopeConfig.ThrottleSensitivity;
-}
-
-float UHapticPlatformController::GetHOTASPedalInput() const
-{
-	if (!bHOTASConnected || !Config.GyroscopeConfig.bEnablePedals)
-	{
-		return 0.0f;
-	}
-	return HOTASPedalInput;
-}
-
-bool UHapticPlatformController::IsHOTASConnected() const
-{
-	return bHOTASConnected;
-}
-
-ELBEASTHOTASType UHapticPlatformController::GetHOTASType() const
-{
-	return Config.GyroscopeConfig.HOTASType;
-}
-
-bool UHapticPlatformController::InitializeHOTAS()
-{
-	if (Config.GyroscopeConfig.HOTASType == ELBEASTHOTASType::None)
-	{
-		return false;
-	}
-
-	// NOOP: TODO - Initialize HOTAS SDK connection based on type
-	switch (Config.GyroscopeConfig.HOTASType)
-	{
-	case ELBEASTHOTASType::LogitechX56:
-		UE_LOG(LogTemp, Log, TEXT("HapticPlatformController: Initializing Logitech G X56 HOTAS..."));
-		// NOOP: TODO - Initialize Logitech G X56 SDK
-		break;
-
-	case ELBEASTHOTASType::ThrustmasterTFlight:
-		UE_LOG(LogTemp, Log, TEXT("HapticPlatformController: Initializing Thrustmaster T.Flight HOTAS..."));
-		// NOOP: TODO - Initialize Thrustmaster T.Flight SDK
-		break;
-
-	case ELBEASTHOTASType::Custom:
-		UE_LOG(LogTemp, Log, TEXT("HapticPlatformController: Initializing Custom HOTAS..."));
-		// NOOP: TODO - Initialize custom HOTAS interface
-		break;
-
-	default:
-		break;
-	}
-
-	// For now, simulate successful connection
-	// In a real implementation, this would check if the SDK initialized successfully
-	bHOTASConnected = true;
-	UE_LOG(LogTemp, Log, TEXT("HapticPlatformController: HOTAS initialized successfully"));
-	return true;
-}
-
-void UHapticPlatformController::UpdateHOTASInput()
-{
-	if (!bHOTASConnected)
-	{
-		return;
-	}
-
-	// NOOP: TODO - Read actual input from HOTAS SDK
-	// For now, we can read from Unreal's generic input system or use the specific SDK
-
-	// Placeholder: Read from Unreal's input system (which can map to HOTAS devices)
-	// In a real implementation, this would query the Logitech/Thrustmaster SDK directly
-	
-	// Example of how it might work:
-	// HOTASJoystickInput.X = ReadJoystickAxis("HOTAS_Roll");
-	// HOTASJoystickInput.Y = ReadJoystickAxis("HOTAS_Pitch");
-	// HOTASThrottleInput = ReadThrottleAxis("HOTAS_Throttle");
-	// HOTASPedalInput = ReadPedalAxis("HOTAS_Pedals");
-
-	// Apply axis inversions if configured
-	if (Config.GyroscopeConfig.bInvertPitchAxis)
-	{
-		HOTASJoystickInput.Y *= -1.0f;
-	}
-	if (Config.GyroscopeConfig.bInvertRollAxis)
-	{
-		HOTASJoystickInput.X *= -1.0f;
-	}
-}
+// Note: HOTAS methods are implemented in subclasses (e.g., U2DOFGyroPlatformController)
+// Base class does not handle HOTAS - it's platform-specific
 
 // Channel-Based IO API (SendFloat, SendBool, SendInt32, SendBytes, SendStruct, GetReceivedFloat, GetReceivedBool, GetReceivedInt32)
 // are inherited from ULBEASTUDPTransport base class - no duplicate implementation needed
