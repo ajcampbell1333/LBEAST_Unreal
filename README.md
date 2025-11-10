@@ -30,6 +30,17 @@ The LBEAST SDK democratizes LBE development by providing:
 ## Philosophy
 
 <details>
+<summary><strong>Why LBEAST?</strong></summary>
+
+<div style="margin-left: 20px;">
+
+If a Hollywood studio invested millions in a new project, and then only showed in one theater? They'd never turn profit. We need hundreds of VR venues ready to deploy the same experience at once, and hundreds of developer teams need a way to deploy to the specs of those venues reliably so the venues and their customers can count on a continuous variety of new content. Enter LBEAST.
+
+</div>
+
+</details>
+
+<details>
 <summary><strong>Who is LBEAST for?</strong></summary>
 
 <div style="margin-left: 20px;">
@@ -371,6 +382,88 @@ Experience->NumberOfPlayers = 4;     // VR players
 </div>
 
 </details>
+
+## Standard Pop-up Layout
+
+LBEAST is applicable to a large variety of venues, but it is designed in particular to enable rapid deployment of pop-up VR LBE. The SDK pairs well with a standard physical layout which, when used, gives everyone in the ecosystem confidence of rapid deployment and content refresh.
+
+<img src="Source/images/standard-layout.png" alt="Standard Pop-up Layout" width="100%">
+
+### Minimum Square Footage
+
+**Standard pop-up installation minimum square footage recommendation: ~40' × ~40'**
+
+This includes:
+- **Dual ingress/egress stations** (~12' × ~12' each) equipped with up to 4 VR HMDs apiece
+- **Dual battery charging stations** ready for hot-swap after each playthrough
+- **Charger stalls in staging area** near Ops Tech monitor console/server (~12' × ~12')
+- **Play space** with enough room for ingress/egress door swing (~18' × ~40')
+- **Lobby/Greeting area** with dual ingress/egress entry/exit (~10' × ~40')
+
+### LBEAST-Ready Venue Configuration
+
+To be considered **LBEAST-ready**, a venue would aim to have at least a handful of 40' × 40' stations:
+
+- **100' × 100' play space** subdivided into 4 play stations is perfect for variety
+- **One play space each** dedicated to each unique hardware genre:
+  - One gunship space
+  - One AI narrative space
+  - One escape room space
+  - One car and flight sim arcade
+
+**The Theater Analogy:**
+Just like movie theaters where multiple screens offer variety, VR play spaces function similarly. Variety creates demand:
+- **Customer** arrives knowing a variety of new content choice is always on-site
+- **Developer** knows their experience is supported by on-site hardware
+- **Venue** knows many developers are in-progress on new content
+- **Result:** A healthy, thriving market
+
+### Recommended HMD Hardware Example
+
+For standard LBEAST installations, the following hardware configuration provides optimal performance and reliability:
+
+#### VR Headset
+- **Model:** Meta Quest 3 (512GB, standalone VR/MR)
+- **Price Range:** $450–$500 per unit (2025 pricing)
+- **Features:** Standalone VR/MR capability, OpenXR-compatible, includes controllers
+- **Note:** Supports both standalone and PC-connected modes for maximum flexibility
+
+#### Backpack PC (VR Harness Compute Unit)
+- **Model:** ASUS ROG Zephyrus G16 GU605 (2025 edition)
+- **CPU:** Intel Core Ultra 9
+- **GPU:** NVIDIA RTX 5080 (or RTX 5070 Ti for cost optimization)
+- **RAM:** 32GB
+- **Storage:** 2TB SSD
+- **Price Range:** $2,800–$3,200 per unit
+- **Form Factor:** Gaming laptop (backpack-compatible)
+- **Use Case:** Powers VR headset for high-end rendering, offloads graphics processing from HMD battery
+
+#### Safety Harness
+- **Model:** Petzl EasyFit harness (full-body fall arrest, size 1–2)
+- **Price Range:** $300–$350 per unit
+- **Features:** Newton EasyFit model; padded, quick-donning for adventure/ride use
+- **Use Case:** Full-body fall arrest protection for players on motion platforms and elevated play spaces
+- **Availability:** REI/Amazon pricing
+
+#### Integration & Assembly
+- **System Integration:** The backpack PC, HMD, and EasyFit harness are all connected together as an integrated VR harness system
+- **Connection Method:** Custom straps and 3D-printed interfaces secure all components together
+- **Assembly:** Backpack PC mounts to harness via 3D-printed brackets; HMD connects to backpack via cable; harness provides structural support and safety attachment points
+- **Result:** Single unified system that players don and doff as one unit, streamlining ingress/egress operations
+- **Ingress/Egress Support:** Each ingress/egress station contains four carabiner hooks mounted to the wall, allowing the entire integrated rig to be suspended during donning/doffing. This enables players to unstrap and egress rapidly without dropping or damaging equipment, while keeping the rig ready for the next player
+
+**Why This Configuration?**
+- **High Performance:** RTX 5080/5070 Ti provides sufficient power for complex VR experiences
+- **Battery Efficiency:** Offloading graphics processing extends HMD battery life
+- **Flexibility:** Laptop form factor enables backpack mounting or stationary use
+- **Future-Proof:** High-end specs support demanding experiences and future content updates
+
+**Alternative Configurations:**
+- For lighter experiences: RTX 5070 Ti configuration (~$2,800) provides cost savings
+- For maximum performance: RTX 5080 configuration (~$3,200) enables highest-quality rendering
+- Bulk purchasing (10+ units) typically provides ~5% discount
+
+---
 
 ## Features
 
@@ -1664,6 +1757,7 @@ The Command Protocol (UDP port 7779) **can work over the internet** with proper 
 - [ ] **Implementing HOTAS integration** - Complete HOTAS controller support with full input mapping and calibration
 - [ ] **Adding Weight & Height Safety Check Embedded Firmware** - Safety firmware for motion platforms to prevent operation if weight/height limits are exceeded
 - [ ] **Go-Kart Experience** - Electric go-karts, bumper cars, race boats, or bumper boats augmented by passthrough VR or AR headsets enabling overlaid virtual weapons and pickups that affect the performance of the vehicles
+- [ ] **24V Large Solenoid Kicker with Dual-Handle Thumb Triggers** - 24V large solenoid kicker with dual-handle thumb triggers connected to an embedded system to simulate a large gun/rocket/laser/plasma mini-gun/rifle/launcher mounted to the hydraulic rig in the GunshipExperience
 
 ### v1.1 (Future)
 - Real-time AI facial animation integration
