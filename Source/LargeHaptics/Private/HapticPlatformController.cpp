@@ -1,6 +1,7 @@
 // Copyright (c) 2025 AJ Campbell. Licensed under the MIT License.
 
 #include "HapticPlatformController.h"
+#include "IPAddress.h"
 
 UHapticPlatformController::UHapticPlatformController()
 {
@@ -18,6 +19,12 @@ void UHapticPlatformController::BeginPlay()
 	}
 }
 
+void UHapticPlatformController::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	ShutdownUDPConnection();
+	Super::EndPlay(EndPlayReason);
+}
+
 void UHapticPlatformController::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
@@ -26,6 +33,9 @@ void UHapticPlatformController::TickComponent(float DeltaTime, ELevelTick TickTy
 	{
 		return;
 	}
+
+	// Receive data from hardware (bidirectional IO) - handled by base class
+	// Base class TickComponent already calls ProcessIncomingUDPData()
 
 	// Update HOTAS input if enabled
 	if (bHOTASConnected)
@@ -94,6 +104,13 @@ bool UHapticPlatformController::InitializePlatform(const FHapticPlatformConfig& 
 		}
 	}
 
+	// Initialize UDP connection to hardware controller (uses base class)
+	if (!InitializeUDPConnection(Config.ControllerIPAddress, Config.ControllerPort, TEXT("LBEAST_HapticPlatform")))
+	{
+		UE_LOG(LogTemp, Error, TEXT("HapticPlatformController: Failed to initialize UDP connection"));
+		return false;
+	}
+
 	// Initialize HOTAS if this is a flight sim
 	if (Config.PlatformType == ELBEASTPlatformType::FlightSim_2DOF && Config.GyroscopeConfig.HOTASType != ELBEASTHOTASType::None)
 	{
@@ -108,7 +125,7 @@ bool UHapticPlatformController::InitializePlatform(const FHapticPlatformConfig& 
 	return true;
 }
 
-void UHapticPlatformController::SendMotionCommand(const FPlatformMotionCommand& Command)
+void UHapticPlatformController::SendMotionCommand(const FPlatformMotionCommand& Command, bool bUseStructPacket)
 {
 	if (!bIsInitialized)
 	{
@@ -141,7 +158,7 @@ void UHapticPlatformController::SendMotionCommand(const FPlatformMotionCommand& 
 	MotionTimeRemaining = Command.Duration;
 	MotionTotalDuration = Command.Duration;
 
-	SendCommandToHardware(TargetState);
+	SendCommandToHardware(TargetState, bUseStructPacket);
 }
 
 void UHapticPlatformController::SendNormalizedMotion(float TiltX, float TiltY, float ForwardOffset, float VerticalOffset, float Duration)
@@ -248,14 +265,39 @@ FTransform UHapticPlatformController::GetCurrentPlatformTransform() const
 	return Transform;
 }
 
-void UHapticPlatformController::SendCommandToHardware(const FPlatformMotionCommand& Command)
+void UHapticPlatformController::SendCommandToHardware(const FPlatformMotionCommand& Command, bool bUseStructPacket)
 {
-	// NOOP: TODO - Implement network communication with hardware controller
-	// This would typically use UDP or TCP sockets to send commands to the platform controller
-	// For now, this is a placeholder
-	UE_LOG(LogTemp, Log, TEXT("HapticPlatformController: Sending command - Pitch: %.2f, Roll: %.2f, Y: %.2f, Z: %.2f"),
-		Command.Pitch, Command.Roll, Command.TranslationY, Command.TranslationZ);
+	if (!bIsInitialized || !IsHardwareConnected())
+	{
+		return;
+	}
+
+	if (bUseStructPacket)
+	{
+		// Send as single struct packet (Channel 200 for full motion command structs)
+		// More efficient: 1 UDP packet instead of 5
+		SendStruct<FPlatformMotionCommand>(200, Command);
+		UE_LOG(LogTemp, Verbose, TEXT("HapticPlatformController: Sent command as struct - Pitch: %.2f, Roll: %.2f, Y: %.2f, Z: %.2f, Duration: %.2f"),
+			Command.Pitch, Command.Roll, Command.TranslationY, Command.TranslationZ, Command.Duration);
+	}
+	else
+	{
+		// Map motion command to channels (experience-specific)
+		// GunshipExperience uses: Ch0=Pitch, Ch1=Roll, Ch2=TranslationY, Ch3=TranslationZ, Ch4=Duration
+		// Other experiences can override this mapping by calling SendFloat directly
+		
+		// For GunshipExperience (4DOF platform):
+		SendFloat(0, Command.Pitch);           // Channel 0: Pitch (degrees)
+		SendFloat(1, Command.Roll);            // Channel 1: Roll (degrees)
+		SendFloat(2, Command.TranslationY);   // Channel 2: Forward/Reverse (cm)
+		SendFloat(3, Command.TranslationZ);   // Channel 3: Up/Down (cm)
+		SendFloat(4, Command.Duration);        // Channel 4: Duration (seconds)
+
+		UE_LOG(LogTemp, Verbose, TEXT("HapticPlatformController: Sent command as channels - Pitch: %.2f, Roll: %.2f, Y: %.2f, Z: %.2f, Duration: %.2f"),
+			Command.Pitch, Command.Roll, Command.TranslationY, Command.TranslationZ, Command.Duration);
+	}
 }
+
 
 void UHapticPlatformController::UpdateMotionInterpolation(float DeltaTime)
 {
@@ -385,5 +427,15 @@ void UHapticPlatformController::UpdateHOTASInput()
 		HOTASJoystickInput.X *= -1.0f;
 	}
 }
+
+// Channel-Based IO API (SendFloat, SendBool, SendInt32, SendBytes, SendStruct, GetReceivedFloat, GetReceivedBool, GetReceivedInt32)
+// are inherited from ULBEASTUDPTransport base class - no duplicate implementation needed
+
+bool UHapticPlatformController::IsHardwareConnected() const
+{
+	return IsUDPConnected();
+}
+
+// UDP socket and protocol management now handled by base class (ULBEASTUDPTransport)
 
 

@@ -62,8 +62,28 @@
  */
 
 #include "LBEAST_Wireless_RX.h"
+#include "../Base/Templates/LBEAST_Wireless_TX.h"
 #include "../Base/Templates/ActuatorSystem_Controller.h"
 #include "../Base/Templates/ScissorLift_Controller.h"
+
+// Struct definitions matching Unreal (must match exactly for binary compatibility)
+struct FTiltState {
+  float Pitch;  // degrees
+  float Roll;    // degrees
+};
+
+struct FScissorLiftState {
+  float TranslationY;  // cm (forward/reverse)
+  float TranslationZ;  // cm (up/down)
+};
+
+struct FPlatformMotionCommand {
+  float Pitch;          // degrees
+  float Roll;           // degrees
+  float TranslationY;   // cm
+  float TranslationZ;   // cm
+  float Duration;       // seconds
+};
 
 // =====================================
 // Configuration
@@ -72,6 +92,10 @@
 // WiFi credentials (change to match your LAN)
 const char* ssid = "VR_Arcade_LAN";
 const char* password = "your_password_here";
+
+// Unreal Engine PC IP address (for bidirectional IO feedback)
+IPAddress unrealIP(192, 168, 1, 100);
+uint16_t unrealPort = 8888;
 
 // Create controller instances
 ScissorLiftController liftController;
@@ -154,8 +178,11 @@ void setup() {
   // Initialize actuator system controller
   actuatorController.begin(actuatorConfig);
   
-  // Initialize wireless communication
+  // Initialize wireless communication (RX for receiving commands)
   LBEAST_Wireless_Init(ssid, password, 8888);
+  
+  // Initialize TX for sending feedback to Unreal
+  LBEAST_Wireless_TX_Init(ssid, password, unrealIP, unrealPort);
   
   motionStartTime = millis();
   
@@ -185,6 +212,13 @@ void loop() {
   // Update both controllers
   liftController.update();
   actuatorController.update();
+  
+  // Send position feedback to Unreal (bidirectional IO) - every 100ms (10 Hz)
+  static unsigned long lastFeedbackTime = 0;
+  if (millis() - lastFeedbackTime >= 100) {
+    SendPositionFeedback();
+    lastFeedbackTime = millis();
+  }
   
   delay(10); // Control loop update rate (~100 Hz)
 }
@@ -280,4 +314,82 @@ void LBEAST_HandleBool(uint8_t channel, bool value) {
       Serial.println("ECU: Returning to calibrated zero position");
     }
   }
+}
+
+// =====================================
+// Struct Packet Handlers (MVC Pattern)
+// =====================================
+
+void LBEAST_HandleBytes(uint8_t channel, uint8_t* data, uint8_t length) {
+  switch (channel) {
+    case 100: {
+      // Channel 100: FTiltState struct (pitch and roll only)
+      if (length >= sizeof(FTiltState)) {
+        FTiltState* tiltState = (FTiltState*)data;
+        actuatorController.handleFloatCommand(0, tiltState->Pitch);
+        actuatorController.handleFloatCommand(1, tiltState->Roll);
+        Serial.printf("ECU: Tilt struct - Pitch: %.2f, Roll: %.2f\n", 
+          tiltState->Pitch, tiltState->Roll);
+      }
+      break;
+    }
+    
+    case 101: {
+      // Channel 101: FScissorLiftState struct (Y and Z translations only)
+      if (length >= sizeof(FScissorLiftState)) {
+        FScissorLiftState* liftState = (FScissorLiftState*)data;
+        liftController.handleFloatCommand(1, liftState->TranslationY); // Forward/reverse
+        liftController.handleFloatCommand(0, liftState->TranslationZ);  // Up/down
+        Serial.printf("ECU: Scissor lift struct - Y: %.2f, Z: %.2f\n", 
+          liftState->TranslationY, liftState->TranslationZ);
+      }
+      break;
+    }
+    
+    case 200: {
+      // Channel 200: FPlatformMotionCommand struct (full command)
+      if (length >= sizeof(FPlatformMotionCommand)) {
+        FPlatformMotionCommand* command = (FPlatformMotionCommand*)data;
+        actuatorController.handleFloatCommand(0, command->Pitch);
+        actuatorController.handleFloatCommand(1, command->Roll);
+        liftController.handleFloatCommand(1, command->TranslationY);
+        liftController.handleFloatCommand(0, command->TranslationZ);
+        motionDuration = max(command->Duration, 0.1f);
+        motionStartTime = millis();
+        motionInProgress = true;
+        Serial.printf("ECU: Full command struct - Pitch: %.2f, Roll: %.2f, Y: %.2f, Z: %.2f, Duration: %.2f\n",
+          command->Pitch, command->Roll, command->TranslationY, command->TranslationZ, command->Duration);
+      }
+      break;
+    }
+    
+    default:
+      Serial.printf("ECU: Unknown struct channel: %d\n", channel);
+      break;
+  }
+}
+
+// =====================================
+// Bidirectional IO: Position Feedback
+// =====================================
+
+void SendPositionFeedback() {
+  // Get current positions from controllers
+  // Note: Using target positions as current positions (controllers track these internally)
+  float currentPitch = actuatorController.getTargetPitch();
+  float currentRoll = actuatorController.getTargetRoll();
+  float currentLiftY = liftController.getCurrentForwardPosition();
+  float currentLiftZ = liftController.getCurrentHeight();
+  
+  // Send tilt state feedback (Channel 100)
+  FTiltState tiltFeedback;
+  tiltFeedback.Pitch = currentPitch;
+  tiltFeedback.Roll = currentRoll;
+  LBEAST_SendBytes(100, (uint8_t*)&tiltFeedback, sizeof(FTiltState));
+  
+  // Send scissor lift state feedback (Channel 101)
+  FScissorLiftState liftFeedback;
+  liftFeedback.TranslationY = currentLiftY;
+  liftFeedback.TranslationZ = currentLiftZ;
+  LBEAST_SendBytes(101, (uint8_t*)&liftFeedback, sizeof(FScissorLiftState));
 }

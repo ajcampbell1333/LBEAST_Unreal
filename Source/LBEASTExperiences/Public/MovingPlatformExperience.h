@@ -7,7 +7,7 @@
 #include "MovingPlatformExperience.generated.h"
 
 // Forward declarations
-class UHapticPlatformController;
+class U4DOFPlatformController;
 
 /**
  * 5DOF Moving Platform Experience Template
@@ -30,9 +30,9 @@ class LBEASTEXPERIENCES_API AMovingPlatformExperience : public ALBEASTExperience
 public:
 	AMovingPlatformExperience();
 
-	/** Haptic platform controller */
+	/** 4DOF platform controller (specialized for Gunship, MovingPlatform, CarSim) */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LBEAST|Moving Platform")
-	TObjectPtr<UHapticPlatformController> PlatformController;
+	TObjectPtr<U4DOFPlatformController> PlatformController;
 
 	/** Maximum pitch angle in degrees */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|Moving Platform", meta = (ClampMin = "1.0", ClampMax = "15.0"))

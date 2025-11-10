@@ -5,8 +5,7 @@
 #include "CoreMinimal.h"
 #include "ProLighting.h"
 #include "IDMXTransport.h"
-#include "Sockets.h"
-#include "SocketSubsystem.h"
+#include "Networking/UDPTransportBase.h"
 
 /** Minimal Art-Net transport (UDP) */
 class PROLIGHTING_API FArtNetTransport : public IDMXTransport
@@ -17,42 +16,22 @@ public:
 
 	virtual bool Initialize() override
 	{
-		ISocketSubsystem* SS = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM);
-		if (!SS) return false;
-		Socket = SS->CreateSocket(NAME_DGram, TEXT("LBEAST_ArtNetTransport"), false);
-		if (!Socket) return false;
-		Address = SS->CreateInternetAddr();
-		bool bValid = false;
-		Address->SetIp(*TargetIP, bValid);
-		Address->SetPort(Port);
-		if (!bValid)
-		{
-			Shutdown();
-			return false;
-		}
-		Socket->SetBroadcast(true);
-		return true;
+		// Use base UDP transport for socket management (with broadcast enabled for Art-Net)
+		return UDPTransport.InitializeUDPConnection(TargetIP, Port, TEXT("LBEAST_ArtNetTransport"), true);
 	}
 
 	virtual void Shutdown() override
 	{
-		if (Socket)
-		{
-			Socket->Close();
-			ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->DestroySocket(Socket);
-			Socket = nullptr;
-		}
-		Address.Reset();
+		UDPTransport.ShutdownUDPConnection();
 	}
 
-	virtual bool IsConnected() const override { return Socket != nullptr && Address.IsValid(); }
+	virtual bool IsConnected() const override { return UDPTransport.IsUDPConnected(); }
 
 	virtual void SendDMX(int32 Universe, const TArray<uint8>& DMXData) override
 	{
 		if (!IsConnected()) return;
 		TArray<uint8> Packet = BuildArtDmxPacket(Universe, DMXData);
-		int32 BytesSent = 0;
-		Socket->SendTo(Packet.GetData(), Packet.Num(), BytesSent, *Address);
+		UDPTransport.SendUDPData(Packet);
 	}
 
 private:
@@ -78,12 +57,14 @@ private:
 	}
 
 private:
+	/** Base UDP transport (handles raw socket management) */
+	FUDPTransportBase UDPTransport;
+
+	/** Art-Net configuration */
 	FString TargetIP;
 	int32 Port = 6454;
 	int32 Net = 0;
 	int32 SubNet = 0;
-	FSocket* Socket = nullptr;
-	TSharedPtr<FInternetAddr> Address;
 };
 
 

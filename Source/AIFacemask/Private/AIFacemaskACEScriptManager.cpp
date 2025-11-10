@@ -190,7 +190,7 @@ bool UAIFacemaskACEScriptManager::HasScriptForState(FName StateName) const
 
 FAIFacemaskACEScript UAIFacemaskACEScriptManager::GetScriptForState(FName StateName) const
 {
-	FAIFacemaskACEScript* Script = ScriptCollection.GetScriptForState(StateName);
+	const FAIFacemaskACEScript* Script = ScriptCollection.GetScriptForState(StateName);
 	if (Script)
 	{
 		return *Script;

@@ -236,7 +236,15 @@ struct FAIFacemaskACEScriptCollection
 	{}
 
 	/**
-	 * Get script for a specific narrative state
+	 * Get script for a specific narrative state (const version)
+	 */
+	const FAIFacemaskACEScript* GetScriptForState(FName StateName) const
+	{
+		return ScriptsByState.Find(StateName);
+	}
+
+	/**
+	 * Get script for a specific narrative state (non-const version for modification)
 	 */
 	FAIFacemaskACEScript* GetScriptForState(FName StateName)
 	{

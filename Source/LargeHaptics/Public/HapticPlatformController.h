@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
+#include "Networking/LBEASTUDPTransport.h"
 #include "HapticPlatformController.generated.h"
 
 /**
@@ -151,7 +151,7 @@ struct FHapticPlatformConfig
 
 	/** Network port for platform controller */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|Haptics")
-	int32 ControllerPort = 8080;
+	int32 ControllerPort = 8888;
 };
 
 /**
@@ -199,7 +199,7 @@ struct FPlatformMotionCommand
  * Provides both high-level motion commands and low-level actuator control.
  */
 UCLASS(ClassGroup=(LBEAST), meta=(BlueprintSpawnableComponent))
-class LARGEHAPTICS_API UHapticPlatformController : public UActorComponent
+class LARGEHAPTICS_API UHapticPlatformController : public ULBEASTUDPTransport
 {
 	GENERATED_BODY()
 
@@ -221,9 +221,10 @@ public:
 	/**
 	 * Send a motion command to the platform (advanced - uses absolute angles)
 	 * @param Command - The motion command to execute
+	 * @param bUseStructPacket - If true, sends as single struct packet; if false, sends as 5 separate channel packets (default: false for compatibility)
 	 */
 	UFUNCTION(BlueprintCallable, Category = "LBEAST|Haptics|Advanced")
-	void SendMotionCommand(const FPlatformMotionCommand& Command);
+	void SendMotionCommand(const FPlatformMotionCommand& Command, bool bUseStructPacket = false);
 
 	/**
 	 * Send normalized platform motion (recommended for game code)
@@ -297,13 +298,28 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "LBEAST|Haptics|HOTAS")
 	ELBEASTHOTASType GetHOTASType() const;
 
+	// =====================================
+	// Channel-Based IO API (Generic - Experience-Agnostic)
+	// =====================================
+	// Note: SendFloat, SendBool, SendInt32, SendBytes, SendStruct, GetReceivedFloat, GetReceivedBool, GetReceivedInt32
+	// are inherited from ULBEASTUDPTransport base class. OnFloatReceived, OnBoolReceived, OnInt32Received delegates
+	// are also inherited from base class.
+
+	/**
+	 * Check if platform controller is connected to hardware
+	 */
+	UFUNCTION(BlueprintCallable, Category = "LBEAST|Haptics|IO")
+	bool IsHardwareConnected() const;
+
 protected:
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-private:
 	/** Whether the system is initialized and connected */
 	bool bIsInitialized = false;
+
+private:
 
 	/** Current platform state */
 	FPlatformMotionCommand CurrentState;
@@ -329,10 +345,16 @@ private:
 	/** Whether HOTAS is connected */
 	bool bHOTASConnected = false;
 
+	// UDP socket and protocol management now handled by base class (ULBEASTUDPTransport)
+
 	/**
-	 * Send command to hardware controller
+	 * Send command to hardware controller (uses channel-based API internally)
+	 * @param Command - The motion command to send
+	 * @param bUseStructPacket - If true, sends as single struct packet; if false, sends as 5 separate channel packets
 	 */
-	void SendCommandToHardware(const FPlatformMotionCommand& Command);
+	void SendCommandToHardware(const FPlatformMotionCommand& Command, bool bUseStructPacket = false);
+
+	// UDP socket and protocol management now handled by base class (ULBEASTUDPTransport)
 
 	/**
 	 * Interpolate between current and target state

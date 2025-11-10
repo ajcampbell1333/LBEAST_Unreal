@@ -97,6 +97,7 @@ void LBEAST_HandleBool(uint8_t channel, bool value);
 void LBEAST_HandleInt32(uint8_t channel, int32_t value);
 void LBEAST_HandleFloat(uint8_t channel, float value);
 void LBEAST_HandleString(uint8_t channel, const char* str, uint8_t length);
+void LBEAST_HandleBytes(uint8_t channel, uint8_t* data, uint8_t length);
 
 /**
  * Initialize wireless communication
@@ -216,6 +217,16 @@ void LBEAST_ProcessIncoming() {
       }
       break;
       
+    case LBEAST_TYPE_BYTES:
+      if (len >= 5) {
+        uint8_t byteLen = buffer[3];
+        if (byteLen > 0 && len >= 5 + byteLen) {
+          // Extract bytes (skip length byte at buffer[3])
+          LBEAST_HandleBytes(channel, &buffer[4], byteLen);
+        }
+      }
+      break;
+      
     default:
       Serial.printf("LBEAST: Unknown type: %d\n", type);
       break;
@@ -237,6 +248,11 @@ __attribute__((weak)) void LBEAST_HandleFloat(uint8_t channel, float value) {
 
 __attribute__((weak)) void LBEAST_HandleString(uint8_t channel, const char* str, uint8_t length) {
   Serial.printf("LBEAST: String - Ch:%d Val:%s\n", channel, str);
+}
+
+__attribute__((weak)) void LBEAST_HandleBytes(uint8_t channel, uint8_t* data, uint8_t length) {
+  Serial.printf("LBEAST: Bytes - Ch:%d Len:%d\n", channel, length);
+  // Default implementation just logs - override in your sketch to parse struct packets
 }
 
 #endif // LBEAST_WIRELESS_RX_H

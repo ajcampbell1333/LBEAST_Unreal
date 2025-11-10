@@ -1,7 +1,7 @@
 // Copyright (c) 2025 AJ Campbell. Licensed under the MIT License.
 
 #include "AIFacemaskASRManager.h"
-#include "VOIP/IVOIPAudioVisitor.h"
+#include "IVOIPAudioVisitor.h"
 
 UAIFacemaskASRManager::UAIFacemaskASRManager()
 {

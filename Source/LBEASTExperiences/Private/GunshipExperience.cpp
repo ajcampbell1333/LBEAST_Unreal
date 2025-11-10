@@ -1,11 +1,11 @@
 // Copyright (c) 2025 AJ Campbell. Licensed under the MIT License.
 
 #include "GunshipExperience.h"
-#include "HapticPlatformController.h"
+#include "4DOFPlatformController.h"
 
 AGunshipExperience::AGunshipExperience()
 {
-	PlatformController = CreateDefaultSubobject<UHapticPlatformController>(TEXT("PlatformController"));
+	PlatformController = CreateDefaultSubobject<U4DOFPlatformController>(TEXT("PlatformController"));
 	bMultiplayerEnabled = true;
 
 	// Default 4-seat configuration
@@ -65,9 +65,19 @@ void AGunshipExperience::SendGunshipTilt(float TiltX, float TiltY, float Forward
 		return;
 	}
 
-	// Use the normalized API - automatically scales to hardware capabilities
-	// TiltX = roll, TiltY = pitch, ForwardOffset = scissor lift forward/reverse, VerticalOffset = scissor lift up/down
-	PlatformController->SendNormalizedMotion(TiltX, TiltY, ForwardOffset, VerticalOffset, Duration);
+	// Use struct-based MVC pattern for efficient UDP transmission
+	// Create tilt state from normalized input
+	FTiltState TiltState = FTiltState::FromNormalized(TiltY, TiltX, MaxPitch, MaxRoll);
+	
+	// Create scissor lift state from normalized input
+	FScissorLiftState LiftState = FScissorLiftState::FromNormalized(ForwardOffset, VerticalOffset, 100.0f, 100.0f);
+	
+	// Send as struct packets (more efficient: 2 UDP packets instead of 4)
+	PlatformController->SendTiltStruct(TiltState, 100);
+	PlatformController->SendScissorLiftStruct(LiftState, 101);
+	
+	// Send duration separately (or could be part of a full command struct)
+	PlatformController->SendFloat(4, Duration);
 }
 
 void AGunshipExperience::SendGunshipMotion(float Pitch, float Roll, float ForwardOffset, float VerticalOffset, float Duration)
@@ -77,15 +87,18 @@ void AGunshipExperience::SendGunshipMotion(float Pitch, float Roll, float Forwar
 		return;
 	}
 
+	// Use struct-based MVC pattern for efficient UDP transmission
+	// Option 1: Send as single full command struct (Channel 200) - most efficient
 	FPlatformMotionCommand Command;
-	Command.Pitch = Pitch;
-	Command.Roll = Roll;
+	Command.Pitch = FMath::Clamp(Pitch, -MaxPitch, MaxPitch);
+	Command.Roll = FMath::Clamp(Roll, -MaxRoll, MaxRoll);
 	// TranslationY = forward/reverse (scissor lift), TranslationZ = up/down (scissor lift)
 	Command.TranslationY = ForwardOffset;
 	Command.TranslationZ = VerticalOffset;
 	Command.Duration = Duration;
 
-	PlatformController->SendMotionCommand(Command);
+	// Send as single struct packet (Channel 200) - 1 UDP packet instead of 5
+	PlatformController->SendMotionCommand(Command, true);
 }
 
 void AGunshipExperience::ReturnToNeutral(float Duration)

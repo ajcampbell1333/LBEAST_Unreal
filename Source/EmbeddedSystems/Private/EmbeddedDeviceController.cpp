@@ -129,45 +129,8 @@ bool UEmbeddedDeviceController::InitializeWiFiConnection()
 	UE_LOG(LogTemp, Log, TEXT("EmbeddedDeviceController: Initializing WiFi/Ethernet (UDP) to %s:%d"), 
 		*Config.DeviceAddress, Config.Port);
 
-	// Get socket subsystem
-	ISocketSubsystem* SocketSubsystem = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM);
-	if (!SocketSubsystem)
-	{
-		UE_LOG(LogTemp, Error, TEXT("EmbeddedDeviceController: Failed to get socket subsystem"));
-		return false;
-	}
-
-	// Create UDP socket
-	Socket = SocketSubsystem->CreateSocket(NAME_DGram, TEXT("LBEAST_Embedded"), false);
-	if (!Socket)
-	{
-		UE_LOG(LogTemp, Error, TEXT("EmbeddedDeviceController: Failed to create UDP socket"));
-		return false;
-	}
-
-	// Make socket non-blocking
-	Socket->SetNonBlocking(true);
-
-	// Set receive buffer size (8KB should be plenty for embedded data)
-	int32 NewSize = 8192;
-	Socket->SetReceiveBufferSize(NewSize, NewSize);
-
-	// Parse and store remote address
-	RemoteAddr = SocketSubsystem->CreateInternetAddr();
-	bool bIsValid = false;
-	RemoteAddr->SetIp(*Config.DeviceAddress, bIsValid);
-	RemoteAddr->SetPort(Config.Port);
-
-	if (!bIsValid)
-	{
-		UE_LOG(LogTemp, Error, TEXT("EmbeddedDeviceController: Invalid IP address: %s"), *Config.DeviceAddress);
-		SocketSubsystem->DestroySocket(Socket);
-		Socket = nullptr;
-		return false;
-	}
-
-	UE_LOG(LogTemp, Log, TEXT("EmbeddedDeviceController: UDP socket created successfully"));
-	return true;
+	// Use base class for UDP socket management
+	return InitializeUDPConnection(Config.DeviceAddress, Config.Port, TEXT("LBEAST_Embedded"));
 }
 
 bool UEmbeddedDeviceController::InitializeSerialConnection()
@@ -235,13 +198,10 @@ void UEmbeddedDeviceController::DisconnectDevice()
 		return;
 	}
 
-	// Close socket if using WiFi/Ethernet
-	if (Socket)
+	// Close UDP connection (uses base class)
+	if (Config.Protocol == ELBEASTCommProtocol::WiFi || Config.Protocol == ELBEASTCommProtocol::Ethernet)
 	{
-		Socket->Close();
-		ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->DestroySocket(Socket);
-		Socket = nullptr;
-		RemoteAddr.Reset();
+		ShutdownUDPConnection();
 	}
 
 	bIsConnected = false;
@@ -297,54 +257,24 @@ void UEmbeddedDeviceController::SendDataToDevice(const TArray<uint8>& Data)
 
 void UEmbeddedDeviceController::SendWiFiData(const TArray<uint8>& Data)
 {
-	if (!Socket || !RemoteAddr.IsValid())
-	{
-		return;
-	}
-
-	int32 BytesSent = 0;
-	bool bSuccess = Socket->SendTo(Data.GetData(), Data.Num(), BytesSent, *RemoteAddr);
-
-	if (!bSuccess || BytesSent != Data.Num())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("EmbeddedDeviceController: Failed to send %d bytes (sent: %d)"), 
-			Data.Num(), BytesSent);
-	}
-	else
-	{
-		UE_LOG(LogTemp, VeryVerbose, TEXT("EmbeddedDeviceController: Sent %d bytes"), BytesSent);
-	}
+	// Use base class SendUDPData to send raw packets (with encryption/HMAC already applied)
+	// EmbeddedDeviceController builds its own packets with security features, so we send them directly
+	SendUDPData(Data);
 }
 
 void UEmbeddedDeviceController::ReceiveWiFiData()
 {
-	if (!Socket)
-	{
-		return;
-	}
-
-	// Check if data is available
-	uint32 PendingDataSize = 0;
-	if (!Socket->HasPendingData(PendingDataSize) || PendingDataSize == 0)
-	{
-		return;
-	}
-
-	// Read data
+	// Use base class's UDPTransport to get raw packets, then parse with encryption/HMAC support
 	TArray<uint8> ReceivedData;
-	ReceivedData.SetNumUninitialized(PendingDataSize);
-
 	int32 BytesRead = 0;
-	TSharedRef<FInternetAddr> SenderAddr = 
-		ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateInternetAddr();
+	TSharedPtr<FInternetAddr> SenderAddr;
 
-	bool bSuccess = Socket->RecvFrom(ReceivedData.GetData(), ReceivedData.Num(), BytesRead, *SenderAddr);
-
-	if (bSuccess && BytesRead > 0)
+	// Access protected UDPTransport member from base class
+	if (UDPTransport.ReceiveUDPData(ReceivedData, BytesRead, &SenderAddr))
 	{
 		UE_LOG(LogTemp, VeryVerbose, TEXT("EmbeddedDeviceController: Received %d bytes"), BytesRead);
 
-		// Parse the received data
+		// Parse the received data (with encryption/HMAC support if enabled)
 		if (Config.bDebugMode)
 		{
 			ParseJSONPacket(ReceivedData, BytesRead);
@@ -518,7 +448,7 @@ TArray<uint8> UEmbeddedDeviceController::BuildBinaryPacket(ELBEASTDataType Type,
 		TArray<uint8> Ciphertext = EncryptAES128(Plaintext, IV);
 		
 		// Build packet: [Marker][IV][Ciphertext]
-		Packet.Add(PACKET_START_MARKER);
+		Packet.Add(ULBEASTUDPTransport::PACKET_START_MARKER);
 		Packet.Add((IV) & 0xFF);
 		Packet.Add((IV >> 8) & 0xFF);
 		Packet.Add((IV >> 16) & 0xFF);
@@ -533,7 +463,7 @@ TArray<uint8> UEmbeddedDeviceController::BuildBinaryPacket(ELBEASTDataType Type,
 	{
 		// HMAC-only format: [0xAA][Type][Ch][Payload][HMAC:8]
 		
-		Packet.Add(PACKET_START_MARKER);
+		Packet.Add(ULBEASTUDPTransport::PACKET_START_MARKER);
 		Packet.Add((uint8)Type);
 		Packet.Add((uint8)Channel);
 		Packet.Append(Payload);
@@ -546,7 +476,7 @@ TArray<uint8> UEmbeddedDeviceController::BuildBinaryPacket(ELBEASTDataType Type,
 	{
 		// No security: [0xAA][Type][Ch][Payload][CRC:1]
 		
-		Packet.Add(PACKET_START_MARKER);
+		Packet.Add(ULBEASTUDPTransport::PACKET_START_MARKER);
 		Packet.Add((uint8)Type);
 		Packet.Add((uint8)Channel);
 		Packet.Append(Payload);
@@ -590,8 +520,8 @@ TArray<uint8> UEmbeddedDeviceController::BuildJSONPacket(ELBEASTDataType Type, i
 
 void UEmbeddedDeviceController::ParseBinaryPacket(const TArray<uint8>& Data, int32 Length)
 {
-	// Validate start marker (common to all formats)
-	if (Length < 1 || Data[0] != PACKET_START_MARKER)
+	// Validate start marker (common to all formats) - use base class constant
+	if (Length < 1 || Data[0] != ULBEASTUDPTransport::PACKET_START_MARKER)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("EmbeddedDeviceController: Invalid start marker"));
 		return;

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AIFacemaskACEScript.h"
 #include "AIFacemaskACEImprov.generated.h"
 
 /**
@@ -227,7 +228,7 @@ private:
 	 * Request LLM to generate response (local LLM endpoint)
 	 * NOOP: TODO - Implement HTTP request to local LLM (Ollama, vLLM, or NVIDIA NIM)
 	 */
-	FString RequestLLMResponse(const FString& PlayerInput, const FString& SystemPrompt, const TArray<FString>& ConversationHistory);
+	FString RequestLLMResponse(const FString& PlayerInput, const FString& SystemPrompt, const TArray<FString>& InConversationHistory);
 
 	/**
 	 * Request TTS conversion (local TTS endpoint - NVIDIA Riva or other)

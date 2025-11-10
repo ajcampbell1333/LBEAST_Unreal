@@ -7,7 +7,7 @@
 #include "CarSimExperience.generated.h"
 
 // Forward declarations
-class UHapticPlatformController;
+class U4DOFPlatformController;
 
 /**
  * 5DOF Car Sim Experience Template
@@ -29,9 +29,9 @@ class LBEASTEXPERIENCES_API ACarSimExperience : public ALBEASTExperienceBase
 public:
 	ACarSimExperience();
 
-	/** Haptic platform controller */
+	/** 4DOF platform controller (specialized for Gunship, MovingPlatform, CarSim) */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LBEAST|Car Sim")
-	TObjectPtr<UHapticPlatformController> PlatformController;
+	TObjectPtr<U4DOFPlatformController> PlatformController;
 
 	/** Maximum pitch angle in degrees (for acceleration/braking) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|Car Sim", meta = (ClampMin = "1.0", ClampMax = "15.0"))

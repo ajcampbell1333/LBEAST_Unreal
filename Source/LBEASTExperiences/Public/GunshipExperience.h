@@ -4,10 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "LBEASTExperienceBase.h"
+#include "Models/TiltState.h"
+#include "Models/ScissorLiftState.h"
 #include "GunshipExperience.generated.h"
 
 // Forward declarations
-class UHapticPlatformController;
+class U4DOFPlatformController;
 
 /**
  * 4DOF Gunship Experience Template
@@ -32,9 +34,9 @@ class LBEASTEXPERIENCES_API AGunshipExperience : public ALBEASTExperienceBase
 public:
 	AGunshipExperience();
 
-	/** Haptic platform controller */
+	/** 4DOF platform controller (specialized for Gunship, MovingPlatform, CarSim) */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LBEAST|Gunship")
-	TObjectPtr<UHapticPlatformController> PlatformController;
+	TObjectPtr<U4DOFPlatformController> PlatformController;
 
 	/** Player seat locations (4 seats) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|Gunship")

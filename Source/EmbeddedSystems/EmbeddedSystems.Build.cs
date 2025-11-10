@@ -30,7 +30,8 @@ public class EmbeddedSystems : ModuleRules
 				"Networking",
 				"Json",
 				"JsonUtilities",
-				"LBEASTCommon"  // Required for ILBEASTEmbeddedDeviceInterface
+				"LBEASTCommon",  // Required for ILBEASTEmbeddedDeviceInterface
+				"LBEASTCore"     // Required for ULBEASTUDPTransport
 			}
 		);
 			

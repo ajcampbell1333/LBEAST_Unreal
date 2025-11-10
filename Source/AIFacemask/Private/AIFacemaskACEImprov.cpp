@@ -158,7 +158,7 @@ void UAIFacemaskACEImprovManager::StopCurrentResponse()
 	UE_LOG(LogTemp, Log, TEXT("AIFacemaskACEImprovManager: Stopped current response generation"));
 }
 
-FString UAIFacemaskACEImprovManager::RequestLLMResponse(const FString& PlayerInput, const FString& SystemPrompt, const TArray<FString>& ConversationHistory)
+FString UAIFacemaskACEImprovManager::RequestLLMResponse(const FString& PlayerInput, const FString& SystemPrompt, const TArray<FString>& InConversationHistory)
 {
 	// NOOP: TODO - Implement HTTP request to local LLM endpoint
 	// 

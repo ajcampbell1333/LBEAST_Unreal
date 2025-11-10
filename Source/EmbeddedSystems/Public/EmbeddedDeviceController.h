@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
+#include "Networking/LBEASTUDPTransport.h"
 #include "LBEASTEmbeddedDeviceInterface.h"
 #include "EmbeddedDeviceController.generated.h"
 
@@ -175,12 +175,8 @@ struct FEmbeddedOutputCommand
 // Delegate for input events
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEmbeddedInputReceived, FEmbeddedInputData, InputData);
 
-// Delegates for typed input events (binary protocol)
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnBoolReceived, int32, Channel, bool, Value);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnInt32Received, int32, Channel, int32, Value);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnFloatReceived, int32, Channel, float, Value);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnStringReceived, int32, Channel, FString, Value);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnBytesReceived, int32, Channel, TArray<uint8>, Value);
+// Note: FOnBoolReceived, FOnInt32Received, FOnFloatReceived, FOnStringReceived, FOnBytesReceived
+// are inherited from ULBEASTUDPTransport base class
 
 /**
  * Data type enum for binary protocol
@@ -206,7 +202,7 @@ enum class ELBEASTDataType : uint8
  * - Wireless and wired communication protocols
  */
 UCLASS(ClassGroup=(LBEAST), meta=(BlueprintSpawnableComponent))
-class EMBEDDEDSYSTEMS_API UEmbeddedDeviceController : public UActorComponent, public ILBEASTEmbeddedDeviceInterface
+class EMBEDDEDSYSTEMS_API UEmbeddedDeviceController : public ULBEASTUDPTransport, public ILBEASTEmbeddedDeviceInterface
 {
 	GENERATED_BODY()
 
@@ -221,25 +217,8 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "LBEAST|Embedded")
 	FOnEmbeddedInputReceived OnInputReceived;
 
-	/** Event fired when bool value is received (binary protocol) */
-	UPROPERTY(BlueprintAssignable, Category = "LBEAST|Embedded")
-	FOnBoolReceived OnBoolReceived;
-
-	/** Event fired when int32 value is received (binary protocol) */
-	UPROPERTY(BlueprintAssignable, Category = "LBEAST|Embedded")
-	FOnInt32Received OnInt32Received;
-
-	/** Event fired when float value is received (binary protocol) */
-	UPROPERTY(BlueprintAssignable, Category = "LBEAST|Embedded")
-	FOnFloatReceived OnFloatReceived;
-
-	/** Event fired when string value is received (binary protocol) */
-	UPROPERTY(BlueprintAssignable, Category = "LBEAST|Embedded")
-	FOnStringReceived OnStringReceived;
-
-	/** Event fired when raw bytes are received (binary protocol) */
-	UPROPERTY(BlueprintAssignable, Category = "LBEAST|Embedded")
-	FOnBytesReceived OnBytesReceived;
+	// Note: OnBoolReceived, OnInt32Received, OnFloatReceived, OnStringReceived, OnBytesReceived
+	// are inherited from ULBEASTUDPTransport base class
 
 	/**
 	 * Initialize connection to embedded device
@@ -296,45 +275,43 @@ public:
 	// =====================================
 	// Binary Protocol - Primitive Send API
 	// =====================================
+	// Note: These methods shadow base class methods to add encryption/HMAC and JSON debug mode support
+	// They are NOT UFUNCTIONs (cannot override UFUNCTIONs in Unreal), but work in C++ code
+	// Blueprint code will use the base class methods (without encryption/HMAC)
 
 	/**
-	 * Send a boolean value to device
+	 * Send a boolean value to device (with encryption/HMAC support)
 	 * @param Channel - Channel/pin number
 	 * @param Value - Boolean value to send
 	 */
-	UFUNCTION(BlueprintCallable, Category = "LBEAST|Embedded|Send")
 	void SendBool(int32 Channel, bool Value);
 
 	/**
-	 * Send an integer value to device
+	 * Send an integer value to device (with encryption/HMAC support)
 	 * @param Channel - Channel/pin number
 	 * @param Value - Integer value to send
 	 */
-	UFUNCTION(BlueprintCallable, Category = "LBEAST|Embedded|Send")
 	void SendInt32(int32 Channel, int32 Value);
 
 	/**
-	 * Send a float value to device
+	 * Send a float value to device (with encryption/HMAC support)
 	 * @param Channel - Channel/pin number
 	 * @param Value - Float value to send
 	 */
-	UFUNCTION(BlueprintCallable, Category = "LBEAST|Embedded|Send")
 	void SendFloat(int32 Channel, float Value);
 
 	/**
-	 * Send a string value to device
+	 * Send a string value to device (with encryption/HMAC support)
 	 * @param Channel - Channel/pin number
 	 * @param Value - String value to send (max 255 bytes)
 	 */
-	UFUNCTION(BlueprintCallable, Category = "LBEAST|Embedded|Send")
 	void SendString(int32 Channel, const FString& Value);
 
 	/**
-	 * Send raw bytes to device
+	 * Send raw bytes to device (with encryption/HMAC support)
 	 * @param Channel - Channel/pin number
 	 * @param Data - Raw byte array
 	 */
-	UFUNCTION(BlueprintCallable, Category = "LBEAST|Embedded|Send")
 	void SendBytes(int32 Channel, const TArray<uint8>& Data);
 
 	/**
@@ -383,17 +360,12 @@ private:
 	/** Timestamp of last successful communication */
 	float LastCommTimestamp = 0.0f;
 
-	/** UDP/TCP Socket for WiFi/Ethernet communication */
-	FSocket* Socket = nullptr;
-
-	/** Remote address for UDP communication */
-	TSharedPtr<FInternetAddr> RemoteAddr;
+	// UDP socket management now handled by base class (ULBEASTUDPTransport)
 
 	/** Receive buffer for incoming packets */
 	TArray<uint8> ReceiveBuffer;
 
-	/** Protocol start marker */
-	static constexpr uint8 PACKET_START_MARKER = 0xAA;
+	// Protocol start marker (0xAA) now in base class (ULBEASTUDPTransport)
 
 	/** Derived AES key (16 bytes for AES-128) */
 	uint8 DerivedAESKey[16];
@@ -420,7 +392,7 @@ private:
 	void CheckConnectionHealth();
 
 	/**
-	 * Initialize WiFi/Ethernet connection (UDP)
+	 * Initialize WiFi/Ethernet connection (UDP) - uses base class
 	 */
 	bool InitializeWiFiConnection();
 
@@ -430,17 +402,18 @@ private:
 	bool InitializeSerialConnection();
 
 	/**
-	 * Send data via UDP
+	 * Send data via UDP - uses base class
 	 */
 	void SendWiFiData(const TArray<uint8>& Data);
 
 	/**
-	 * Receive data via UDP
+	 * Receive data via UDP - uses base class
 	 */
 	void ReceiveWiFiData();
 
 	/**
-	 * Build binary packet for transmission
+	 * Build binary packet for transmission (with encryption/HMAC support)
+	 * Overrides base class to add security features
 	 */
 	TArray<uint8> BuildBinaryPacket(ELBEASTDataType Type, int32 Channel, const TArray<uint8>& Payload);
 
@@ -450,7 +423,8 @@ private:
 	TArray<uint8> BuildJSONPacket(ELBEASTDataType Type, int32 Channel, const FString& ValueString);
 
 	/**
-	 * Parse incoming binary packet
+	 * Parse incoming binary packet (with encryption/HMAC support)
+	 * Overrides base class to add security features
 	 */
 	void ParseBinaryPacket(const TArray<uint8>& Data, int32 Length);
 
@@ -460,12 +434,12 @@ private:
 	void ParseJSONPacket(const TArray<uint8>& Data, int32 Length);
 
 	/**
-	 * Calculate CRC checksum (XOR-based)
+	 * Calculate CRC checksum (XOR-based) - same as base class, but kept for encryption/HMAC
 	 */
 	uint8 CalculateCRC(const TArray<uint8>& Data, int32 Length) const;
 
 	/**
-	 * Validate CRC checksum
+	 * Validate CRC checksum - same as base class, but kept for encryption/HMAC
 	 */
 	bool ValidateCRC(const TArray<uint8>& Data, int32 Length, uint8 ExpectedCRC) const;
 

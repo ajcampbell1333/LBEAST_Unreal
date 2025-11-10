@@ -1,11 +1,11 @@
 // Copyright (c) 2025 AJ Campbell. Licensed under the MIT License.
 
 #include "MovingPlatformExperience.h"
-#include "HapticPlatformController.h"
+#include "4DOFPlatformController.h"
 
 AMovingPlatformExperience::AMovingPlatformExperience()
 {
-	PlatformController = CreateDefaultSubobject<UHapticPlatformController>(TEXT("PlatformController"));
+	PlatformController = CreateDefaultSubobject<U4DOFPlatformController>(TEXT("PlatformController"));
 }
 
 bool AMovingPlatformExperience::InitializeExperienceImpl()
