@@ -1679,7 +1679,12 @@ All components are fully Blueprint-compatible with exposed properties and functi
 
 ## Architecture
 
-### Module Structure
+<details>
+<summary><strong>Module Structure</strong></summary>
+
+<div style="margin-left: 20px;">
+
+## Module Structure
 
 ```
 LBEAST/
@@ -1699,7 +1704,16 @@ LBEAST/
     └── EscapeRoomExperience
 ```
 
-### Networking
+</div>
+
+</details>
+
+<details>
+<summary><strong>Networking</strong></summary>
+
+<div style="margin-left: 20px;">
+
+## Networking
 
 LBEAST v0.1.0 focuses on **local LAN multiplayer** using Unreal's built-in replication and Gameplay Ability System (GAS):
 
@@ -1707,7 +1721,16 @@ LBEAST v0.1.0 focuses on **local LAN multiplayer** using Unreal's built-in repli
 - No web-hosting or online matchmaking in v0.1.0
 - Future versions may add cloud deployment
 
-### Hardware Integration
+</div>
+
+</details>
+
+<details>
+<summary><strong>Hardware Integration</strong></summary>
+
+<div style="margin-left: 20px;">
+
+## Hardware Integration
 
 All hardware communication is **abstracted** through interfaces:
 
@@ -1721,24 +1744,14 @@ This allows you to:
 2. Integrate real hardware without changing game code
 3. Swap hardware systems in configuration
 
-## Contributing
+</div>
 
-LBEAST is open-source under the MIT License. Contributions are welcome!
+</details>
 
-### Development Workflow
+<details>
+<summary><strong>Use Cases</strong></summary>
 
-1. Fork this repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-### Code Standards
-
-- Follow [Unreal Engine Coding Standard](https://docs.unrealengine.com/5.5/en-US/epic-cplusplus-coding-standard-for-unreal-engine/)
-- Add XML documentation comments to public APIs
-- Write Blueprint-friendly functions where appropriate
-- Test with both C++ and Blueprint workflows
+<div style="margin-left: 20px;">
 
 ## Use Cases
 
@@ -1750,6 +1763,15 @@ LBEAST is designed for **commercial LBE installations** including:
 - 🎭 **Immersive Theater** with live actor-driven avatars
 - 🏢 **Corporate Events** and brand experiences
 - 🚀 **Research Labs** and academic projects
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>Dedicated Server & Server Manager</strong></summary>
+
+<div style="margin-left: 20px;">
 
 ## Dedicated Server & Server Manager
 
@@ -1947,6 +1969,10 @@ The Command Protocol (UDP port 7779) **can work over the internet** with proper 
 - **7778:** Server Beacon port (UDP discovery broadcasts - LAN only)
 - **7779:** Command Protocol port (UDP command/control - works over internet)
 
+</div>
+
+</details>
+
 ---
 
 ## Network Configuration
@@ -1954,6 +1980,11 @@ The Command Protocol (UDP port 7779) **can work over the internet** with proper 
 LBEAST requires reliable network communication between game engine servers, ECUs (embedded control units), VR clients, and console interfaces. This section details network setup options and recommended configurations.
 
 > **⚠️ Network Isolation & Safety:** Each LBEAST deployment operates as its own isolated network—a micro-intranet completely offline from any other systems on-site. This isolation is a critical safety requirement: LBEAST networks must not connect to corporate networks, guest WiFi, or any other infrastructure. The OpsTech personnel operating the LBEAST console serve as the system administrators (SysAdmins) for this isolated micro-intranet, responsible for network configuration, device management, and troubleshooting. While most network management tasks can be automated through LBEAST's router API integration (when using professional routers with REST API support), the OpsTech team must understand and maintain this isolated network environment.
+
+<details>
+<summary><strong>Overview</strong></summary>
+
+<div style="margin-left: 20px;">
 
 ### Overview
 
@@ -1968,6 +1999,15 @@ LBEAST requires reliable network communication between game engine servers, ECUs
 - **UDP Port Assignment**: Each device type uses specific UDP ports (configurable)
 - **Connection Verification**: System verifies all device connections at session start
 - **NAT Punchthrough**: Optional fallback for remote connections through firewalls
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>Consumer Router Setup (Manual Configuration)</strong></summary>
+
+<div style="margin-left: 20px;">
 
 ### Consumer Router Setup (Manual Configuration)
 
@@ -2031,7 +2071,14 @@ LBEAST requires reliable network communication between game engine servers, ECUs
 - ✅ Works with any consumer router
 - ✅ No special router features required
 
----
+</div>
+
+</details>
+
+<details>
+<summary><strong>Professional Router Setup (API Integration)</strong></summary>
+
+<div style="margin-left: 20px;">
 
 ### Professional Router Setup (API Integration)
 
@@ -2099,7 +2146,14 @@ LBEAST requires reliable network communication between game engine servers, ECUs
 - Supports multiple router vendors (UniFi, Cisco, pfSense, etc.)
 - Fallback to manual mode if API unavailable
 
----
+</div>
+
+</details>
+
+<details>
+<summary><strong>UDP Port Configuration</strong></summary>
+
+<div style="margin-left: 20px;">
 
 ### UDP Port Configuration
 
@@ -2117,7 +2171,14 @@ LBEAST requires reliable network communication between game engine servers, ECUs
 - All ports configurable per device
 - Port changes require device restart to take effect
 
----
+</div>
+
+</details>
+
+<details>
+<summary><strong>NAT Punchthrough (Optional)</strong></summary>
+
+<div style="margin-left: 20px;">
 
 ### NAT Punchthrough (Optional)
 
@@ -2137,7 +2198,14 @@ LBEAST requires reliable network communication between game engine servers, ECUs
 - Configure punchthrough server (if using relay server)
 - Devices automatically attempt punchthrough if direct connection fails
 
----
+</div>
+
+</details>
+
+<details>
+<summary><strong>Best Practices</strong></summary>
+
+<div style="margin-left: 20px;">
 
 ### Best Practices
 
@@ -2171,9 +2239,18 @@ LBEAST requires reliable network communication between game engine servers, ECUs
    - Bulk operations save time
    - Better suited for multi-device deployments
 
+</div>
+
+</details>
+
 ---
 
 ## Roadmap
+
+<details>
+<summary><strong>v0.1.0 (Current)</strong></summary>
+
+<div style="margin-left: 20px;">
 
 ### v0.1.0 (Current)
 - ✅ Core module architecture
@@ -2189,12 +2266,34 @@ LBEAST requires reliable network communication between game engine servers, ECUs
 - ✅ **Automatic Server Discovery** (UDP broadcast)
 - ✅ **NVIDIA ACE Integration Architecture** (data structures, visitor pattern, component architecture)
 
+</div>
+
+</details>
+
+<details>
+<summary><strong>v1.0 (Planned)</strong></summary>
+
+<div style="margin-left: 20px;">
+
 ### v1.0 (Planned)
-- [ ] **Finishing AIFacemask functionality** - Complete all NOOP implementations for NVIDIA ACE service integration (ASR, TTS, Audio2Face, LLM, script pre-baking)
+- [ ] **Finishing AIFacemask functionality** - Complete all NOOP implementations for NVIDIA ACE service integration:
+  - **AIFaceController**: Receive facial animation data from NVIDIA ACE endpoint (HTTP/WebSocket client), apply blend shape weights to skeletal mesh morph targets, apply facial texture to mesh material
+  - **ACE Script Manager**: Request script playback from NVIDIA ACE server (HTTP POST), request script pre-baking (TTS → Audio, Audio → Facial data), async pre-baking support (background processing)
+  - **ACE ASR Manager**: Request ASR transcription from local ASR service (gRPC/HTTP to NVIDIA Riva ASR), trigger improv after transcription (wire to ACEImprovManager)
+  - **ACE Improv Manager**: Request LLM response from local LLM (HTTP to Ollama/vLLM/NVIDIA NIM), request TTS conversion from local TTS (gRPC to NVIDIA Riva TTS), request Audio2Face conversion from local Audio2Face (HTTP/gRPC to NVIDIA NIM), auto-trigger Audio2Face after TTS completes (callback chain), monitor async response generation status (track LLM/TTS/Audio2Face operations)
+  - **AIFacemaskExperience**: Configure NVIDIA ACE endpoint URL (load from project settings/config), register ASR Manager as visitor with VOIPManager (wire visitor pattern), configure NVIDIA ACE server base URL (load from project settings/config)
+  - **VOIPManager**: Decode Opus to PCM for visitors (decode Mumble Opus before passing to visitors), integrate with player replication system (get remote player positions)
+  - **Server Beacon**: Get server port from project settings (load port configuration), track actual player count (query Unreal networking)
+  - **Optimization**: Optimize blend shape application (batch updates, interpolation, caching), texture streaming optimization (efficient texture updates, compression)
 - [ ] **Implementing HOTAS integration** - Complete HOTAS controller support with full input mapping and calibration
 - [ ] **Adding Weight & Height Safety Check Embedded Firmware** - Safety firmware for motion platforms to prevent operation if weight/height limits are exceeded
 - [ ] **Go-Kart Experience** - Electric go-karts, bumper cars, race boats, or bumper boats augmented by passthrough VR or AR headsets enabling overlaid virtual weapons and pickups that affect the performance of the vehicles
 - [ ] **24V Large Solenoid Kicker with Dual-Handle Thumb Triggers** - 24V large solenoid kicker with dual-handle thumb triggers connected to an embedded system to simulate a large gun/rocket/laser/plasma mini-gun/rifle/launcher mounted to the hydraulic rig in the GunshipExperience
+- [ ] **Pro Audio UMG Templates for Command Console** - Create drag-and-drop UMG widget templates (channel faders, mute buttons, bus sends) that auto-map to physical mixer channels on Behringer X32/M32/Wing, Yamaha QL/CL/TF, and other OSC-enabled consoles. Templates will use ProAudioController's bidirectional sync delegates to stay synchronized with physical console state.
+- [ ] **Design the Default Server Manager UI** - Create polished UMG interface for server management
+- [ ] **Example Maps** - Create demonstration maps for each experience genre template
+- [ ] **Blueprint Templates** - Create Blueprint-only versions of experience genre templates
+- [ ] **Hardware Calibration Tool** - Build utility for calibrating hydraulic platforms
 - [ ] **Network Configuration Module** - Build a network configuration system with console interface for OpsTech to manage IP addresses and UDP ports:
   - **IP & Port Configuration Console**: Centralized console interface for assigning static IP addresses and UDP ports to all LBEAST devices (ECUs, game engine servers, VR clients, console). Manual entry interface for consumer router deployments (requires keying-in IP addresses from router admin panel). Automatic device discovery for professional router deployments (via router API integration).
   - **Connection Verification**: At session start, verify connection to all devices and confirm IP addresses match expected values. If any device connection fails, automatically attempt reconnection via NAT punchthrough or re-authentication. Ensures all devices are reachable before gameplay begins.
@@ -2262,12 +2361,28 @@ LBEAST requires reliable network communication between game engine servers, ECUs
   - **Purpose**: Provide reference designs for developers building custom hardware or adapting existing ESP32 boards
   - **File Structure**: Organize in `Hardware/Shields/` directory with subdirectories for each shield type
 
+</div>
+
+</details>
+
+<details>
+<summary><strong>v1.1 (Future)</strong></summary>
+
+<div style="margin-left: 20px;">
+
 ### v1.1 (Future)
 - Real-time AI facial animation integration
-- **Blueprint-only experience genre templates** (no C++ required)
 - Performance profiling tools
-- Hardware calibration utilities
 - Visual configuration editor for platforms
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>v2.0 (Future)</strong></summary>
+
+<div style="margin-left: 20px;">
 
 ### v2.0 (Future)
 - Holographic eCommerce module (Looking Glass, Voxon)
@@ -2277,56 +2392,9 @@ LBEAST requires reliable network communication between game engine servers, ECUs
 - AR headset support (if viable hardware emerges)
 - **3D-Printable 1/8th-Scale Platform Model** - Design a 3D-printable 1/8th-scale model of the scissor lift and tilt platform with complete ECU prototype integration capability for use in off-site network debugging. Enables developers to test network configurations, firmware updates, and communication protocols without requiring access to full-scale hardware. Includes mounting points for ESP32 ECUs, mock actuators, and all necessary interfaces for full system validation.
 
-## Next Steps
+</div>
 
-### General Tasks
-
-- [ ] **Pro Audio UMG Templates for Command Console** - Create drag-and-drop UMG widget templates (channel faders, mute buttons, bus sends) that auto-map to physical mixer channels on Behringer X32/M32/Wing, Yamaha QL/CL/TF, and other OSC-enabled consoles. Templates will use ProAudioController's bidirectional sync delegates to stay synchronized with physical console state.
-- [ ] **Design the Default Server Manager UI** - Create polished UMG interface for server management
-- [ ] **Example Maps** - Create demonstration maps for each experience genre template
-- [ ] **Blueprint Templates** - Create Blueprint-only versions of experience genre templates
-- [ ] **Hardware Calibration Tool** - Build utility for calibrating hydraulic platforms
-
-### AI Facemask Experience - Service Integration (NOOP)
-
-The AI Facemask system architecture is complete with all data structures, component integration, and visitor patterns in place. The following service integrations are marked as NOOP (Not Operationally Programmed) and need implementation:
-
-#### **High Priority (Core Functionality)**
-
-- [ ] **AIFaceController** - Receive facial animation data from NVIDIA ACE endpoint (HTTP/WebSocket client)
-- [ ] **AIFaceController** - Apply blend shape weights to skeletal mesh morph targets
-- [ ] **AIFaceController** - Apply facial texture to mesh material
-- [ ] **ACE Script Manager** - Request script playback from NVIDIA ACE server (HTTP POST)
-- [ ] **ACE Script Manager** - Request script pre-baking from NVIDIA ACE server (TTS → Audio, Audio → Facial data)
-- [ ] **ACE Script Manager** - Async pre-baking support (background processing)
-- [ ] **ACE ASR Manager** - Request ASR transcription from local ASR service (gRPC/HTTP to NVIDIA Riva ASR)
-- [ ] **ACE ASR Manager** - Trigger improv after transcription (wire to ACEImprovManager)
-- [ ] **ACE Improv Manager** - Request LLM response from local LLM (HTTP to Ollama/vLLM/NVIDIA NIM)
-- [ ] **ACE Improv Manager** - Request TTS conversion from local TTS (gRPC to NVIDIA Riva TTS)
-- [ ] **ACE Improv Manager** - Request Audio2Face conversion from local Audio2Face (HTTP/gRPC to NVIDIA NIM)
-- [ ] **ACE Improv Manager** - Auto-trigger Audio2Face after TTS completes (callback chain)
-- [ ] **ACE Improv Manager** - Monitor async response generation status (track LLM/TTS/Audio2Face operations)
-- [ ] **AIFacemaskExperience** - Configure NVIDIA ACE endpoint URL (load from project settings/config)
-- [ ] **AIFacemaskExperience** - Register ASR Manager as visitor with VOIPManager (wire visitor pattern)
-- [ ] **AIFacemaskExperience** - Configure NVIDIA ACE server base URL (load from project settings/config)
-
-#### **Medium Priority (Infrastructure)**
-
-- [ ] **VOIPManager** - Decode Opus to PCM for visitors (decode Mumble Opus before passing to visitors)
-- [ ] **VOIPManager** - Integrate with player replication system (get remote player positions)
-- [ ] **Server Beacon** - Get server port from project settings (load port configuration)
-- [ ] **Server Beacon** - Track actual player count (query Unreal networking)
-
-#### **Low Priority (Optimization)**
-
-- [ ] **AIFaceController** - Optimize blend shape application (batch updates, interpolation, caching)
-- [ ] **AIFaceController** - Texture streaming optimization (efficient texture updates, compression)
-
-**Implementation Notes:**
-- All NOOP functions have detailed comments explaining expected API formats
-- Backend-agnostic design supports multiple service providers (Ollama, vLLM, NVIDIA NIM, etc.)
-- Visitor pattern keeps modules decoupled - VOIP doesn't know about AIFacemask
-- All data structures are complete and ready for service integration
+</details>
 
 ## Support
 
@@ -2340,9 +2408,46 @@ Copyright (c) 2025 AJ Campbell
 
 Licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
+## Contributing
+
+LBEAST is open-source under the MIT License. Contributions are welcome!
+
+<details>
+<summary><strong>Development Workflow</strong></summary>
+
+<div style="margin-left: 20px;">
+
+### Development Workflow
+
+1. Fork this repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>Code Standards</strong></summary>
+
+<div style="margin-left: 20px;">
+
+### Code Standards
+
+- Follow [Unreal Engine Coding Standard](https://docs.unrealengine.com/5.5/en-US/epic-cplusplus-coding-standard-for-unreal-engine/)
+- Add XML documentation comments to public APIs
+- Write Blueprint-friendly functions where appropriate
+- Test with both C++ and Blueprint workflows
+
+</div>
+
+</details>
+
 ## Credits
 
-Created by **AJ Campbell** with experience from dozens of LBE projects deployed at major entertainment events worldwide.
+Created by **AJ Campbell**.
 
 ---
 
