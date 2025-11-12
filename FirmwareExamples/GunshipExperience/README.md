@@ -27,6 +27,27 @@ Located in `GunshipExperience/`:
 |------|-------------|----------|
 | **`GunshipExperience_ECU.ino`** | Combined ECU for complete 4DOF control | Use for GunshipExperience (combines both modules) |
 
+### **Gun ECUs (Per-Station Controllers)**
+
+**Note:** Gun ECU firmware examples are planned for future releases. For now, see **[Gunship_Hardware_Specs.md](Gunship_Hardware_Specs.md)** for complete hardware specifications.
+
+**Architecture:**
+- **4× Gun ECUs** (one per player station) connect to the Primary Gunship ECU in a star topology
+- Each Gun ECU handles:
+  - Dual thumb button input (debounced, rate-limited)
+  - N× solenoid kicker control (with optional redundancy and thermal management)
+  - SteamVR Ultimate tracker pose reading (or relay from Primary ECU)
+  - Telemetry reporting to Primary Gunship ECU (10–30 Hz)
+- **Connection:** Wired Ethernet (recommended, < 1 ms latency) or WiFi to Primary Gunship ECU
+- **Protocol:** LBEAST UDP binary protocol (same as engine communication)
+
+**Primary Gunship ECU:**
+- Aggregates data from all 4× Gun ECUs
+- Controls scissor lift platform directly (pitch/roll/Y/Z translation)
+- Relays fused gun/platform state to game engine via wireless UDP
+
+For complete hardware specifications, communication architecture, and ECU implementation details, see **[Gunship_Hardware_Specs.md](Gunship_Hardware_Specs.md)**.
+
 ---
 
 ## 🎯 Quick Start
@@ -115,7 +136,7 @@ ESP32 GPIO 34 ──[4-20mA Sensor]── Actuator 2 Position (via 250Ω resisto
 ESP32 GPIO 35 ──[4-20mA Sensor]── Actuator 3 Position (via 250Ω resistor)
 ```
 
-**Note:** See `COST_ANALYSIS.md` for complete hardware bill of materials.
+**Note:** See `COST_ANALYSIS.md` for complete hardware bill of materials. For gun hardware specifications (solenoid kickers, drivers, thermal management), see **[Gunship_Hardware_Specs.md](Gunship_Hardware_Specs.md)**.
 
 ---
 
@@ -347,6 +368,7 @@ See `COST_ANALYSIS.md` in `Source/LBEASTExperiences/` for complete hardware cost
 - **[Base/Templates/README.md](../../Base/Templates/README.md)** - Using wireless templates
 - **[Base/Examples/README.md](../../Base/Examples/README.md)** - Base example documentation
 - **[COST_ANALYSIS.md](../../../Source/LBEASTExperiences/COST_ANALYSIS.md)** - Complete cost breakdown
+- **[Gunship_Hardware_Specs.md](Gunship_Hardware_Specs.md)** - Complete hardware specifications for gun solenoid kickers (solenoids, drivers, thermal management, communication architecture)
 - **[GunshipExperience.h](../../../Source/LBEASTExperiences/Public/GunshipExperience.h)** - Unreal API
 
 ---

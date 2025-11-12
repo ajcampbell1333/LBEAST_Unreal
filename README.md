@@ -385,11 +385,46 @@ Experience->NumberOfPlayers = 4;     // VR players
 
 ## Standard Pop-up Layout
 
+> **Note:** The Standard Pop-up Layout is **recommended but not required**. LBEAST can be deployed in any configuration that meets your needs. This standard format is optimized for rapid pop-up deployments in public venues.
+
 LBEAST is applicable to a large variety of venues, but it is designed in particular to enable rapid deployment of pop-up VR LBE. The SDK pairs well with a standard physical layout which, when used, gives everyone in the ecosystem confidence of rapid deployment and content refresh.
 
 <img src="Source/images/standard-layout.png" alt="Standard Pop-up Layout" width="100%">
 
-### Minimum Square Footage
+<details>
+<summary><strong>Overview</strong></summary>
+
+<div style="margin-left: 20px;">
+
+LBEAST is designed for **1-to-4 player co-located VR multiplayer experiences** in publicly accessible venues such as:
+- Trade shows
+- Civic centers
+- Shopping malls
+- Theme parks
+- Corporate events
+- Brand activations
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>Space Recommendation</strong></summary>
+<div style="margin-left: 20px;">
+
+- **Play Area:** 100+ square feet of open play space
+- **Ceiling Height:** Sufficient clearance for players swinging long padded props (minimum 10+ feet recommended)
+- **Total Space:** 50% of total space may be allocated for retail, ingress, and egress infrastructure
+- **Flexible Boundaries:** Play space can be cordoned off with temporary trade-show walls or dividers around the 50% play area
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>Minimum Square Footage</strong></summary>
+
+<div style="margin-left: 20px;">
 
 **Standard pop-up installation minimum square footage recommendation: ~40' × ~40'**
 
@@ -400,7 +435,155 @@ This includes:
 - **Play space** with enough room for ingress/egress door swing (~18' × ~40')
 - **Lobby/Greeting area** with dual ingress/egress entry/exit (~10' × ~40')
 
-### LBEAST-Ready Venue Configuration
+</div>
+
+</details>
+
+<details>
+<summary><strong>Modular Wall System</strong></summary>
+
+<div style="margin-left: 20px;">
+
+The standard installation uses a **modular wall facade system** for rapid setup and teardown:
+
+#### Wall Components
+- **Panel Size:** 4' × 8' lightweight composite panels (e.g. ACM)
+- **Frame Height:** 10' total (8' panel + 2' footer)
+- **Frame Material:** Steel framing on pairs of swivel caster legs
+- **Exterior Surface:** Light-weight composite material with vinyl graphics capability
+- **Connections:** QuickConnect interfaces on all sides for rapid assembly
+- **Bracket Support:** Rivnuts offset from parallel QuickConnect for 90-degree bracket attachments
+- **Optional detachable 2-caster side-mounts:** Consider letting footer sit on ground with rivnuts on inner footer ready to mate with a caster pair for each end to facilitate rapid redeploy of reusable parts to other stations at the same location
+
+#### Footer System
+- **Height:** 2' tall swivel caster footers
+- **Exterior:** Composite surface flush with walls above and floor on exterior side
+- **Interior:** Standard grid pattern enabling 80/20 aluminum furniture attachments and snap-on facia tiling
+
+#### Facade Configuration
+- **Standard Height:** 10' tall facade behind lobby desk
+- **Quick Assembly:** Modular panels connect rapidly via QuickConnect system
+- **Graphics Ready:** Vinyl exterior graphics can be applied to panels
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>Ingress/Egress Rooms</strong></summary>
+
+<div style="margin-left: 20px;">
+
+The standard layout includes **two mirror-image ingress/egress stations**:
+
+#### Dimensions & Layout
+- **Room Size:** 12' × 12' each (3 panels wide)
+- **Separation:** Two rooms separated by 4' with two parallel panels forming a closet space between them
+- **Open-Air Console:** The rear of the two parallel panels may be left out to provide visibility into the play space for the Ops Tech to run the console from the closet space during playthrough.
+- **AR Experience Monitoring:** If the experience is AR, the second panel may be one-way glass or a solid wall with camera monitors supporting the Ops Tech at the console.
+- **Command Console:** The Ops Tech may drive the experience from a networked console usually running an Admin Panel built with either UI Toolkit in Unity or UMG in Unreal.
+  > **Note:** The **"Command Console"** is the UI Panel (admin interface) used by Operations Technicians. It provides the graphical interface for monitoring and controlling the experience. The **"Server Manager"** is the dedicated server backend that handles all network traffic, decision-making, graphics processing offloaded from VR harnesses, and other heavy computational tasks. The Command Console (UI) may run on the same CPU/PC as the Server Manager (dedicated server), or they may be separate but networked in close proximity.
+- **Flow:** Front-of-House (FOH) Retail clerk directs up to four players in alternating fashion to the next available ingress station (left or right)
+
+#### Features per Room
+- **Swing Wall:** One panel-footer pair may include a built-in hinge to enable the entire rear wall to swing open, revealing the play area after players don VR headsets
+- **Harness Storage:** Wall with four hooks to stow VR harnesses between uses
+- **Charging Cabinet:** 80/20 aluminum framing cabinet for rapid battery recharge cycling
+- **Capacity:** Up to four VR harnesses per room (eight total across both rooms)
+- **Chargers:** Four chargers per room (eight total)
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>Staffing Requirements</strong></summary>
+
+<div style="margin-left: 20px;">
+
+**Minimum Staff:** Two employees during operation hours
+
+1. **Front-of-House (FOH) Retail Clerk**
+   - Operates lobby desk
+   - Point-of-sale station (tablet or computer)
+   - Directs players to ingress stations
+   - Handles transactions and customer service
+
+2. **Operations Technician (Ops Tech)**
+   - Assists with player ingress/egress
+   - Manages VR harness distribution and collection
+   - Performs battery swaps
+   - Monitors experience operations
+
+**Optional Staff:**
+- **Immersive Actors:** Join players in the experience to enhance immersion
+- Additional support staff as needed for high-traffic venues
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>VR Harness & Power Specifications</strong></summary>
+
+<div style="margin-left: 20px;">
+
+#### Battery System
+- **Type:** Hot-swap LiFePO4 6S5P 21700 battery packs
+- **Drain Rate:** ~5% per playthrough
+- **Swap Protocol:** Ops Tech swaps batteries after each playthrough to ensure harnesses are always near 100% State of Charge (SOC)
+- **Total Harnesses:** 8 harnesses (4 per ingress/egress room)
+
+#### Power Requirements
+- **Continuous Draw:** 250W-500W per harness
+- **Drain-to-Charge Ratio:** 1:4 (always reaching near 100% SOC before reuse)
+- **Charging Specifications:**
+  - **250W Harnesses:** 5A chargers
+  - **500W Harnesses:** 10A chargers
+
+#### Power Management
+- All batteries reach near 100% SOC before reuse
+- Continuous operation enabled by hot-swap system
+- No reserve battery mode needed due to swap protocol
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>Lobby & Retail Area</strong></summary>
+
+<div style="margin-left: 20px;">
+
+- **Lobby Desk:** Point-of-sale station with tablet or computer
+- **Facade:** 10' tall modular wall facade behind lobby desk
+- **Graphics:** Vinyl exterior graphics on facade panels
+- **Flow:** Customers enter lobby → FOH directs to ingress → Ops Tech assists with setup → Play → Egress → Return to lobby
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>Rapid Deployment Benefits</strong></summary>
+
+<div style="margin-left: 20px;">
+
+This standard format enables:
+- **Fast Setup:** Modular components assemble quickly via QuickConnect system
+- **Easy Teardown:** Disassembles rapidly for venue transitions
+- **Consistent Operations:** Standardized layout and procedures across venues
+- **Professional Appearance:** Clean, branded facade with custom graphics
+- **Operational Efficiency:** Streamlined player flow and battery management
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>LBEAST-Ready Venue Configuration</strong></summary>
+
+<div style="margin-left: 20px;">
 
 To be considered **LBEAST-ready**, a venue would aim to have at least a handful of 40' × 40' stations:
 
@@ -418,7 +601,29 @@ Just like movie theaters where multiple screens offer variety, VR play spaces fu
 - **Venue** knows many developers are in-progress on new content
 - **Result:** A healthy, thriving market
 
-### Recommended HMD Hardware Example
+</div>
+
+</details>
+
+<details>
+<summary><strong>Safety Considerations</strong></summary>
+
+<div style="margin-left: 20px;">
+
+- **QTY2 Up-to-code Fire Emergency Fire Extinguishers:** One at the Ops Tech Console and another near any hydraulic equipment.
+- **Movable stairs:** Any system that causes players to be lifted into the air must have a physical means of egress in an e-stop emergency.
+- **Hydraulically-actuated equipment should have multiple manual and auto e-stops** located at console and on device.
+- **Theme park safety regulations vary by state** - take steps to abide by the same rules that apply to carnival equipment in your state.
+- **The author of LBEAST disclaims any liability resulting in the use of this free software.**
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>Recommended HMD Hardware Example</strong></summary>
+
+<div style="margin-left: 20px;">
 
 For standard LBEAST installations, the following hardware configuration provides optimal performance and reliability:
 
@@ -462,6 +667,10 @@ For standard LBEAST installations, the following hardware configuration provides
 - For lighter experiences: RTX 5070 Ti configuration (~$2,800) provides cost savings
 - For maximum performance: RTX 5080 configuration (~$3,200) enables highest-quality rendering
 - Bulk purchasing (10+ units) typically provides ~5% discount
+
+</div>
+
+</details>
 
 ---
 
@@ -793,6 +1002,10 @@ Gunship->SendGunshipTilt(0.5f, 0.8f, 0.2f, 0.1f, 1.5f);  // TiltX (roll), TiltY 
 // Advanced: Use absolute angles if you need precise control
 Gunship->SendGunshipMotion(8.0f, 5.0f, 10.0f, 15.0f, 1.5f);  // pitch, roll, forwardOffset (cm), verticalOffset (cm), duration
 ```
+
+**Related Documentation:**
+- **[FirmwareExamples/GunshipExperience/README.md](FirmwareExamples/GunshipExperience/README.md)** - ECU firmware examples and setup
+- **[FirmwareExamples/GunshipExperience/Gunship_Hardware_Specs.md](FirmwareExamples/GunshipExperience/Gunship_Hardware_Specs.md)** - Complete hardware specifications for gun solenoid kickers (solenoids, drivers, thermal management, communication architecture)
 
 </div>
 
@@ -1736,6 +1949,230 @@ The Command Protocol (UDP port 7779) **can work over the internet** with proper 
 
 ---
 
+## Network Configuration
+
+LBEAST requires reliable network communication between game engine servers, ECUs (embedded control units), VR clients, and console interfaces. This section details network setup options and recommended configurations.
+
+> **⚠️ Network Isolation & Safety:** Each LBEAST deployment operates as its own isolated network—a micro-intranet completely offline from any other systems on-site. This isolation is a critical safety requirement: LBEAST networks must not connect to corporate networks, guest WiFi, or any other infrastructure. The OpsTech personnel operating the LBEAST console serve as the system administrators (SysAdmins) for this isolated micro-intranet, responsible for network configuration, device management, and troubleshooting. While most network management tasks can be automated through LBEAST's router API integration (when using professional routers with REST API support), the OpsTech team must understand and maintain this isolated network environment.
+
+### Overview
+
+**Network Architecture:**
+- **Local Network (LAN)**: All LBEAST devices operate on the same local network
+- **Static DHCP (Recommended)**: Devices use DHCP but receive reserved IP addresses
+- **Centralized Management**: Console interface for IP and port assignment
+- **Security Rotation**: Optional scheduled IP address rotation for security
+
+**Key Concepts:**
+- **DHCP Reservations**: Router assigns same IP to device based on MAC address (static DHCP mode)
+- **UDP Port Assignment**: Each device type uses specific UDP ports (configurable)
+- **Connection Verification**: System verifies all device connections at session start
+- **NAT Punchthrough**: Optional fallback for remote connections through firewalls
+
+### Consumer Router Setup (Manual Configuration)
+
+**Recommended for:** Small deployments, home labs, budget-conscious setups
+
+**Router Requirements:**
+- Router with DHCP reservation capability (most modern routers support this)
+- Web-based admin interface (standard on consumer routers)
+- No API access required (manual configuration)
+
+**Setup Walkthrough:**
+
+1. **Identify Device MAC Addresses**
+   - Each ECU (Gunship ECU, Gun ECUs) has a unique MAC address
+   - Document MAC addresses for all LBEAST devices
+   - Methods to obtain MAC:
+     - Serial monitor output during device boot
+     - Router's connected devices list
+     - Device firmware can report MAC address
+
+2. **Configure DHCP Reservations in Router**
+   - Access router admin panel (typically `192.168.1.1` or `192.168.0.1`)
+   - Navigate to DHCP settings → DHCP Reservations (or "Static DHCP")
+   - For each LBEAST device:
+     - Enter MAC address
+     - Assign desired static IP address
+     - Ensure IPs are outside DHCP dynamic range (e.g., if DHCP pool is 192.168.1.100-200, use 192.168.1.10-99)
+   - Save configuration
+
+3. **Configure LBEAST Console IP Settings**
+   - Open LBEAST Command Console
+   - Navigate to Network Configuration
+   - Manually enter IP address and UDP port for each device:
+     - Gunship ECU: IP address, port 8888
+     - Gun ECU Station 0: IP address, port 8888
+     - Gun ECU Station 1: IP address, port 8889
+     - Gun ECU Station 2: IP address, port 8890
+     - Gun ECU Station 3: IP address, port 8891
+     - Game Engine Server: IP address, port 8888
+   - Save configuration
+
+4. **Verify Connections**
+   - Console will verify all device connections at session start
+   - If any device fails to connect, check:
+     - IP address matches router reservation
+     - Device is powered on and connected to network
+     - Firewall allows UDP traffic on assigned ports
+
+5. **IP Rotation (Manual)**
+   - To rotate IPs for security:
+     - Access router admin panel
+     - Update DHCP reservations with new IP addresses
+     - Update LBEAST Console IP settings to match
+     - Restart devices to acquire new IPs
+   - **Note:** Manual process - must be done outside operating hours
+
+**Limitations:**
+- ❌ No automated bulk IP rotation
+- ❌ Manual entry required in console for each device
+- ❌ IP changes require manual router + console updates
+- ✅ Works with any consumer router
+- ✅ No special router features required
+
+---
+
+### Professional Router Setup (API Integration)
+
+**Recommended for:** Production deployments, enterprise installations, advanced users
+
+**Router Requirements:**
+- Enterprise-grade router with API access (SNMP, REST, or vendor-specific API)
+- Examples: Ubiquiti UniFi, Cisco, pfSense, MikroTik RouterOS
+- Router API credentials for programmatic access
+
+**Setup Walkthrough:**
+
+1. **Configure Router API Access**
+   - Enable API access in router admin panel
+   - Generate API credentials (API key, username/password, or certificate)
+   - Document API endpoint URL and authentication method
+   - Test API connectivity from game engine server
+
+2. **Initial DHCP Reservation Setup**
+   - Option A: Use router web UI (same as consumer setup)
+   - Option B: Use router API to create reservations programmatically
+   - Configure all LBEAST device MAC addresses with reserved IPs
+   - Ensure IPs are outside DHCP dynamic range
+
+3. **Configure LBEAST Console**
+   - Open LBEAST Command Console
+   - Navigate to Network Configuration → Router Integration
+   - Enter router API credentials:
+     - Router IP address
+     - API endpoint URL
+     - Authentication credentials
+   - Test router API connection
+   - Console will automatically discover and populate device IPs from router
+
+4. **Automatic Device Discovery**
+   - Console queries router API for all DHCP reservations
+   - Filters for LBEAST devices (by MAC address prefix or device naming)
+   - Automatically populates IP addresses and ports
+   - No manual entry required
+
+5. **Connection Verification**
+   - Console verifies all device connections at session start
+   - Confirms IP addresses match router reservations
+   - Automatic reconnection via NAT punchthrough if needed
+
+6. **Scheduled IP Rotation (Automated)**
+   - Configure rotation schedule in console (morning/evening, before/after hours)
+   - Console triggers router API to update all DHCP reservations simultaneously
+   - Console automatically updates its own IP configuration
+   - Devices acquire new IPs on next DHCP renewal
+   - **Note:** Rotation only occurs during scheduled windows (prevents mid-session changes)
+
+**Advantages:**
+- ✅ Automated bulk IP rotation
+- ✅ Automatic device discovery
+- ✅ No manual IP entry required
+- ✅ Coordinated network-wide IP refresh
+- ✅ Scheduled security rotation
+
+**Router API Integration:**
+- Console module calls router API to:
+  - Query current DHCP reservations
+  - Bulk update reservations for IP rotation
+  - Verify device connectivity
+- Supports multiple router vendors (UniFi, Cisco, pfSense, etc.)
+- Fallback to manual mode if API unavailable
+
+---
+
+### UDP Port Configuration
+
+**Default Port Assignments:**
+- **Game Engine Server**: 8888 (receives from Gunship ECU, sends to Gunship ECU)
+- **Gunship ECU**: 8888 (receives from Game Engine), 8892 (receives from Gun ECUs)
+- **Gun ECU Station 0**: 8888 (receives from Gunship ECU)
+- **Gun ECU Station 1**: 8889 (receives from Gunship ECU)
+- **Gun ECU Station 2**: 8890 (receives from Gunship ECU)
+- **Gun ECU Station 3**: 8891 (receives from Gunship ECU)
+- **Command Console**: 7778 (Server Beacon), 7779 (Command Protocol)
+
+**Port Conflicts:**
+- Console interface allows reassignment if ports conflict with other services
+- All ports configurable per device
+- Port changes require device restart to take effect
+
+---
+
+### NAT Punchthrough (Optional)
+
+**When to Use:**
+- Remote device connections (devices behind different NATs)
+- Firewall traversal for off-site monitoring
+- Backup connection method if DHCP reservations fail
+
+**How It Works:**
+- Custom NAT punchthrough implementation for LBEAST UDP protocol
+- Establishes connection through firewalls/NAT devices
+- Automatic fallback if primary connection fails
+- Not required for local network deployments (DHCP reservations preferred)
+
+**Configuration:**
+- Enable in console Network Configuration
+- Configure punchthrough server (if using relay server)
+- Devices automatically attempt punchthrough if direct connection fails
+
+---
+
+### Best Practices
+
+1. **Use DHCP Reservations (Static DHCP)**
+   - Centralized management via router
+   - Devices always get same IP
+   - Easier than device-side static IP configuration
+
+2. **Keep IPs Outside DHCP Dynamic Range**
+   - Prevents conflicts between reserved and dynamic IPs
+   - Example: DHCP pool 192.168.1.100-200, use 192.168.1.10-99 for reservations
+
+3. **Document All Manual IP Assignments** (Consumer Router Deployments)
+   - Maintain spreadsheet or documentation of all device IPs
+   - Include MAC addresses for reference
+   - Update when IPs rotate
+   - **Note:** Professional router deployments with API integration automatically maintain this documentation
+
+4. **Verify Connections at Session Start**
+   - Console automatically verifies all device connections
+   - Prevents gameplay with missing devices
+   - Automatic recovery via NAT punchthrough if needed
+
+5. **Schedule IP Rotation Outside Operating Hours**
+   - Configure rotation for morning (before open) or evening (after close)
+   - Prevents mid-session network disruptions
+   - Router DHCP lease times can enforce timing
+
+6. **Use Professional Router for Production**
+   - API integration enables automated management
+   - Bulk operations save time
+   - Better suited for multi-device deployments
+
+---
+
 ## Roadmap
 
 ### v0.1.0 (Current)
@@ -1758,6 +2195,72 @@ The Command Protocol (UDP port 7779) **can work over the internet** with proper 
 - [ ] **Adding Weight & Height Safety Check Embedded Firmware** - Safety firmware for motion platforms to prevent operation if weight/height limits are exceeded
 - [ ] **Go-Kart Experience** - Electric go-karts, bumper cars, race boats, or bumper boats augmented by passthrough VR or AR headsets enabling overlaid virtual weapons and pickups that affect the performance of the vehicles
 - [ ] **24V Large Solenoid Kicker with Dual-Handle Thumb Triggers** - 24V large solenoid kicker with dual-handle thumb triggers connected to an embedded system to simulate a large gun/rocket/laser/plasma mini-gun/rifle/launcher mounted to the hydraulic rig in the GunshipExperience
+- [ ] **Network Configuration Module** - Build a network configuration system with console interface for OpsTech to manage IP addresses and UDP ports:
+  - **IP & Port Configuration Console**: Centralized console interface for assigning static IP addresses and UDP ports to all LBEAST devices (ECUs, game engine servers, VR clients, console). Manual entry interface for consumer router deployments (requires keying-in IP addresses from router admin panel). Automatic device discovery for professional router deployments (via router API integration).
+  - **Connection Verification**: At session start, verify connection to all devices and confirm IP addresses match expected values. If any device connection fails, automatically attempt reconnection via NAT punchthrough or re-authentication. Ensures all devices are reachable before gameplay begins.
+  - **NAT Punchthrough Support**: Custom NAT punchthrough implementation for embedded systems (since Unity's NGO NAT punchthrough doesn't cover our custom UDP protocol). Enables remote device connections through firewalls/NAT when needed, with automatic reconnection if devices are reassigned. Primary deployment uses static DHCP (reservations) for local network stability.
+
+- [ ] **Router API Integration Module (Optional, Advanced)** - Professional router integration for automated network management:
+  - **Router API Connectivity**: Support for enterprise router APIs (Ubiquiti UniFi, Cisco, pfSense, MikroTik RouterOS, etc.) to programmatically query and manage DHCP reservations. Automatic device discovery by querying router for all LBEAST device reservations.
+  - **Network-Wide IP Refresh**: Queue network-wide IP address rotation via router API - updates all DHCP reservations simultaneously, then triggers network-wide NAT punchthrough to re-establish all connections. Optional module for advanced users with professional routers. Consumer router users must manually update IPs in router admin panel and console (see Network Configuration documentation).
+  - **Scheduled Rotation**: Configure IP rotation schedules (morning/evening, before/after hours) that trigger router API bulk updates. Prevents IP changes during work hours or mid-session. Router DHCP lease times and reservation rules handle timing enforcement.
+
+- [ ] **VR Player Transport (Server ↔ VR Clients)** - Bidirectional communication between game server and VR players:
+  - **Server → VR Players**: Relay gun button events (Ch 310), gun state (firing, intensity), gun transforms (from trackers), and platform motion state. Use Unreal Replication for reliable state synchronization and optional UDP multicast for low-latency events.
+  - **VR Players → Server**: Receive fire commands from VR controllers/triggers, relay to Gunship ECU → Gun ECU for solenoid firing. Support both centralized (via Gunship ECU) and direct (to Gun ECU) routing modes for latency optimization.
+  - **Implementation**: Integrate with Unreal's multiplayer replication system (Replication/GAS) for state management, with optional custom UDP transport for time-critical events. Handle player connection/disconnection, station assignment, and network recovery.
+
+#### Gunship Experience — Alpha Readiness
+
+> **📋 Hardware Specifications:** See **[FirmwareExamples/GunshipExperience/Gunship_Hardware_Specs.md](FirmwareExamples/GunshipExperience/Gunship_Hardware_Specs.md)** for complete hardware specifications including solenoid selection, PWM driver modules, thermal management, redundancy, and communication architecture.
+
+- [ ] **Guns Subsystem (Per-Station Solenoid Kicker)**
+  - **Hardware**: One embedded controller per play station (4 total), each with:
+    - Dual thumb buttons (fire mode controls)
+    - 24V solenoid kicker (haptic recoil) — see [Gunship_Hardware_Specs.md](FirmwareExamples/GunshipExperience/Gunship_Hardware_Specs.md) for detailed specifications
+    - One SteamVR Ultimate tracker on the gun nose
+  - **Networking**:
+    - Station ECUs sync over UDP to the primary Gunship ECU (mounted on scissor lift) — see [Gunship_Hardware_Specs.md](FirmwareExamples/GunshipExperience/Gunship_Hardware_Specs.md) for communication architecture
+    - Primary ECU relays aggregated per-station state to game engine:
+      - Button states (debounced, rate-limited)
+      - Gun orientation vectors (from trackers)
+      - Optional kicker telemetry (duty, temp, faults)
+  - **Engine-Side APIs**:
+    - Real-time tracker node per gun transform (C++ component + BP access)
+    - Event/delegate surface for fire presses, fire rate gating, and safety lockouts
+    - Sample rendering helpers for minigun/grenade/alt-fire archetypes
+    - Per-station ID mapping and replication-safe routing
+
+- [ ] **Virtual Scissor Lift Platform Representation**
+  - **Tracking**:
+    - At least one SteamVR Ultimate tracker on the platform chassis
+    - Engine-side transform fusion: commanded pose vs tracker pose
+  - **Performance Optimization Module**:
+    - Measure responsiveness to tilt/translation commands (latency, overshoot, settling)
+    - Rolling KPIs exposed to Command Console/UMG (basic performance dashboard)
+  - **Blueprint Locator Actor**:
+    - Simple locator blueprint representing the moving platform root
+    - Easy attachment point for chopper/gunship/spaceship meshes
+    - Auto-follows fused platform transform (commanded ⊕ tracker correction)
+  - **Grounded/In-Flight State**:
+    - Digital state surfaced from ECU and engine logic:
+      - Grounded: calibration zeroed; tilt/move commands ignored
+      - In-Flight: motion enabled within safety limits
+    - Visual state and API for mode transitions, with safety interlocks
+
+- [ ] **ESP32 Shield Design (Hardware)**
+  - **Example Shield Designs**: Design example shields/breakout boards for ESP32 plus needed modules for both ECU types:
+    - **GunshipExperience_ECU**: ESP32 + Ethernet PHY (LAN8720A) + actuator control interfaces + scissor lift control interfaces
+    - **Gun_ECU**: ESP32 + Ethernet PHY (LAN8720A) + dual thumb button inputs + N× solenoid PWM driver interfaces + NTC thermistor ADC inputs
+  - **Source Files**: Include PCB design source files in KiCAD format (`.kicad_pcb`, `.kicad_sch`) for maximum extensibility
+    - **Note**: EasyEDA projects can be exported to KiCAD format for cross-tool compatibility
+    - **Alternative**: Include source files in EasyEDA format if preferred, but provide KiCAD export
+  - **Manufacturing Files**: Include GERBER files (industry standard) for direct PCB manufacturing
+    - GERBER files are tool-agnostic and can be used with any PCB manufacturer (JLCPCB, PCBWay, OSH Park, etc.)
+    - Include drill files, pick-and-place files, and assembly drawings
+  - **Documentation**: Include schematics (PDF), PCB layouts (PDF), BOM (CSV/Excel), and assembly instructions
+  - **Purpose**: Provide reference designs for developers building custom hardware or adapting existing ESP32 boards
+  - **File Structure**: Organize in `Hardware/Shields/` directory with subdirectories for each shield type
 
 ### v1.1 (Future)
 - Real-time AI facial animation integration
@@ -1772,6 +2275,7 @@ The Command Protocol (UDP port 7779) **can work over the internet** with proper 
 - Custom tracking system plugins (UWB, optical, ultrasonic)
 - Online multiplayer support
 - AR headset support (if viable hardware emerges)
+- **3D-Printable 1/8th-Scale Platform Model** - Design a 3D-printable 1/8th-scale model of the scissor lift and tilt platform with complete ECU prototype integration capability for use in off-site network debugging. Enables developers to test network configurations, firmware updates, and communication protocols without requiring access to full-scale hardware. Includes mounting points for ESP32 ECUs, mock actuators, and all necessary interfaces for full system validation.
 
 ## Next Steps
 

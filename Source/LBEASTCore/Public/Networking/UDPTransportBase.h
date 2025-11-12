@@ -92,3 +92,4 @@ protected:
 	TSharedPtr<FInternetAddr> RemoteAddress;
 };
 
+

@@ -51,8 +51,7 @@ bool UHapticPlatformController::InitializePlatform(const FHapticPlatformConfig& 
 {
 	Config = InConfig;
 
-	// NOOP: TODO - Establish network connection to hardware controller
-	// For now, just validate config
+	// Validate config before connecting
 	if (Config.ControllerIPAddress.IsEmpty())
 	{
 		UE_LOG(LogTemp, Error, TEXT("HapticPlatformController: Cannot initialize - no controller IP address specified"));
@@ -208,7 +207,8 @@ void UHapticPlatformController::SetActuatorExtension(FName ActuatorID, float Ext
 		if (Actuator.ActuatorID == ActuatorID)
 		{
 			Actuator.Extension = Extension;
-			// NOOP: TODO - Send individual actuator command to hardware
+			// Intentionally no per-actuator UDP command:
+			// 4DOF platforms use struct/full-motion commands for synchronized control.
 			break;
 		}
 	}
@@ -225,8 +225,12 @@ void UHapticPlatformController::EmergencyStop()
 	MotionTimeRemaining = 0.0f;
 	TargetState = CurrentState;
 
-	// NOOP: TODO - Send emergency stop command to hardware
-	UE_LOG(LogTemp, Warning, TEXT("HapticPlatformController: EMERGENCY STOP"));
+	// Notify ECU universally for all large haptics experiences (Channel 7 = Emergency Stop)
+	if (bIsInitialized && IsHardwareConnected())
+	{
+		SendBool(7, true);
+	}
+	UE_LOG(LogTemp, Warning, TEXT("HapticPlatformController: EMERGENCY STOP (Ch7=true)"));
 }
 
 void UHapticPlatformController::ReturnToNeutral(float Duration)

@@ -72,6 +72,7 @@ FirmwareExamples/
 - **[Base/Examples/README.md](Base/Examples/README.md)** - Base example documentation
 - **[EscapeRoom/README.md](EscapeRoom/README.md)** - Escape room examples guide
 - **[GunshipExperience/README.md](GunshipExperience/README.md)** - Gunship experience examples guide
+- **[GunshipExperience/Gunship_Hardware_Specs.md](GunshipExperience/Gunship_Hardware_Specs.md)** - Complete hardware specifications for gun solenoid kickers
 
 ---
 

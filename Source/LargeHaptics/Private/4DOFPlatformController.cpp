@@ -1,6 +1,8 @@
 // Copyright (c) 2025 AJ Campbell. Licensed under the MIT License.
 
 #include "4DOFPlatformController.h"
+#include "Models/GunButtonEvents.h"
+#include "Models/GunTelemetry.h"
 
 U4DOFPlatformController::U4DOFPlatformController()
 {
@@ -55,6 +57,32 @@ bool U4DOFPlatformController::GetScissorLiftStateFeedback(FScissorLiftState& Out
 	if (ReceivedBytes.Num() >= sizeof(FScissorLiftState))
 	{
 		FMemory::Memcpy(&OutLiftState, ReceivedBytes.GetData(), sizeof(FScissorLiftState));
+		return true;
+	}
+	return false;
+}
+
+bool U4DOFPlatformController::GetGunButtonEvents(FGunButtonEvents& OutButtonEvents) const
+{
+	// Hardware sends button events on Channel 310
+	// Parse from received bytes cache
+	TArray<uint8> ReceivedBytes = GetReceivedBytes(310);
+	if (ReceivedBytes.Num() >= sizeof(FGunButtonEvents))
+	{
+		FMemory::Memcpy(&OutButtonEvents, ReceivedBytes.GetData(), sizeof(FGunButtonEvents));
+		return true;
+	}
+	return false;
+}
+
+bool U4DOFPlatformController::GetGunTelemetry(FGunTelemetry& OutTelemetry) const
+{
+	// Hardware sends gun telemetry on Channel 311
+	// Parse from received bytes cache
+	TArray<uint8> ReceivedBytes = GetReceivedBytes(311);
+	if (ReceivedBytes.Num() >= sizeof(FGunTelemetry))
+	{
+		FMemory::Memcpy(&OutTelemetry, ReceivedBytes.GetData(), sizeof(FGunTelemetry));
 		return true;
 	}
 	return false;

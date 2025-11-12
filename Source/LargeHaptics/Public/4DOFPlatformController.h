@@ -6,6 +6,8 @@
 #include "HapticPlatformController.h"
 #include "Models/TiltState.h"
 #include "Models/ScissorLiftState.h"
+#include "Models/GunButtonEvents.h"
+#include "Models/GunTelemetry.h"
 #include "4DOFPlatformController.generated.h"
 
 /**
@@ -62,5 +64,24 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LBEAST|Haptics|4DOF|Feedback")
 	bool GetScissorLiftStateFeedback(FScissorLiftState& OutLiftState) const;
+
+	/**
+	 * Get gun button events from hardware (Channel 310)
+	 * Used by GunshipExperience for low-latency button event handling.
+	 * @param OutButtonEvents - Output button events received from hardware
+	 * @return True if valid button events were received
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LBEAST|Haptics|4DOF|Guns")
+	bool GetGunButtonEvents(FGunButtonEvents& OutButtonEvents) const;
+
+	/**
+	 * Get gun telemetry from hardware (Channel 311)
+	 * Used by GunshipExperience for monitoring gun system health.
+	 * @param OutTelemetry - Output telemetry received from hardware
+	 * @return True if valid telemetry was received
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LBEAST|Haptics|4DOF|Guns")
+	bool GetGunTelemetry(FGunTelemetry& OutTelemetry) const;
+
 };
 
