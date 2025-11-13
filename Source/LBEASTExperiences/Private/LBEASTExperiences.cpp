@@ -2,6 +2,8 @@
 
 #include "LBEASTExperiences.h"
 
+DEFINE_LOG_CATEGORY(LogGoKart);
+
 #define LOCTEXT_NAMESPACE "FLBEASTExperiencesModule"
 
 void FLBEASTExperiencesModule::StartupModule()

@@ -4,6 +4,7 @@
 #include "Input/LBEASTInputAdapter.h"
 #include "Networking/LBEASTServerCommandProtocol.h"
 #include "ExperienceLoop/ExperienceStateMachine.h"
+#include "LBEASTWorldPositionCalibrator.h"
 #include "GameFramework/GameStateBase.h"
 
 ALBEASTExperienceBase::ALBEASTExperienceBase()
@@ -20,6 +21,9 @@ ALBEASTExperienceBase::ALBEASTExperienceBase()
 
 	// Narrative state machine will be created in InitializeExperienceImpl if bUseNarrativeStateMachine is true
 	NarrativeStateMachine = nullptr;
+
+	// Create world position calibrator (available to all experiences)
+	WorldPositionCalibrator = CreateDefaultSubobject<ULBEASTWorldPositionCalibrator>(TEXT("WorldPositionCalibrator"));
 
 	// Default HMD configuration
 	HMDConfig.HMDType = ELBEASTHMDType::OpenXR;

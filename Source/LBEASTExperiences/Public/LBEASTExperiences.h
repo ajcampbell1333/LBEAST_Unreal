@@ -17,7 +17,11 @@
  * - Gunship Experience
  * - Car Sim Experience
  * - Flight Sim Experience
+ * - GoKart Experience
  */
+
+DECLARE_LOG_CATEGORY_EXTERN(LogGoKart, Log, All);
+
 class FLBEASTExperiencesModule : public IModuleInterface
 {
 public:

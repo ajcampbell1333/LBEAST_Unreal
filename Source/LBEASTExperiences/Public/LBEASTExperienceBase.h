@@ -7,12 +7,14 @@
 #include "LBEASTHMDInterface.h"
 #include "LBEASTTrackingInterface.h"
 #include "Networking/LBEASTServerCommandProtocol.h"
+#include "LBEASTWorldPositionCalibrator.h"
 #include "LBEASTExperienceInterface.h"
 #include "LBEASTExperienceBase.generated.h"
 
 // Forward declarations
 class ULBEASTInputAdapter;
 class UExperienceStateMachine;
+class ULBEASTWorldPositionCalibrator;
 
 /**
  * Server mode for multiplayer experiences
@@ -113,6 +115,20 @@ public:
 	 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LBEAST|Components|Narrative")
 	TObjectPtr<UExperienceStateMachine> NarrativeStateMachine;
+
+	/**
+	 * World position calibrator for drift correction
+	 * Auto-created for all experiences. Provides VR 6DOF drag/drop calibration.
+	 * Allows Ops Tech to quickly recalibrate if tracking drift occurs throughout the day.
+	 * 
+	 * Usage:
+	 * - Player trigger-holds any part of virtual world
+	 * - System automatically detects horizontal or vertical drag axis
+	 * - Constrains to that axis as virtual world recalibrates origin offset
+	 * - Releases when trigger is released
+	 */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LBEAST|Components|Calibration")
+	TObjectPtr<class ULBEASTWorldPositionCalibrator> WorldPositionCalibrator;
 
 	/** Whether to enable narrative state machine for this experience */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|Experience|Narrative")

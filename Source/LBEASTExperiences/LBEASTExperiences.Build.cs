@@ -27,7 +27,13 @@ public class LBEASTExperiences : ModuleRules
 				"CoreUObject",
 				"Engine",
 				"LBEASTCommon",  // Interfaces and shared types
-				"LBEASTCore"      // Implementation classes (InputAdapter, ServerCommandProtocol, etc.)
+				"LBEASTCore",    // Implementation classes (InputAdapter, ServerCommandProtocol, etc.)
+				"Sockets",        // For GoKart ECU UDP communication
+				"Networking",     // For GoKart ECU UDP communication
+				"EnhancedInput",  // For GoKart input handling
+				"InputCore",      // For GoKart input handling
+				"Json",           // For GoKart data serialization
+				"JsonUtilities"   // For GoKart data serialization
 			}
 		);
 			

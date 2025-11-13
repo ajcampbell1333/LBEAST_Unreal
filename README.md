@@ -405,6 +405,20 @@ LBEAST is designed for **1-to-4 player co-located VR multiplayer experiences** i
 - Corporate events
 - Brand activations
 
+#### Open Layout
+
+- Standard minimum roomscale dimensions suitable for AIFacemask narratives and escape rooms
+- Minimum 10' × 10' cordoned-off play space
+- Virtual guardian setup recommended with 2-foot padding buffer to the cord to prevent player from striking outside viewer
+- Consider outer margin buffer with secondary cord for extra safety (12' × 12')
+- 20' × 20' recommended for any open layout using large haptics
+
+#### Closed Layout
+
+- 20' × 40' minimum play space to accommodate swinging ingress/egress walls
+- Establish guardian with 2-foot padding buffer to walls for safety
+- Consider safety cord to prevent players from reaching the Ops console
+
 </div>
 
 </details>
@@ -1146,6 +1160,78 @@ void OnNarrativeStateChanged(FName OldState, FName NewState, int32 NewStateIndex
 ### Low-Level APIs (Advanced/Custom Usage)
 
 For developers who need full control or want to build custom experiences from scratch, LBEAST provides low-level APIs. These are the same APIs used internally by the Experience Genre Templates.
+
+<details>
+<summary><strong>🔧 Core Module (`LBEASTCore`)</strong></summary>
+
+<div style="margin-left: 20px;">
+
+**Module:** `LBEASTCore`
+
+Foundation module providing core systems for all LBEAST experiences, including HMD/tracking abstraction, networking, and world position calibration.
+
+**Key Components:**
+- `LBEASTExperienceBase` - Base class for all experience templates
+- `LBEASTTrackingInterface` - Unified API for 6DOF tracking systems (SteamVR, custom optical, UWB, ultrasonic)
+- `LBEASTHMDInterface` - Unified API for VR/AR headsets (OpenXR, SteamVR, Meta)
+- `LBEASTWorldPositionCalibrator` - Manual and automatic position calibration for drift prevention
+- `LBEASTUDPTransport` - Binary UDP communication for embedded systems
+- `LBEASTInputAdapter` - Hardware-agnostic input abstraction
+
+**World Position Calibration:**
+
+LBEAST provides two calibration modes to prevent tracking drift throughout the day:
+
+**1. Manual Calibration (Drag/Drop):**
+- Ops Tech toggles calibration mode ON from server (Command Console or Blueprint)
+- First HMD client that connects can act as calibrating agent
+- Trigger-hold any part of the virtual world and drag to recalibrate
+- Automatically detects horizontal/vertical drag axis and constrains movement
+- Server saves calibration offset to JSON file immediately when trigger is released
+- Offset replicates to all clients automatically
+
+**2. Automatic Tracker-Based Calibration:**
+- Uses a fixed Ultimate tracker in a known physical location
+- Each client finds that tracker at launch
+- Calculates offset based on expected vs actual tracker position
+- Applies offset once at launch (not continuous - tracker may move during gameplay)
+- Ops Tech can add a fixed tracker to any lighthouse-ready experience for zero-maintenance calibration
+
+**Example:**
+```cpp
+// Manual calibration mode (default)
+ULBEASTWorldPositionCalibrator* Calibrator = CreateDefaultSubobject<ULBEASTWorldPositionCalibrator>(TEXT("Calibrator"));
+Calibrator->CalibrationMode = ECalibrationMode::Manual;
+
+// Enable calibration mode from server
+Calibrator->EnableCalibrationMode();
+
+// Client: Start calibration when trigger is pressed
+Calibrator->StartCalibration(GrabLocation);
+
+// Client: Update calibration while trigger is held
+Calibrator->UpdateCalibration(CurrentGrabLocation);
+
+// Client: End calibration when trigger is released (saves to JSON immediately)
+Calibrator->EndCalibration();
+
+// Automatic tracker-based calibration
+Calibrator->CalibrationMode = ECalibrationMode::CalibrateToTracker;
+Calibrator->CalibrationTrackerIndex = 0;  // Fixed tracker device index
+Calibrator->ExpectedTrackerPosition = FVector(0.0f, 0.0f, 100.0f);  // Known physical location
+// Calibration happens automatically at BeginPlay
+```
+
+**Benefits:**
+- ✅ **Drift Prevention** - Corrects tracking drift throughout the day
+- ✅ **Networked** - Server-authoritative calibration with automatic replication
+- ✅ **Persistent** - Saves to JSON file for recall on next session
+- ✅ **Zero-Maintenance Option** - Tracker-based mode requires no Ops Tech interaction
+- ✅ **Blueprint-Friendly** - All calibration functions are BlueprintCallable
+
+</div>
+
+</details>
 
 <details>
 <summary><strong>🤖 AIFace API</strong></summary>
