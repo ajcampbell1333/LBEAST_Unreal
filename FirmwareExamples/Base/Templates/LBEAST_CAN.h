@@ -409,3 +409,4 @@ void LBEAST_CAN_SendLiftEmergencyStop(bool enable, uint32_t canIdBase = 0x200) {
 #endif // LBEAST_CAN_H
 
 
+

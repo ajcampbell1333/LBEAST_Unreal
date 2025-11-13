@@ -77,19 +77,18 @@ void AArcadePaymentManager::StartWebhookServer()
 	}
 
 	// Create TCP listen socket
-	TSharedRef<FInternetAddr> Addr = SocketSubsystem->CreateInternetAddr();
-	bool bIsValid = false;
-	Addr->SetIp(*GetLocalIP(), bIsValid);
-	if (!bIsValid)
+	FString LocalIPStr = GetLocalIP();
+	FIPv4Address BindAddress;
+	if (!FIPv4Address::Parse(LocalIPStr, BindAddress))
 	{
-		UE_LOG(LogRetail, Error, TEXT("[Payment] Invalid local IP address"));
+		UE_LOG(LogRetail, Error, TEXT("[Payment] Invalid local IP address: %s"), *LocalIPStr);
 		return;
 	}
-	Addr->SetPort(WebhookPort);
 
 	ListenSocket = FTcpSocketBuilder(TEXT("LBEAST_PaymentWebhook"))
 		.AsReusable()
-		.BoundToAddress(Addr)
+		.BoundToAddress(BindAddress)
+		.BoundToPort(WebhookPort)
 		.Listening(8) // Max pending connections
 		.Build();
 
@@ -383,7 +382,7 @@ void AArcadePaymentManager::ProcessWebhookConnections()
 				// Read request data
 				TArray<uint8> RequestData;
 				RequestData.SetNumUninitialized(8192);
-				uint32 DataSize = 0;
+				int32 DataSize = 0;
 				
 				// Wait for data with timeout
 				if (ClientSocket->Wait(ESocketWaitConditions::WaitForRead, FTimespan::FromSeconds(5)))

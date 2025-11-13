@@ -294,3 +294,4 @@ void PanasonicMinasA6Drive::updateStatus() {
 #endif // PANASONIC_MINASA6_DRIVE_H
 
 
+

@@ -67,12 +67,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Payment")
 	void StartSession(const FString& CardId, float Balance);
 
-	/** Check the balance for a card ID (async callback) */
-	UFUNCTION(BlueprintCallable, Category = "Payment")
+	/** Check the balance for a card ID (async callback) - C++ only (TFunction cannot be exposed to Blueprint) */
 	void CheckBalance(const FString& CardId, TFunction<void(float)> Callback);
 
-	/** Allocate tokens/credits for gameplay (async callback) */
-	UFUNCTION(BlueprintCallable, Category = "Payment")
+	/** Allocate tokens/credits for gameplay (async callback) - C++ only (TFunction cannot be exposed to Blueprint) */
 	void AllocateTokens(const FString& StationId, float Amount, TFunction<void(bool)> Callback);
 
 protected:
