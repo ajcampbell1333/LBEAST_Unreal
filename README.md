@@ -2807,86 +2807,75 @@ LBEAST requires reliable network communication between game engine servers, ECUs
 
 ---
 
-## Roadmap
+## 🗺️ Roadmap
 
 <details>
 <summary><strong>v0.1.0 (Complete)</strong></summary>
 
 <div style="margin-left: 20px;">
 
-### v0.1.0 (Complete)
-- ✅ Core module architecture
-- ✅ HMD and hand tracking via OpenXR (Unreal's native XR system)
-- ✅ Tracking abstraction (SteamVR Trackers)
-- ✅ AI Face API
-- ✅ Large Haptics API (4DOF platforms + 2DOF gyroscope)
-- ✅ HOTAS integration framework (Logitech X56, Thrustmaster T.Flight)
-- ✅ Embedded Systems API
-- ✅ **Experience Genre Templates** (AIFacemask, MovingPlatform, Gunship, CarSim, FlightSim, EscapeRoom)
+### ✅ Completed (v0.1.0)
+- ✅ Core VR tracking abstraction
+- ✅ HMD and hand tracking via OpenXR (Unity's native XR system)
+- ✅ Hand gesture recognition (`LBEASTHandGestureRecognizer`)
+- ✅ 4DOF hydraulic platform support (4 & 6 actuators)
+- ✅ 2DOF gyroscope support
 - ✅ **Dedicated Server** architecture
-- ✅ **Server Manager GUI** (UMG-based)
+- ✅ **Server Manager GUI** (UI Toolkit-based)
 - ✅ **Automatic Server Discovery** (UDP broadcast)
+- ✅ Normalized input system (-1 to +1)
+- ✅ HOTAS integration framework
+- ✅ AI facial animation control
+- ✅ Embedded systems (Arduino, ESP32, STM32)
+- ✅ LAN multiplayer (Unity NetCode)
+- ✅ Experience Genre Templates (AIFacemask, MovingPlatform, Gunship, CarSim, FlightSim, EscapeRoom, SuperheroFlight)
 - ✅ **NVIDIA ACE Integration Architecture** (data structures, visitor pattern, component architecture)
+- ✅ **433MHz RF Trigger API** - Hardware-agnostic 433MHz wireless remote/receiver integration with rolling code validation, button learning, and function mapping
 
 </div>
 
 </details>
 
+### ✅ Current (v0.1.1) Pre-Alpha
+
 <details>
-<summary><strong>v0.1.2 (Current)</strong></summary>
+<summary><strong>v0.1.2 (In-Progress)</strong></summary>
 
 <div style="margin-left: 20px;">
 
-### v0.1.2 (Current)
+### 🎯 Planned (v0.1.2 - In-Progress)
 - ✅ **24V Large Solenoid Kicker with Dual-Handle Thumb Triggers** - 24V large solenoid kicker with dual-handle thumb triggers connected to an embedded system to simulate a large gun/rocket/laser/plasma mini-gun/rifle/launcher mounted to the hydraulic rig in the GunshipExperience
-- ✅ **Implementing HOTAS integration** - Complete HOTAS controller support with full input mapping and calibration (completed for FlightSimExperience; other experiences can migrate from FlightSimExperience if needed)
+- ✅ **Implementing HOTAS integration** - Full Unity Input System HOTAS profiles and complete HOTAS controller support (completed for FlightSimExperience; other experiences can migrate from FlightSimExperience if needed)
 - ✅ **Cashless Tap Card Payment Interface** - Implement cashless tap card payment interface for VR tap-to-play capability. Enables players to tap NFC/RFID cards or devices to initiate gameplay sessions without cash transactions.
-- ✅ **433MHz RF Trigger API** - Create low-level API module (`RF433MHz`) for 433MHz wireless remote/receiver integration. Provides abstraction layer (`I433MHzReceiver` interface) supporting multiple USB receiver modules (RTL-SDR, CC1101, RFM69, Generic). Features: rolling code validation, replay attack prevention, button event decoding, unified interface for game server code. Enables wireless button/remote control for calibration systems, trigger buttons, and other RF-based input devices. Includes: button learning/mapping system, JSON persistence (server-side), cross-platform flash storage (firmware), full server-side example (`RFTriggerController_Example.cpp`), full firmware example (`RFTriggerECU_Example.ino`). **Note:** USB hardware drivers are NOOP (platform-specific implementations required based on chosen USB receiver module). See `SuperheroFlightExperience` for usage example (height calibration clicker).
+- ✅ **Go-Kart Experience** - Electric go-karts, bumper cars, race boats, or bumper boats augmented by passthrough VR or AR headsets enabling overlaid virtual weapons and pickups that affect the performance of the vehicles
+- ✅ **Superhero Flight Experience** - A dual-hoist-harness-and-truss system that lifts a player into the air and turns them prone to create the feeling of superhero flight as they punch fists out forward, up, or down
+- ✅ **10-Finger OpenXR Gesture Recognition Mapping** - An alpha system for calculating angle and distances relationships between various hand and head nodes to trigger desired events e.g. transition from closed-fist-to-open-palm
+- ✅ **433MHz RF Transceiver Communication** - In addition to embedded comms across WiFi and Bluetooth, LBEAST now has the ability to integrate inexpensive keychain-style RF button clickers and any other devices using old-school 433MHz comms with replay encryption protection
 - [ ] **Finishing AIFacemask functionality** - Complete all NOOP implementations for NVIDIA ACE service integration:
-  - **AIFaceController**: Receive facial animation data from NVIDIA ACE endpoint (HTTP/WebSocket client), apply blend shape weights to skeletal mesh morph targets, apply facial texture to mesh material
+  - **AIFaceController**: Receive facial animation data from NVIDIA ACE endpoint (HTTP/WebSocket client), apply blend shape weights to SkinnedMeshRenderer morph targets, apply facial texture to mesh material
   - **ACE Script Manager**: Request script playback from NVIDIA ACE server (HTTP POST), request script pre-baking (TTS → Audio, Audio → Facial data), async pre-baking support (background processing)
   - **ACE ASR Manager**: Request ASR transcription from local ASR service (gRPC/HTTP to NVIDIA Riva ASR), trigger improv after transcription (wire to ACEImprovManager)
   - **ACE Improv Manager**: Request LLM response from local LLM (HTTP to Ollama/vLLM/NVIDIA NIM), request TTS conversion from local TTS (gRPC to NVIDIA Riva TTS), request Audio2Face conversion from local Audio2Face (HTTP/gRPC to NVIDIA NIM), auto-trigger Audio2Face after TTS completes (callback chain), monitor async response generation status (track LLM/TTS/Audio2Face operations)
   - **AIFacemaskExperience**: Configure NVIDIA ACE endpoint URL (load from project settings/config), register ASR Manager as visitor with VOIPManager (wire visitor pattern), configure NVIDIA ACE server base URL (load from project settings/config)
   - **VOIPManager**: Decode Opus to PCM for visitors (decode Mumble Opus before passing to visitors), integrate with player replication system (get remote player positions)
-  - **Server Beacon**: Get server port from project settings (load port configuration), track actual player count (query Unreal networking)
+  - **Server Beacon**: Get server port from project settings (load port configuration), track actual player count (query Unity networking)
   - **Optimization**: Optimize blend shape application (batch updates, interpolation, caching), texture streaming optimization (efficient texture updates, compression)
-- [ ] **Go-Kart Experience** - Electric go-karts, bumper cars, race boats, or bumper boats augmented by passthrough VR or AR headsets enabling overlaid virtual weapons and pickups that affect the performance of the vehicles
-- [ ] **Superhero Flight Experience** - Single-player or multiplayer VR free-body flight experience (flying like Superman) with dual-winch suspended harness system and 10-finger/arm gesture-based control. **Note:** This is distinct from `FlightSimExperience` (2DOF gyroscope HOTAS cockpit for jet/spaceship simulation). Superhero Flight uses gesture control only - no HOTAS, no button events, no 6DOF body tracking required. Control is based on: (1) fist vs open hand gesture state, (2) distance/worldspace-relative angle between HMD-to-hands and world ground plane. See `FirmwareExamples/SuperheroFlightExperience/README.md` for detailed specifications:
-  - **Core Experience Actor**: Create `ASuperheroFlightExperience` actor class with five game states (standing, hovering, flight-up, flight-forward, flight-down), dual-winch state management, virtual altitude raycasting, and server-side parameter exposure. Support 1-4 players, each on their own dual-winch harness.
-  - **Dual-Winch System**: Implement redundant dual-winch system (front shoulder-hook, rear pelvis-hook) with tandem coordination, height calibration, and winch state management for all five game modes.
-  - **Superhero Flight ECU Controller & Firmware**: Create `USuperheroFlightECUController` component and `SuperheroFlightExperience_ECU.ino` firmware for dual-winch control (2 winches per player: front shoulder-hook and rear pelvis-hook), tension monitoring, safety systems, and telemetry. Support winch redundancy. Controller orchestrates winch ECU and optional motion platform ECU (separate ECUs, not integrated).
-  - **Flight Hands Controller**: Create `UFlightHandsController` component (client-side on HMD) that converts 10-finger/arm gestures into control events. Analyzes HMD-to-hands vector relative to world ground plane. Replicates gesture events to server via Unreal Replication (mostly NOOP for initial pass, document as NOOP).
-  - **Gesture Debugger**: Create `UGestureDebugger` component for HMD HUD visualization of gesture detection system (for Ops Tech calibration). **Note:** UMG HUD text overlay is deferred to v1.0 (nice-to-have). Debug visualization uses DrawDebugLine/DrawDebugSphere for now.
-  - **Height Calibration System**: Use `RF433MHz` low-level API to integrate 433MHz USB receiver dongle (connected to server PC) with 433MHz wireless up-down clicker for Ops Tech to calibrate player height during harness strapping. API provides abstraction layer for different USB receiver modules (RTL-SDR, CC1101, RFM69, Generic) with rolling code validation and safety interlock enforcement. Commands route directly from USB receiver to game server via API, which sends winch position commands to main ECU.
-  - **Data Models**: Create structs for dual-winch state, gesture state, virtual altitude, and telemetry (no button events).
-  - **Hardware Specifications & IO Flow Documentation**: Create hardware specs and IO flow docs in `FirmwareExamples/SuperheroFlightExperience/`. See `FirmwareExamples/SuperheroFlightExperience/README.md` for details.
-  - **Multiplayer Support**: Mostly NOOP for initial pass. Will support up to 4 players each on their own dual-winch harness. Use Unreal Replication to transport gesture-based triggers to server for relay. Document as NOOP.
 - [ ] **VR Player Transport (Server ↔ VR Clients)** - Bidirectional communication between game server and VR players:
-  - **Server → VR Players**: Relay gun button events (Ch 310), gun state (firing, intensity), gun transforms (from trackers), and platform motion state. Use Unreal Replication for reliable state synchronization and optional UDP multicast for low-latency events.
+  - **Server → VR Players**: Relay gun button events (Ch 310), gun state (firing, intensity), gun transforms (from trackers), and platform motion state. Use Unity NetCode for reliable state synchronization and optional UDP multicast for low-latency events.
   - **VR Players → Server**: Receive fire commands from VR controllers/triggers, relay to Gunship ECU → Gun ECU for solenoid firing. Support both centralized (via Gunship ECU) and direct (to Gun ECU) routing modes for latency optimization.
-  - **Implementation**: Integrate with Unreal's multiplayer replication system (Replication/GAS) for state management, with optional custom UDP transport for time-critical events. Handle player connection/disconnection, station assignment, and network recovery.
-  - **⚠️ HMD and Hand Tracking Replication**: When implementing remote player hand tracking replication:
-    - **Current State**: Unreal's OpenXR system (`IHandTracker`, `IXRTrackingSystem`) only provides hand/HMD tracking data for the local player's HMD. Each client is only connected to one HMD, so remote players' hand data is not available via OpenXR APIs.
-    - **Future Implementation**: Replicate HMD and hand node transforms (wrist, fingertips, middle knuckle) from each client to all other clients via Unreal Replication. This enables rendering accurate real-time hands of other players in viewport.
-    - **Gesture Recognizer Integration**: When remote hand tracking replication is implemented, update `ULBEASTHandGestureRecognizer` and `UFlightHandsController` to accept replicated hand node transforms as an alternative data source (in addition to OpenXR's local player data). This will allow remote players to trigger gesture events when `bOnlyProcessLocalPlayer = false` is set. The gesture recognizer should check for replicated data first (if available), then fall back to OpenXR APIs for local player.
+  - **Implementation**: Integrate with Unity's multiplayer networking system (NetCode for GameObjects) for state management, with optional custom UDP transport for time-critical events. Handle player connection/disconnection, station assignment, and network recovery.
 
 </div>
 
 </details>
 
 <details>
-<summary><strong>v1.0 (Planned)</strong></summary>
+<summary><strong>v1.0 (Alpha)</strong></summary>
 
 <div style="margin-left: 20px;">
 
-### v1.0 (Planned)
+### 🎯 Planned Alpha (v1.0)
 - [ ] **Adding Weight & Height Safety Check Embedded Firmware** - Safety firmware for motion platforms to prevent operation if weight/height limits are exceeded
-- [ ] **Pro Audio UMG Templates for Command Console** - Create drag-and-drop UMG widget templates (channel faders, mute buttons, bus sends) that auto-map to physical mixer channels on Behringer X32/M32/Wing, Yamaha QL/CL/TF, and other OSC-enabled consoles. Templates will use ProAudioController's bidirectional sync delegates to stay synchronized with physical console state.
-- [ ] **Design the Default Server Manager UI** - Create polished UMG interface for server management
-- [ ] **Example Maps** - Create demonstration maps for each experience genre template
-- [ ] **Blueprint Templates** - Create Blueprint-only versions of experience genre templates
-- [ ] **Hardware Calibration Tool** - Build utility for calibrating hydraulic platforms
 - [ ] **Network Configuration Module** - Build a network configuration system with console interface for OpsTech to manage IP addresses and UDP ports:
   - **IP & Port Configuration Console**: Centralized console interface for assigning static IP addresses and UDP ports to all LBEAST devices (ECUs, game engine servers, VR clients, console). Manual entry interface for consumer router deployments (requires keying-in IP addresses from router admin panel). Automatic device discovery for professional router deployments (via router API integration).
   - **Connection Verification**: At session start, verify connection to all devices and confirm IP addresses match expected values. If any device connection fails, automatically attempt reconnection via NAT punchthrough or re-authentication. Ensures all devices are reachable before gameplay begins.
@@ -2899,21 +2888,21 @@ LBEAST requires reliable network communication between game engine servers, ECUs
 
 #### Gunship Experience — Alpha Readiness
 
-> **📋 Hardware Specifications:** See **[FirmwareExamples/GunshipExperience/Gunship_Hardware_Specs.md](FirmwareExamples/GunshipExperience/Gunship_Hardware_Specs.md)** for complete hardware specifications including solenoid selection, PWM driver modules, thermal management, redundancy, and communication architecture.
+> **📋 Hardware Specifications:** See **[FirmwareExamples/GunshipExperience/Gunship_Hardware_Specs.md](Packages/com.ajcampbell.lbeast/FirmwareExamples/GunshipExperience/Gunship_Hardware_Specs.md)** for complete hardware specifications including solenoid selection, PWM driver modules, thermal management, redundancy, and communication architecture.
 
 - [ ] **Guns Subsystem (Per-Station Solenoid Kicker)**
   - **Hardware**: One embedded controller per play station (4 total), each with:
     - Dual thumb buttons (fire mode controls)
-    - 24V solenoid kicker (haptic recoil) — see [Gunship_Hardware_Specs.md](FirmwareExamples/GunshipExperience/Gunship_Hardware_Specs.md) for detailed specifications
+    - 24V solenoid kicker (haptic recoil) — see [Gunship_Hardware_Specs.md](Packages/com.ajcampbell.lbeast/FirmwareExamples/GunshipExperience/Gunship_Hardware_Specs.md) for detailed specifications
     - One SteamVR Ultimate tracker on the gun nose
   - **Networking**:
-    - Station ECUs sync over UDP to the primary Gunship ECU (mounted on scissor lift) — see [Gunship_Hardware_Specs.md](FirmwareExamples/GunshipExperience/Gunship_Hardware_Specs.md) for communication architecture
+    - Station ECUs sync over UDP to the primary Gunship ECU (mounted on scissor lift) — see [Gunship_Hardware_Specs.md](Packages/com.ajcampbell.lbeast/FirmwareExamples/GunshipExperience/Gunship_Hardware_Specs.md) for communication architecture
     - Primary ECU relays aggregated per-station state to game engine:
       - Button states (debounced, rate-limited)
       - Gun orientation vectors (from trackers)
       - Optional kicker telemetry (duty, temp, faults)
   - **Engine-Side APIs**:
-    - Real-time tracker node per gun transform (C++ component + BP access)
+    - Real-time tracker node per gun transform (C# component + Unity Inspector access)
     - Event/delegate surface for fire presses, fire rate gating, and safety lockouts
     - Sample rendering helpers for minigun/grenade/alt-fire archetypes
     - Per-station ID mapping and replication-safe routing
@@ -2924,9 +2913,9 @@ LBEAST requires reliable network communication between game engine servers, ECUs
     - Engine-side transform fusion: commanded pose vs tracker pose
   - **Performance Optimization Module**:
     - Measure responsiveness to tilt/translation commands (latency, overshoot, settling)
-    - Rolling KPIs exposed to Command Console/UMG (basic performance dashboard)
-  - **Blueprint Locator Actor**:
-    - Simple locator blueprint representing the moving platform root
+    - Rolling KPIs exposed to Command Console/UI Toolkit (basic performance dashboard)
+  - **Unity GameObject Locator**:
+    - Simple GameObject representing the moving platform root
     - Easy attachment point for chopper/gunship/spaceship meshes
     - Auto-follows fused platform transform (commanded ⊕ tracker correction)
   - **Grounded/In-Flight State**:
@@ -2958,10 +2947,10 @@ LBEAST requires reliable network communication between game engine servers, ECUs
 
 <div style="margin-left: 20px;">
 
-### v1.1 (Future)
-- Real-time AI facial animation integration
-- Performance profiling tools
-- Visual configuration editor for platforms
+### 🔄 In Progress (v1.1)
+- [ ] Meta Quest 3 native integration
+- [ ] Sample Arduino/ESP32 firmware
+- [ ] WebSocket alternative for live actor streaming
 
 </div>
 
@@ -2972,18 +2961,21 @@ LBEAST requires reliable network communication between game engine servers, ECUs
 
 <div style="margin-left: 20px;">
 
-### v2.0 (Future)
-- Holographic eCommerce module (Looking Glass, Voxon)
-- **Holographic Render Target Support** - Support for holographic display technologies including swept-plane, swept-volume, Pepper's Ghost, lenticular, and other volumetric display methods. Enables rendering to specialized holographic hardware for immersive product visualization and LBE installations.
-- **GunshipExperience HOTAS Pilot Support** - Add optional 5th player (pilot) support to GunshipExperience with HOTAS controller integration. Enables pilot-controlled flight while 4 gunners operate weapons, expanding gameplay possibilities for multi-crew vehicle experiences.
-- **Superhero Flight Experience Optional Motion Platform** - Add optional 2DOF or 3DOF hydraulic motion platform support for Superhero Flight Experience. Platform ECU is separate from winch ECU, both orchestrated by `USuperheroFlightECUController` on server. Cannot repurpose existing 4DOF template (Gunship) or 2DOF gyro template (FlightSim) - requires new 2DOF/3DOF hydraulic platform controllers built from scratch. Platform provides additional motion feedback during takeoff/landing sequences and flight maneuvers.
-- Cloud-based AI facial animation
-- Custom tracking system plugins (UWB, optical, ultrasonic)
-- Online multiplayer support
-- AR headset support (if viable hardware emerges)
-- **Render Target Arrays and Matrices** - Support for Render Target arrays and matrices with hardware-agnostic output to video spheres, 360 video, stereoscopic 3D billboards, stereoscopic 360 video, LED walls, projectors (front projection, rear projection, variable-depth projection), and drone swarm renderers. Enables synchronized multi-display installations for immersive LBE experiences.
-- **OTA Firmware Updates** - Implement and test OTA (Over-The-Air) firmware flashing for ESP32-based reference design, APT package management for Raspberry Pi and Jetson Nano, and ESP32-as-wireless-adapter for STM32 OTA based on the rounakdatta open-source project. **Note:** The rounakdatta project will be included as a git submodule when implementing OTA functionality.
-- **3D-Printable 1/8th-Scale Platform Model** - Design a 3D-printable 1/8th-scale model of the scissor lift and tilt platform with complete ECU prototype integration capability for use in off-site network debugging. Enables developers to test network configurations, firmware updates, and communication protocols without requiring access to full-scale hardware. Includes mounting points for ESP32 ECUs, mock actuators, and all necessary interfaces for full system validation.
+### 🎯 Planned (v2.0)
+- [ ] Apple Vision Pro support
+- [ ] **Holographic Render Target Support** - Support for holographic display technologies including swept-plane, swept-volume, Pepper's Ghost, lenticular, and other volumetric display methods. Enables rendering to specialized holographic hardware for immersive product visualization and LBE installations.
+- [ ] **GunshipExperience HOTAS Pilot Support** - Add optional 5th player (pilot) support to GunshipExperience with HOTAS controller integration. Enables pilot-controlled flight while 4 gunners operate weapons, expanding gameplay possibilities for multi-crew vehicle experiences.
+- [ ] Advanced inverse kinematics for custom actuator configs
+- [ ] Visual scripting (Bolt/Visual Scripting) support
+- [ ] Cloud multiplayer (Photon/Mirror)
+- [ ] Prefab packages (ready-to-use scene templates)
+- [ ] **RenderTexture Arrays and Matrices** - Support for RenderTexture arrays and matrices with hardware-agnostic output to video spheres, 360 video, stereoscopic 3D billboards, stereoscopic 360 video, LED walls, projectors (front projection, rear projection, variable-depth projection), and drone swarm renderers. Enables synchronized multi-display installations for immersive LBE experiences.
+- [ ] **OTA Firmware Updates** - Implement and test OTA (Over-The-Air) firmware flashing for ESP32-based reference design, APT package management for Raspberry Pi and Jetson Nano, and ESP32-as-wireless-adapter for STM32 OTA based on the rounakdatta open-source project. **Note:** The rounakdatta project will be included as a git submodule when implementing OTA functionality.
+- [ ] **3D-Printable 1/8th-Scale Platform Model** - Design a 3D-printable 1/8th-scale model of the scissor lift and tilt platform with complete ECU prototype integration capability for use in off-site network debugging. Enables developers to test network configurations, firmware updates, and communication protocols without requiring access to full-scale hardware. Includes mounting points for ESP32 ECUs, mock actuators, and all necessary interfaces for full system validation.
+
+</div>
+
+</details>
 
 </div>
 
