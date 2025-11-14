@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "LBEASTHMDInterface.h"
+#include "LBEASTHMDTypes.h"
 #include "LBEASTTrackingInterface.h"
 #include "Networking/LBEASTServerCommandProtocol.h"
 #include "LBEASTWorldPositionCalibrator.h"

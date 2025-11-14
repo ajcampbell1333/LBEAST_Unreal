@@ -31,7 +31,8 @@ public class EmbeddedSystems : ModuleRules
 				"Json",
 				"JsonUtilities",
 				"LBEASTCommon",  // Required for ILBEASTEmbeddedDeviceInterface
-				"LBEASTCore"     // Required for ULBEASTUDPTransport
+				"LBEASTCore",    // Required for ULBEASTUDPTransport
+				"RF433MHz"       // Required for URF433MHzReceiver
 			}
 		);
 			

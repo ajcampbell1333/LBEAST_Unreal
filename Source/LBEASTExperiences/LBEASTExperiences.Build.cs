@@ -45,7 +45,8 @@ public class LBEASTExperiences : ModuleRules
 				"SlateCore",
 				"AIFacemask",      // Implementation details - not exposed in public API
 				"LargeHaptics",    // Implementation details - not exposed in public API
-				"EmbeddedSystems"  // Implementation details - not exposed in public API
+				"EmbeddedSystems", // Implementation details - not exposed in public API
+				"RF433MHz"         // Required for SuperheroFlightExperience RF433MHz receiver
 			}
 		);
 	}

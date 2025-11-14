@@ -3,6 +3,7 @@
 #include "LBEASTExperiences.h"
 
 DEFINE_LOG_CATEGORY(LogGoKart);
+DEFINE_LOG_CATEGORY(LogSuperheroFlight);
 
 #define LOCTEXT_NAMESPACE "FLBEASTExperiencesModule"
 

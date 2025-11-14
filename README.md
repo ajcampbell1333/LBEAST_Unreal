@@ -16,14 +16,17 @@ LBEAST is a comprehensive SDK for developing VR and AR Location-Based Entertainm
 
 The LBEAST SDK democratizes LBE development by providing:
 - **Experience Genre Templates** - Drag-and-drop complete LBE solutions
-- **Low-Level APIs** - Technical modules for custom implementations
-- **AI-Driven Facial Animation** for immersive theater live actors (NVIDIA ACE automated pipeline)
-- **Wireless Trigger Controls** - Embedded buttons in costume/clothes for narrative state machine control
-- **Large-Scale Hydraulic Haptics** for motion platforms
-- **Embedded Systems Integration** for costume and prop-mounted hardware
-- **Multiplayer LAN Experiences** with state machine control
-- **HMD Abstraction** supporting OpenXR, SteamVR, and Meta Quest
+- **Low-Level APIs** - Technical modules for custom integration between game engine and various physical systems
+- **AI-Driven Facial Animation** for immersive theater live actors (automated w/ NVIDIA ACE)
+- **Wireless Trigger Controls** - Embedded buttons in costume/clothing for narrative state machine control through WiFi/Bluetooth
+- **Large-Scale Hydraulic Haptics** for lift/motion platforms
+- **Embedded Systems Integration** for costume-/prop-/wall-/furniture-mounted interfaces
+- **Embedded Sensors** temperature, motion, face, and body tracking sensors to trigger escape room actions
+- **Co-located XR Multiplayer LAN Experiences** with Unreal Replication + GAS
+- **HMD and Hand Tracking** via OpenXR (Unreal's native XR system)
 - **6DOF Tracking** with SteamVR trackers and future extensibility
+
+> **⚠️ HMD System Note:** LBEAST uses **OpenXR exclusively** for all HMD and hand tracking access through Unreal Engine's native XR system (`IXRTrackingSystem`, `IHandTracker`). If OpenXR is not desired for your LBE deployment for any reason, but you still want to use an LBEAST experience genre template to get started, there may be some customization necessary in `LBEASTHandGestureRecognizer` and in some of the Experience classes. Anywhere OpenXR is referenced, you may need to create an alternative version of that class with your SDK of choice replacing OpenXR usage.
 
 > **🔗 Unity Version:** Also available at [github.com/ajcampbell1333/lbeast_unity](https://github.com/ajcampbell1333/lbeast_unity)
 
@@ -34,7 +37,40 @@ The LBEAST SDK democratizes LBE development by providing:
 
 <div style="margin-left: 20px;">
 
-If a Hollywood studio invested millions in a new project, and then only showed in one theater? They'd never turn profit. We need hundreds of VR venues ready to deploy the same experience at once, and hundreds of developer teams need a way to deploy to the specs of those venues reliably so the venues and their customers can count on a continuous variety of new content. Enter LBEAST.
+Home console VR usage is nascent and difficult despite being steadily on the rise:
+* 80 million monthly active users in the U.S. in 2025
+* up 60% from 2020
+* 10% of Americans started using VR regularly so far this decade
+
+If that growth holds, we might reach 100 million regular VR users by end-of-decade, more than 1/4 of the population. It's not smartphone-era growth, but it's steady.
+
+BUT...
+
+Content budgets are skin-and-bone. 
+
+Building for VR requires specialty talent compared to film/TV/gaming, and every dollar spent goes half as far due to...
+* deeper fidelity challenges
+* bigger QA hurdles
+* evil perf op constraints
+
+VR devs need a leg up. The industry has been in a funding desert since the Pandemic. "VR is all hype" rumors put the dev community on a respirator, and we never got off the ropes.
+
+I get where investors are coming from. We're 10 years into modern VR. They need proof of ROI. We need to deliver in the black. We need better tools. We were building cars without factories.
+
+
+A better analogy - Movie Theaters:
+If a Hollywood studio invested millions on a new film before the streaming era, they'd be sunk if there were no 35mm projector and no movie theaters hungry to roll the next hit.
+
+An even better analogy - the JAMMA Arcade Spec:
+In 1985, the arcade industry was in a slump. All the arcade boxes were proprietary. Venues had to buy a new arcade box for every game. Devs had to design a whole arcade box for just THEIR game. Enter the JAMMA Spec. Suddenly venues could leave the same box in place and swap a card, and suddenly it's a new game! Same hardware, fresh regular content. Devs could focus on the game knowing reliable hardware was already on-site.
+
+We need that for the VR industry:
+* Devs need to be able to focus on dev, not hardware
+* Venues need standard hardware so devs can bring them regular new content.
+
+We have an chicken-egg situation. A standard spec for VR LBE is what we need.
+
+Enter LBEAST. Free, open-source, plug-n-play across multiple genres.
 
 </div>
 
@@ -100,6 +136,7 @@ Foundation modules providing core functionality:
 - `ProLighting` - DMX lighting control (Art-Net, USB DMX)
 - `Retail` - Cashless tap card payment interface for VR tap-to-play
 - `VOIP` - Low-latency voice communication with 3D HRTF spatialization
+- `RF433MHz` - 433MHz RF trigger/receiver API for wireless button/remote control (rolling code support, USB receiver abstraction)
 
 **Use these when:** Building custom experiences from scratch with full control.
 
@@ -907,7 +944,7 @@ Experience->NumberOfPlayers = 4;
 Experience->LiveActorMesh = MyCharacterMesh;
 
 // ServerMode is already set to DedicatedServer by default
-// DO NOT CHANGE IT - initialization will fail if you do
+// DO NOT CHANGE IT - initialization will fail if you dogf
 
 Experience->InitializeExperience();  // Will validate server mode
 
@@ -1173,10 +1210,13 @@ Foundation module providing core systems for all LBEAST experiences, including H
 **Key Components:**
 - `LBEASTExperienceBase` - Base class for all experience templates
 - `LBEASTTrackingInterface` - Unified API for 6DOF tracking systems (SteamVR, custom optical, UWB, ultrasonic)
-- `LBEASTHMDInterface` - Unified API for VR/AR headsets (OpenXR, SteamVR, Meta)
+- `LBEASTHMDTypes` - HMD configuration types (passthrough settings, etc.) - **Note:** HMD and hand tracking uses Unreal's native OpenXR APIs directly (`IXRTrackingSystem`, `IHandTracker`)
+- `LBEASTHandGestureRecognizer` - Hand gesture recognition component using OpenXR hand tracking
 - `LBEASTWorldPositionCalibrator` - Manual and automatic position calibration for drift prevention
 - `LBEASTUDPTransport` - Binary UDP communication for embedded systems
 - `LBEASTInputAdapter` - Hardware-agnostic input abstraction
+
+> **⚠️ OpenXR Requirement:** LBEAST uses OpenXR exclusively for HMD and hand tracking. If you need to use a different XR SDK (SteamVR, Meta SDK, etc.), you will need to customize `LBEASTHandGestureRecognizer` and experience classes that use HMD/hand tracking. See the main Overview section for details.
 
 **World Position Calibration:**
 
@@ -1629,14 +1669,358 @@ void AMyExperience::InitializeExperienceImpl()
 
 </details>
 
+<details>
+<summary><strong>📡 RF433MHz API</strong></summary>
+
+<div style="margin-left: 20px;">
+
+**Module:** `RF433MHz`
+
+Hardware-agnostic 433MHz wireless remote/receiver integration. Provides abstraction layer for different USB receiver modules (RTL-SDR, CC1101, RFM69, RFM95, Generic) with rolling code validation and replay attack prevention.
+
+**Key Features:**
+- **USB Receiver Abstraction** - Unified interface (`I433MHzReceiver`) for multiple receiver types
+- **Rolling Code Validation** - Security feature to prevent replay attacks
+- **Button Learning System** - Dynamic button discovery and registration
+- **Button Mapping System** - Assign function names to learned buttons for rapid Ops Tech configuration
+- **JSON Persistence** - Auto-save/load button mappings on server-side
+- **Cross-Platform Firmware** - Autonomous flash storage for embedded systems
+
+**Basic Example:**
+```cpp
+URF433MHzReceiver* RFReceiver = CreateDefaultSubobject<URF433MHzReceiver>(TEXT("RFReceiver"));
+
+// Configure receiver
+FRF433MHzReceiverConfig Config;
+Config.ReceiverType = ERF433MHzReceiverType::CC1101;  // Or RTL-SDR, RFM69, Generic
+Config.USBDevicePath = TEXT("COM3");  // Or /dev/ttyUSB0 on Linux
+
+// Security configuration
+Config.bEnableRollingCodeValidation = true;
+Config.RollingCodeSeed = 0x12345678;  // Must match remote firmware
+Config.bEnableReplayAttackPrevention = true;
+Config.ReplayAttackWindow = 100;  // Reject codes within 100ms
+
+// Optional: AES encryption (for custom solutions)
+Config.bEnableAESEncryption = false;  // Set to true for AES-encrypted remotes
+// Config.AESEncryptionKey = TEXT("0123456789ABCDEF0123456789ABCDEF");  // AES-128: 32 hex chars
+// Config.AESKeySize = 128;  // 128 or 256 bits
+
+// Initialize receiver
+RFReceiver->InitializeReceiver(Config);
+
+// Subscribe to button events
+RFReceiver->OnButtonPressed.AddDynamic(this, &AMyActor::HandleButtonPressed);
+RFReceiver->OnButtonFunctionTriggered.AddDynamic(this, &AMyActor::HandleButtonFunction);
+
+// Load saved button mappings (auto-loads on BeginPlay)
+RFReceiver->LoadButtonMappings();
+```
+
+**Button Learning & Mapping:**
+```cpp
+// Enable learning mode to pair new remotes
+RFReceiver->EnableLearningMode(60.0f);  // 60 second timeout
+
+// Subscribe to learning events
+RFReceiver->OnCodeLearned.AddDynamic(this, &AMyActor::OnButtonLearned);
+
+// Auto-assign function names when buttons are learned
+void AMyActor::OnButtonLearned(int32 ButtonCode, uint32 RollingCode)
+{
+    FString FunctionName;
+    if (ButtonCode == 0) FunctionName = TEXT("HeightUp");
+    else if (ButtonCode == 1) FunctionName = TEXT("HeightDown");
+    // ... etc
+    
+    RFReceiver->AssignButtonFunction(ButtonCode, FunctionName);
+    // Auto-saved to JSON immediately
+}
+
+// Query learned buttons
+TArray<FRF433MHzLearnedButton> LearnedButtons;
+int32 Count = RFReceiver->GetLearnedButtons(LearnedButtons);
+
+// Get button mappings
+TArray<FRF433MHzButtonMapping> Mappings;
+RFReceiver->GetButtonMappings(Mappings);
+```
+
+**Function-Triggered Events:**
+```cpp
+// Subscribe to function-triggered delegate (fires only if button has assigned function)
+RFReceiver->OnButtonFunctionTriggered.AddDynamic(this, &AMyActor::HandleButtonFunction);
+
+void AMyActor::HandleButtonFunction(int32 ButtonCode, const FString& FunctionName, bool bPressed)
+{
+    if (FunctionName == TEXT("HeightUp"))
+    {
+        AdjustWinchHeight(6.0f);  // Move winch up
+    }
+    else if (FunctionName == TEXT("HeightDown"))
+    {
+        AdjustWinchHeight(-6.0f);  // Move winch down
+    }
+}
+```
+
+**Supported USB Receiver Modules:**
+- **RTL-SDR** - Software-defined radio USB dongle (uses librtlsdr)
+- **CC1101** - Dedicated 433MHz transceiver module with USB interface
+- **RFM69/RFM95** - LoRa/RF modules with USB interface (433MHz capable)
+- **Generic** - Off-the-shelf USB dongles available on Amazon/eBay
+
+**Security Features:**
+
+<details>
+<summary><strong>Rolling Code Validation</strong></summary>
+
+<div style="margin-left: 20px;">
+
+**Purpose:** Prevents replay attacks by validating that each button press uses a unique, incrementing code.
+
+**How It Works:**
+- Remote firmware generates a rolling code (increments on each button press)
+- Receiver validates that received code is greater than last valid code (with tolerance window)
+- Invalid codes (duplicates, out-of-sequence) are rejected
+
+**Configuration:**
+```cpp
+Config.bEnableRollingCodeValidation = true;
+Config.RollingCodeSeed = 0x12345678;  // Must match remote firmware seed
+```
+
+**Supported Protocols:**
+- KeeLoq (common in garage door openers)
+- Hopping Code (proprietary protocols)
+- Custom rolling code implementations
+
+**Note:** Many off-the-shelf 433MHz remotes support rolling codes. Check product specifications before purchase.
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>Replay Attack Prevention</strong></summary>
+
+<div style="margin-left: 20px;">
+
+**Purpose:** Rejects duplicate button codes received within a short time window, preventing attackers from replaying intercepted signals.
+
+**How It Works:**
+- Tracks timestamp of last received code per button
+- Rejects codes received within `ReplayAttackWindow` milliseconds of last code
+- Prevents rapid-fire replay attacks even if rolling codes are bypassed
+
+**Configuration:**
+```cpp
+Config.bEnableReplayAttackPrevention = true;
+Config.ReplayAttackWindow = 100;  // Reject codes within 100ms
+```
+
+**Recommended Settings:**
+- **100ms** - Standard protection (recommended for most use cases)
+- **50ms** - Stricter protection (may reject legitimate rapid presses)
+- **200ms** - More lenient (allows faster button presses)
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>AES Encryption (For Custom Solutions)</strong></summary>
+
+<div style="margin-left: 20px;">
+
+**Purpose:** Encrypts button codes with AES-128 or AES-256 to prevent signal decoding even if intercepted.
+
+**When to Use:**
+- Custom remote/receiver firmware (not off-the-shelf)
+- High-security installations (public venues, high foot traffic)
+- Compliance requirements (enterprise deployments)
+
+**Configuration:**
+```cpp
+Config.bEnableAESEncryption = true;
+Config.AESEncryptionKey = TEXT("0123456789ABCDEF0123456789ABCDEF");  // AES-128: 32 hex chars (16 bytes)
+Config.AESKeySize = 128;  // 128 or 256 bits
+```
+
+**Key Requirements:**
+- **AES-128:** 16-byte key (32 hex characters)
+- **AES-256:** 32-byte key (64 hex characters)
+- Key must match between remote and receiver firmware
+- Store keys securely (not in source code for production)
+
+**Implementation Notes:**
+- Requires custom firmware on both remote and receiver
+- USB receiver implementation must decrypt signals before passing to API
+- API validates decrypted codes (rolling code + replay prevention still applies)
+
+**Trade-offs:**
+- ✅ **High Security** - Prevents signal decoding
+- ❌ **Higher Cost** - Requires custom firmware development
+- ❌ **More Complex** - Additional development and testing required
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>Physical Safety Interlocks</strong></summary>
+
+<div style="margin-left: 20px;">
+
+**Purpose:** Enforces physical safety requirements at the experience level to prevent unsafe operation.
+
+**⚠️ Critical:** Physical safety interlocks are **NOT** implemented in the RF433MHz API itself. They must be enforced by the experience using the API (e.g., `SuperheroFlightExperience`). The API provides the button events - the experience enforces safety.
+
+**Required Interlocks (Experience-Level Implementation):**
+
+1. **Calibration Mode Only:**
+   - RF button events only processed when `playSessionActive = false`
+   - Prevents accidental activation during gameplay
+   - Example: `if (!bPlaySessionActive) { ProcessCalibrationButton(); }`
+
+2. **Movement Limits:**
+   - Limit movement to small increments during calibration (e.g., ±6 inches per button press)
+   - Prevent large movements that could cause injury
+   - Example: `AdjustWinchHeight(Clamp(DeltaHeight, -6.0f, 6.0f));`
+
+3. **Emergency Stop Precedence:**
+   - Emergency stop always takes precedence over calibration commands
+   - E-stop immediately stops all motion, regardless of button state
+   - Example: `if (bEmergencyStop) { StopAllMotion(); return; }`
+
+4. **Physical Presence Requirement:**
+   - Ops Tech must be physically present (line-of-sight to player) during calibration
+   - Documented procedure, not enforced by code
+   - Visual confirmation required before calibration begins
+
+5. **Timeout Protection:**
+   - Calibration mode auto-disables after inactivity timeout (e.g., 5 minutes)
+   - Prevents accidental activation if remote is left unattended
+   - Example: `if (CalibrationInactiveTime > 300.0f) { DisableCalibrationMode(); }`
+
+6. **Network Isolation:**
+   - USB receiver connected to isolated server PC (not on public network)
+   - LBE installation operates on isolated LAN (see Network Configuration documentation)
+   - Reduces attack surface from external networks
+
+**Implementation Example:**
+```cpp
+void ASuperheroFlightExperience::HandleCalibrationButton(const FString& FunctionName, bool bPressed)
+{
+    // Interlock 1: Calibration mode only
+    if (bPlaySessionActive)
+    {
+        UE_LOG(LogSuperheroFlight, Warning, TEXT("Calibration disabled - play session active"));
+        return;
+    }
+    
+    // Interlock 2: Emergency stop precedence
+    if (bEmergencyStop)
+    {
+        UE_LOG(LogSuperheroFlight, Warning, TEXT("Calibration disabled - emergency stop active"));
+        return;
+    }
+    
+    // Interlock 3: Movement limits
+    float DeltaHeight = 0.0f;
+    if (FunctionName == TEXT("HeightUp"))
+    {
+        DeltaHeight = FMath::Clamp(6.0f, -6.0f, 6.0f);  // Max ±6 inches
+    }
+    else if (FunctionName == TEXT("HeightDown"))
+    {
+        DeltaHeight = FMath::Clamp(-6.0f, -6.0f, 6.0f);
+    }
+    
+    // Interlock 4: Timeout protection
+    if (CalibrationInactiveTime > 300.0f)  // 5 minutes
+    {
+        UE_LOG(LogSuperheroFlight, Warning, TEXT("Calibration disabled - timeout"));
+        DisableCalibrationMode();
+        return;
+    }
+    
+    // Process calibration command
+    AdjustWinchHeight(DeltaHeight);
+    CalibrationInactiveTime = 0.0f;  // Reset timeout
+}
+```
+
+**Security Best Practices:**
+- ✅ Always implement all 6 interlock types
+- ✅ Log all interlock violations for audit trail
+- ✅ Display interlock status in Command Console
+- ✅ Test interlock behavior during safety validation
+- ✅ Document interlock procedures in operations manual
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>Code Learning Mode</strong></summary>
+
+<div style="margin-left: 20px;">
+
+**Purpose:** Secure pairing of new remotes without exposing system to unauthorized access.
+
+**How It Works:**
+- Enable learning mode for a limited time window (e.g., 60 seconds)
+- Press buttons on new remote during learning window
+- System learns button codes and rolling code seeds
+- Learning mode auto-disables after timeout or manual disable
+
+**Configuration:**
+```cpp
+RFReceiver->EnableLearningMode(60.0f);  // 60 second timeout
+RFReceiver->OnCodeLearned.AddDynamic(this, &AMyActor::OnButtonLearned);
+```
+
+**Security Considerations:**
+- Learning mode should only be enabled by authorized Ops Tech
+- Learning mode should be disabled immediately after pairing
+- Learned buttons are persisted to JSON (secure storage recommended)
+
+</div>
+
+</details>
+
+**Persistence:**
+- ✅ **Server-Side JSON** - Auto-saves to `Saved/Config/LBEAST/RF433MHz_Buttons.json`
+- ✅ **Firmware Flash Storage** - Autonomous storage on embedded systems (ESP32 Preferences, EEPROM, file system)
+- ✅ **Auto-Load on Startup** - Button mappings restored automatically
+
+**Use Cases:**
+- Height calibration clicker (SuperheroFlightExperience)
+- Wireless trigger buttons (costume-embedded, prop-mounted)
+- Remote control for Ops Tech operations
+- Emergency stop remotes
+
+**Example Files:**
+- Server-side example: `Source/EmbeddedSystems/Private/RFTriggerController_Example.cpp`
+- Firmware example: `FirmwareExamples/Base/Examples/RFTriggerECU_Example.ino`
+
+**Note:** USB hardware drivers are NOOP (platform-specific implementations required based on chosen USB receiver module). The abstraction layer is complete - developers implement USB communication for their specific hardware.
+
+</div>
+
+</details>
+
 ## 📦 Installation
 
 ### Prerequisites
 
 - **Unreal Engine 5.5.4** or later
 - **Visual Studio 2022** (Windows)
-- **SteamVR** (for VR features)
-- **OpenXR Runtime** (Meta Quest, Windows Mixed Reality, etc.)
+- **OpenXR Runtime** (required for HMD and hand tracking - supports Meta Quest, Windows Mixed Reality, SteamVR via OpenXR, etc.)
+- **SteamVR** (optional, for 6DOF body/prop tracking with SteamVR trackers)
+
+> **⚠️ OpenXR Requirement:** LBEAST uses OpenXR exclusively for all HMD and hand tracking. Your HMD must support OpenXR (most modern VR headsets do, including Meta Quest, Windows Mixed Reality, and SteamVR-compatible headsets via OpenXR). If your deployment requires a different XR SDK, you will need to customize the HMD/hand tracking components. See the main Overview section for details.
 
 ### Installation Methods
 
@@ -1795,20 +2179,26 @@ PublicDependencyModuleNames.AddRange(new string[] {
     "AIFacemask", 
     "LargeHaptics", 
     "EmbeddedSystems",
-    "Retail"
+    "Retail",
+    "RF433MHz"
 });
 ```
 
 ### 3. Configure HMD System
 
-```cpp
-#include "LBEASTHMDInterface.h"
+LBEAST uses Unreal Engine's native OpenXR system for all HMD and hand tracking. No additional configuration is required - OpenXR is automatically used when available.
 
+```cpp
+#include "LBEASTCore/LBEASTHMDTypes.h"
+
+// HMD configuration (for passthrough settings, etc.)
 FLBEASTHMDConfig HMDConfig;
-HMDConfig.HMDType = ELBEASTHMDType::OpenXR;
+HMDConfig.HMDType = ELBEASTHMDType::OpenXR;  // OpenXR is the only supported type
 HMDConfig.bEnablePassthrough = true;  // For immersive live actors
 // Apply to your VR pawn...
 ```
+
+> **⚠️ OpenXR Requirement:** LBEAST uses OpenXR exclusively. If you need to use a different XR SDK, you will need to customize `LBEASTHandGestureRecognizer` and experience classes that access HMD/hand tracking. See the main Overview section for details.
 
 ### 4. Add Components to Blueprints
 
@@ -1818,6 +2208,7 @@ LBEAST components are available in the **Add Component** menu:
 - **Embedded Device Controller**
 - **Pro Audio Controller**
 - **Pro Lighting Controller**
+- **RF433MHz Receiver**
 
 LBEAST Actors are available in the **Place Actors** menu:
 - **Arcade Payment Manager**
@@ -1847,6 +2238,7 @@ LBEAST/
 ├── ProLighting         # DMX lighting control (Art-Net, USB DMX)
 ├── Retail              # Cashless tap card payment interface for VR tap-to-play
 ├── VOIP                # Low-latency voice communication with 3D HRTF
+├── RF433MHz            # 433MHz RF trigger/receiver API for wireless button/remote control
 └── LBEASTExperiences   # Pre-configured experience genre templates
     ├── AIFacemaskExperience
     ├── MovingPlatformExperience
@@ -1886,7 +2278,7 @@ LBEAST v0.1.0 focuses on **local LAN multiplayer** using Unreal's built-in repli
 
 All hardware communication is **abstracted** through interfaces:
 
-- **HMD Interface** → OpenXR, SteamVR, Meta
+- **HMD and Hand Tracking** → OpenXR (Unreal's native XR system) - **Note:** OpenXR is used exclusively. If you need a different XR SDK, customization of `LBEASTHandGestureRecognizer` and experience classes will be required.
 - **Tracking Interface** → SteamVR Trackers (future: UWB, optical, ultrasonic)
 - **Platform Controller** → UDP/TCP to hydraulic controller
 - **Embedded Devices** → Serial, WiFi, Bluetooth, Ethernet
@@ -1895,6 +2287,8 @@ This allows you to:
 1. Develop with simulated hardware
 2. Integrate real hardware without changing game code
 3. Swap hardware systems in configuration
+
+> **⚠️ OpenXR Requirement:** LBEAST uses OpenXR exclusively for HMD and hand tracking. If your deployment requires a different XR SDK (SteamVR native, Meta SDK, etc.), you will need to create alternative versions of classes that use OpenXR APIs. See the main Overview section for details.
 
 </div>
 
@@ -2406,7 +2800,7 @@ LBEAST requires reliable network communication between game engine servers, ECUs
 
 ### v0.1.0 (Complete)
 - ✅ Core module architecture
-- ✅ HMD abstraction (OpenXR, SteamVR, Meta)
+- ✅ HMD and hand tracking via OpenXR (Unreal's native XR system)
 - ✅ Tracking abstraction (SteamVR Trackers)
 - ✅ AI Face API
 - ✅ Large Haptics API (4DOF platforms + 2DOF gyroscope)
@@ -2431,6 +2825,7 @@ LBEAST requires reliable network communication between game engine servers, ECUs
 - ✅ **24V Large Solenoid Kicker with Dual-Handle Thumb Triggers** - 24V large solenoid kicker with dual-handle thumb triggers connected to an embedded system to simulate a large gun/rocket/laser/plasma mini-gun/rifle/launcher mounted to the hydraulic rig in the GunshipExperience
 - ✅ **Implementing HOTAS integration** - Complete HOTAS controller support with full input mapping and calibration (completed for FlightSimExperience; other experiences can migrate from FlightSimExperience if needed)
 - ✅ **Cashless Tap Card Payment Interface** - Implement cashless tap card payment interface for VR tap-to-play capability. Enables players to tap NFC/RFID cards or devices to initiate gameplay sessions without cash transactions.
+- ✅ **433MHz RF Trigger API** - Create low-level API module (`RF433MHz`) for 433MHz wireless remote/receiver integration. Provides abstraction layer (`I433MHzReceiver` interface) supporting multiple USB receiver modules (RTL-SDR, CC1101, RFM69, Generic). Features: rolling code validation, replay attack prevention, button event decoding, unified interface for game server code. Enables wireless button/remote control for calibration systems, trigger buttons, and other RF-based input devices. Includes: button learning/mapping system, JSON persistence (server-side), cross-platform flash storage (firmware), full server-side example (`RFTriggerController_Example.cpp`), full firmware example (`RFTriggerECU_Example.ino`). **Note:** USB hardware drivers are NOOP (platform-specific implementations required based on chosen USB receiver module). See `SuperheroFlightExperience` for usage example (height calibration clicker).
 - [ ] **Finishing AIFacemask functionality** - Complete all NOOP implementations for NVIDIA ACE service integration:
   - **AIFaceController**: Receive facial animation data from NVIDIA ACE endpoint (HTTP/WebSocket client), apply blend shape weights to skeletal mesh morph targets, apply facial texture to mesh material
   - **ACE Script Manager**: Request script playback from NVIDIA ACE server (HTTP POST), request script pre-baking (TTS → Audio, Audio → Facial data), async pre-baking support (background processing)
@@ -2441,10 +2836,24 @@ LBEAST requires reliable network communication between game engine servers, ECUs
   - **Server Beacon**: Get server port from project settings (load port configuration), track actual player count (query Unreal networking)
   - **Optimization**: Optimize blend shape application (batch updates, interpolation, caching), texture streaming optimization (efficient texture updates, compression)
 - [ ] **Go-Kart Experience** - Electric go-karts, bumper cars, race boats, or bumper boats augmented by passthrough VR or AR headsets enabling overlaid virtual weapons and pickups that affect the performance of the vehicles
+- [ ] **Superhero Flight Experience** - Single-player or multiplayer VR free-body flight experience (flying like Superman) with dual-winch suspended harness system and 10-finger/arm gesture-based control. **Note:** This is distinct from `FlightSimExperience` (2DOF gyroscope HOTAS cockpit for jet/spaceship simulation). Superhero Flight uses gesture control only - no HOTAS, no button events, no 6DOF body tracking required. Control is based on: (1) fist vs open hand gesture state, (2) distance/worldspace-relative angle between HMD-to-hands and world ground plane. See `FirmwareExamples/SuperheroFlightExperience/README.md` for detailed specifications:
+  - **Core Experience Actor**: Create `ASuperheroFlightExperience` actor class with five game states (standing, hovering, flight-up, flight-forward, flight-down), dual-winch state management, virtual altitude raycasting, and server-side parameter exposure. Support 1-4 players, each on their own dual-winch harness.
+  - **Dual-Winch System**: Implement redundant dual-winch system (front shoulder-hook, rear pelvis-hook) with tandem coordination, height calibration, and winch state management for all five game modes.
+  - **Superhero Flight ECU Controller & Firmware**: Create `USuperheroFlightECUController` component and `SuperheroFlightExperience_ECU.ino` firmware for dual-winch control (2 winches per player: front shoulder-hook and rear pelvis-hook), tension monitoring, safety systems, and telemetry. Support winch redundancy. Controller orchestrates winch ECU and optional motion platform ECU (separate ECUs, not integrated).
+  - **Flight Hands Controller**: Create `UFlightHandsController` component (client-side on HMD) that converts 10-finger/arm gestures into control events. Analyzes HMD-to-hands vector relative to world ground plane. Replicates gesture events to server via Unreal Replication (mostly NOOP for initial pass, document as NOOP).
+  - **Gesture Debugger**: Create `UGestureDebugger` component for HMD HUD visualization of gesture detection system (for Ops Tech calibration). **Note:** UMG HUD text overlay is deferred to v1.0 (nice-to-have). Debug visualization uses DrawDebugLine/DrawDebugSphere for now.
+  - **Height Calibration System**: Use `RF433MHz` low-level API to integrate 433MHz USB receiver dongle (connected to server PC) with 433MHz wireless up-down clicker for Ops Tech to calibrate player height during harness strapping. API provides abstraction layer for different USB receiver modules (RTL-SDR, CC1101, RFM69, Generic) with rolling code validation and safety interlock enforcement. Commands route directly from USB receiver to game server via API, which sends winch position commands to main ECU.
+  - **Data Models**: Create structs for dual-winch state, gesture state, virtual altitude, and telemetry (no button events).
+  - **Hardware Specifications & IO Flow Documentation**: Create hardware specs and IO flow docs in `FirmwareExamples/SuperheroFlightExperience/`. See `FirmwareExamples/SuperheroFlightExperience/README.md` for details.
+  - **Multiplayer Support**: Mostly NOOP for initial pass. Will support up to 4 players each on their own dual-winch harness. Use Unreal Replication to transport gesture-based triggers to server for relay. Document as NOOP.
 - [ ] **VR Player Transport (Server ↔ VR Clients)** - Bidirectional communication between game server and VR players:
   - **Server → VR Players**: Relay gun button events (Ch 310), gun state (firing, intensity), gun transforms (from trackers), and platform motion state. Use Unreal Replication for reliable state synchronization and optional UDP multicast for low-latency events.
   - **VR Players → Server**: Receive fire commands from VR controllers/triggers, relay to Gunship ECU → Gun ECU for solenoid firing. Support both centralized (via Gunship ECU) and direct (to Gun ECU) routing modes for latency optimization.
   - **Implementation**: Integrate with Unreal's multiplayer replication system (Replication/GAS) for state management, with optional custom UDP transport for time-critical events. Handle player connection/disconnection, station assignment, and network recovery.
+  - **⚠️ HMD and Hand Tracking Replication**: When implementing remote player hand tracking replication:
+    - **Current State**: Unreal's OpenXR system (`IHandTracker`, `IXRTrackingSystem`) only provides hand/HMD tracking data for the local player's HMD. Each client is only connected to one HMD, so remote players' hand data is not available via OpenXR APIs.
+    - **Future Implementation**: Replicate HMD and hand node transforms (wrist, fingertips, middle knuckle) from each client to all other clients via Unreal Replication. This enables rendering accurate real-time hands of other players in viewport.
+    - **Gesture Recognizer Integration**: When remote hand tracking replication is implemented, update `ULBEASTHandGestureRecognizer` and `UFlightHandsController` to accept replicated hand node transforms as an alternative data source (in addition to OpenXR's local player data). This will allow remote players to trigger gesture events when `bOnlyProcessLocalPlayer = false` is set. The gesture recognizer should check for replicated data first (if available), then fall back to OpenXR APIs for local player.
 
 </div>
 
@@ -2551,6 +2960,7 @@ LBEAST requires reliable network communication between game engine servers, ECUs
 - Holographic eCommerce module (Looking Glass, Voxon)
 - **Holographic Render Target Support** - Support for holographic display technologies including swept-plane, swept-volume, Pepper's Ghost, lenticular, and other volumetric display methods. Enables rendering to specialized holographic hardware for immersive product visualization and LBE installations.
 - **GunshipExperience HOTAS Pilot Support** - Add optional 5th player (pilot) support to GunshipExperience with HOTAS controller integration. Enables pilot-controlled flight while 4 gunners operate weapons, expanding gameplay possibilities for multi-crew vehicle experiences.
+- **Superhero Flight Experience Optional Motion Platform** - Add optional 2DOF or 3DOF hydraulic motion platform support for Superhero Flight Experience. Platform ECU is separate from winch ECU, both orchestrated by `USuperheroFlightECUController` on server. Cannot repurpose existing 4DOF template (Gunship) or 2DOF gyro template (FlightSim) - requires new 2DOF/3DOF hydraulic platform controllers built from scratch. Platform provides additional motion feedback during takeoff/landing sequences and flight maneuvers.
 - Cloud-based AI facial animation
 - Custom tracking system plugins (UWB, optical, ultrasonic)
 - Online multiplayer support

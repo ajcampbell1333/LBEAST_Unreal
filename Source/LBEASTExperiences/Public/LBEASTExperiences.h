@@ -21,6 +21,7 @@
  */
 
 DECLARE_LOG_CATEGORY_EXTERN(LogGoKart, Log, All);
+DECLARE_LOG_CATEGORY_EXTERN(LogSuperheroFlight, Log, All);
 
 class FLBEASTExperiencesModule : public IModuleInterface
 {
