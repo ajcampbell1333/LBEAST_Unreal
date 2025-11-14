@@ -1,6 +1,7 @@
 // Copyright (c) 2025 AJ Campbell. Licensed under the MIT License.
 
 #include "LBEASTHandGestureRecognizer.h"
+#include "VRPlayerTransport/VRPlayerReplicationComponent.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "IXRTrackingSystem.h"
@@ -196,13 +197,26 @@ IHandTracker* ULBEASTHandGestureRecognizer::GetHandTracker() const
 
 FTransform ULBEASTHandGestureRecognizer::GetHandNodeTransform(bool bLeftHand, EHandKeypoint Keypoint) const
 {
-	// TODO: When VR Player Transport replication is implemented, check for replicated hand node transforms first
-	// if (bOnlyProcessLocalPlayer == false && HasReplicatedHandData())
-	// {
-	//     return GetReplicatedHandNodeTransform(bLeftHand, Keypoint);
-	// }
+	// Check if we should use replicated data for remote players
+	// When bOnlyProcessLocalPlayer is false, we can process gestures for remote players using replicated data
+	if (!bOnlyProcessLocalPlayer || !ShouldProcessGestures())
+	{
+		// Try to get replicated data from VR replication component
+		if (ULBEASTVRPlayerReplicationComponent* ReplicationComp = GetVRReplicationComponent())
+		{
+			// If this is not the local player, use replicated data
+			if (!ReplicationComp->IsLocalPlayer())
+			{
+				FTransform ReplicatedTransform = ReplicationComp->GetReplicatedHandKeypointTransform(bLeftHand, Keypoint);
+				if (!ReplicatedTransform.Equals(FTransform::Identity))
+				{
+					return ReplicatedTransform;
+				}
+			}
+		}
+	}
 	
-	// Current implementation: Use OpenXR APIs (local player only)
+	// For local player or when replication component is not available, use OpenXR APIs
 	IHandTracker* Tracker = GetHandTracker();
 	if (!Tracker)
 	{
@@ -221,15 +235,47 @@ FTransform ULBEASTHandGestureRecognizer::GetHandNodeTransform(bool bLeftHand, EH
 	return FTransform::Identity;
 }
 
+ULBEASTVRPlayerReplicationComponent* ULBEASTHandGestureRecognizer::GetVRReplicationComponent() const
+{
+	AActor* Owner = GetOwner();
+	if (!Owner)
+	{
+		return nullptr;
+	}
+
+	// Try to get the component from the owner
+	return Owner->FindComponentByClass<ULBEASTVRPlayerReplicationComponent>();
+}
+
 void ULBEASTHandGestureRecognizer::UpdateGestureRecognition(float DeltaTime)
 {
-	// Only process gestures for locally controlled pawns (multiplayer safety)
-	if (!ShouldProcessGestures())
+	// Check if we should process gestures
+	// When bOnlyProcessLocalPlayer is true, only process for local player
+	// When false, process for all players (using replicated data for remote players)
+	if (bOnlyProcessLocalPlayer && !ShouldProcessGestures())
 	{
 		return;
 	}
 
-	if (!IsHandTrackingActive())
+	// Check if we have tracking data available
+	// For local player: check OpenXR APIs
+	// For remote player: check replicated data
+	bool bHasTrackingData = false;
+	if (ShouldProcessGestures())
+	{
+		// Local player - check OpenXR
+		bHasTrackingData = IsHandTrackingActive();
+	}
+	else
+	{
+		// Remote player - check replicated data
+		if (ULBEASTVRPlayerReplicationComponent* ReplicationComp = GetVRReplicationComponent())
+		{
+			bHasTrackingData = ReplicationComp->IsHandTrackingActive(true) || ReplicationComp->IsHandTrackingActive(false);
+		}
+	}
+
+	if (!bHasTrackingData)
 	{
 		return;
 	}

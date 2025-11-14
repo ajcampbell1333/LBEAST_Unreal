@@ -11,6 +11,7 @@
 class IXRTrackingSystem;
 class IHandTracker;
 class APlayerController;
+class ULBEASTVRPlayerReplicationComponent;
 
 /**
  * Hand gesture types that can be recognized
@@ -121,18 +122,16 @@ public:
 	/** 
 	 * Only process gestures for locally controlled pawns (multiplayer safety)
 	 * 
-	 * When true (default): Only the local player's gestures are processed.
-	 * When false: All players' gestures are processed (useful for debugging or experiences that need to track all players).
+	 * When true (default): Only the local player's gestures are processed using OpenXR APIs.
+	 * When false: All players' gestures are processed. For local players, uses OpenXR APIs. 
+	 *             For remote players, uses replicated data from ULBEASTVRPlayerReplicationComponent.
 	 * 
-	 * **Current Limitation**: In multiplayer, Unreal's XR system (`IHandTracker`, `IXRTrackingSystem`) only provides 
-	 * hand tracking data for the local player's HMD. Each client is only connected to one HMD, so remote players' 
-	 * hand data is not available via OpenXR APIs. Setting this to false will still only process local player gestures.
+	 * **VR Player Transport Integration**: When this is false and ULBEASTVRPlayerReplicationComponent is present,
+	 * the recognizer will automatically use replicated hand tracking data for remote players, enabling gesture
+	 * recognition for all players in multiplayer experiences.
 	 * 
-	 * **Future Enhancement**: When VR Player Transport replication is implemented (see roadmap), replicated hand node 
-	 * transforms will be available for remote players. At that time, this flag will enable processing gestures for 
-	 * remote players using replicated data instead of OpenXR APIs.
-	 * 
-	 * This is currently useful for single-player or when you want to explicitly allow processing on any pawn.
+	 * This is useful for experiences that need to track gestures from all players (e.g., collaborative experiences,
+	 * gesture-based interactions between players, or experiences that need to detect gestures from live actors).
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|HandGesture|Multiplayer")
 	bool bOnlyProcessLocalPlayer = true;
@@ -173,8 +172,11 @@ protected:
 	/** Get the hand tracker */
 	IHandTracker* GetHandTracker() const;
 
-	/** Get hand node transform from Unreal's native APIs */
+	/** Get hand node transform from Unreal's native APIs or replicated data */
 	FTransform GetHandNodeTransform(bool bLeftHand, EHandKeypoint Keypoint) const;
+
+	/** Get the VR replication component from the owner (if available) */
+	ULBEASTVRPlayerReplicationComponent* GetVRReplicationComponent() const;
 
 	/** Update gesture recognition */
 	void UpdateGestureRecognition(float DeltaTime);
