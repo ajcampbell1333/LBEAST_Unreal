@@ -3284,18 +3284,17 @@ For any experience running one year or longer, LBEAST's author recommends consid
 
 </details>
 
-### ✅ Current (v0.1.2) Pre-Alpha
-
 <details>
-<summary><strong>v0.1.2 (In-Progress)</strong></summary>
+<summary><strong>v0.1.2 (Complete)</strong></summary>
 
 <div style="margin-left: 20px;">
 
-### 🎯 Planned (v0.1.2 - In-Progress)
+### ✅ Completed (v0.1.2)
 - ✅ **VR Player Transport (Server ↔ VR Clients)** - Bidirectional communication between game server and VR players for replicating OpenXR HMD and hand tracking data across LAN multiplayer experiences. Integrates with Unreal Replication for state synchronization. Enables gesture recognition for remote players in 6DOF multiplayer experiences.
 - ✅ **Guns Subsystem (Per-Station Solenoid Kicker)** - Per-station embedded controllers with dual thumb buttons, 24V solenoid kicker for haptic recoil, SteamVR Ultimate tracker on gun nose. Station ECUs sync over UDP to primary Gunship ECU, which relays aggregated per-station state to game engine. Engine-side APIs include real-time tracker node per gun transform, event/delegate surface for fire presses, fire rate gating, safety lockouts, and per-station ID mapping.
 - ✅ **Virtual Scissor Lift Platform Representation** - SteamVR Ultimate tracker on platform chassis with engine-side transform fusion (commanded pose vs tracker pose). Performance optimization module with responsiveness measurement and rolling KPIs. Unity GameObject locator for easy attachment of chopper/gunship/spaceship meshes. Grounded/In-Flight state management with safety interlocks.
-- [ ] **Finishing AIFacemask functionality** - Complete all NOOP implementations for NVIDIA ACE service integration:
+- ✅ **LBEASTAI Module Architecture** - Complete low-level AI API module with decoupled architecture. Includes LLM providers (Ollama, OpenAI-compatible), ASR providers (NVIDIA Riva, Parakeet, Canary, Whisper), container management, HTTP/gRPC clients, and base manager classes (AIScriptManager, AIImprovManager, AIASRManager). Fully extensible provider system with hot-swapping support. AIFacemaskExperience refactored to use LBEASTAI base classes.
+- ✅ **Finishing AIFacemask functionality** - Complete all NOOP implementations for NVIDIA ACE service integration:
   - **AIFacemaskFaceController**: Receive facial animation data from NVIDIA ACE endpoint (HTTP/WebSocket client), apply blend shape weights to SkinnedMeshRenderer morph targets, apply facial texture to mesh material
   - **AIFacemaskScriptManager** (uses LBEASTAI `UAIScriptManager`): Request script playback from NVIDIA ACE server (HTTP POST), request script pre-baking (TTS → Audio, Audio → Facial data), async pre-baking support (background processing)
   - **AIFacemaskASRManager** (uses LBEASTAI `UAIASRManager`): Request ASR transcription from local ASR service (gRPC/HTTP to NVIDIA Riva/Parakeet/Canary), trigger improv after transcription (wire to AIFacemaskImprovManager)
@@ -3305,6 +3304,37 @@ For any experience running one year or longer, LBEAST's author recommends consid
   - **Server Beacon**: Get server port from project settings (load port configuration), track actual player count (query Unity networking)
   - **Optimization**: Optimize blend shape application (batch updates, interpolation, caching), texture streaming optimization (efficient texture updates, compression)
   - **Live Actor HUD Overlay**: Create stereo VR HUD overlay for live actors showing upcoming AI dialogue line, forward/backward arrow buttons with visual feedback on wrist button presses, and current narrative state (name + index). Uses UWidgetComponent attached to live actor's camera for stereo rendering. Procedurally generated in C++ (UAIFacemaskLiveActorHUD widget class + UAIFacemaskLiveActorHUDComponent actor component). Client-only, visible only to live actor HMD clients.
+
+</div>
+
+</details>
+
+### ✅ Current (v0.1.3) Pre-Alpha
+
+<details>
+<summary><strong>v0.1.3 (In-Progress)</strong></summary>
+
+<div style="margin-left: 20px;">
+
+### 🎯 Planned (v0.1.3 - In-Progress)
+
+#### Gunship Experience — Alpha Readiness
+
+> **📋 Hardware Specifications:** See **[FirmwareExamples/GunshipExperience/Gunship_Hardware_Specs.md](Packages/com.ajcampbell.lbeast/FirmwareExamples/GunshipExperience/Gunship_Hardware_Specs.md)** for complete hardware specifications including solenoid selection, PWM driver modules, thermal management, redundancy, and communication architecture.
+
+- [ ] **ESP32 Shield Design (Hardware)**
+  - **Example Shield Designs**: Design example shields/breakout boards for ESP32 plus needed modules for both ECU types:
+    - **GunshipExperience_ECU**: ESP32 + Ethernet PHY (LAN8720A) + actuator control interfaces + scissor lift control interfaces
+    - **Gun_ECU**: ESP32 + Ethernet PHY (LAN8720A) + dual thumb button inputs + N× solenoid PWM driver interfaces + NTC thermistor ADC inputs
+  - **Source Files**: Include PCB design source files in KiCAD format (`.kicad_pcb`, `.kicad_sch`) for maximum extensibility
+    - **Note**: EasyEDA projects can be exported to KiCAD format for cross-tool compatibility
+    - **Alternative**: Include source files in EasyEDA format if preferred, but provide KiCAD export
+  - **Manufacturing Files**: Include GERBER files (industry standard) for direct PCB manufacturing
+    - GERBER files are tool-agnostic and can be used with any PCB manufacturer (JLCPCB, PCBWay, OSH Park, etc.)
+    - Include drill files, pick-and-place files, and assembly drawings
+  - **Documentation**: Include schematics (PDF), PCB layouts (PDF), BOM (CSV/Excel), and assembly instructions
+  - **Purpose**: Provide reference designs for developers building custom hardware or adapting existing ESP32 boards
+  - **File Structure**: Organize in `Hardware/Shields/` directory with subdirectories for each shield type
 
 </div>
 
@@ -3326,24 +3356,6 @@ For any experience running one year or longer, LBEAST's author recommends consid
   - **Router API Connectivity**: Support for enterprise router APIs (Ubiquiti UniFi, Cisco, pfSense, MikroTik RouterOS, etc.) to programmatically query and manage DHCP reservations. Automatic device discovery by querying router for all LBEAST device reservations.
   - **Network-Wide IP Refresh**: Queue network-wide IP address rotation via router API - updates all DHCP reservations simultaneously, then triggers network-wide NAT punchthrough to re-establish all connections. Optional module for advanced users with professional routers. Consumer router users must manually update IPs in router admin panel and console (see Network Configuration documentation).
   - **Scheduled Rotation**: Configure IP rotation schedules (morning/evening, before/after hours) that trigger router API bulk updates. Prevents IP changes during work hours or mid-session. Router DHCP lease times and reservation rules handle timing enforcement.
-
-#### Gunship Experience — Alpha Readiness
-
-> **📋 Hardware Specifications:** See **[FirmwareExamples/GunshipExperience/Gunship_Hardware_Specs.md](Packages/com.ajcampbell.lbeast/FirmwareExamples/GunshipExperience/Gunship_Hardware_Specs.md)** for complete hardware specifications including solenoid selection, PWM driver modules, thermal management, redundancy, and communication architecture.
-
-- [ ] **ESP32 Shield Design (Hardware)**
-  - **Example Shield Designs**: Design example shields/breakout boards for ESP32 plus needed modules for both ECU types:
-    - **GunshipExperience_ECU**: ESP32 + Ethernet PHY (LAN8720A) + actuator control interfaces + scissor lift control interfaces
-    - **Gun_ECU**: ESP32 + Ethernet PHY (LAN8720A) + dual thumb button inputs + N× solenoid PWM driver interfaces + NTC thermistor ADC inputs
-  - **Source Files**: Include PCB design source files in KiCAD format (`.kicad_pcb`, `.kicad_sch`) for maximum extensibility
-    - **Note**: EasyEDA projects can be exported to KiCAD format for cross-tool compatibility
-    - **Alternative**: Include source files in EasyEDA format if preferred, but provide KiCAD export
-  - **Manufacturing Files**: Include GERBER files (industry standard) for direct PCB manufacturing
-    - GERBER files are tool-agnostic and can be used with any PCB manufacturer (JLCPCB, PCBWay, OSH Park, etc.)
-    - Include drill files, pick-and-place files, and assembly drawings
-  - **Documentation**: Include schematics (PDF), PCB layouts (PDF), BOM (CSV/Excel), and assembly instructions
-  - **Purpose**: Provide reference designs for developers building custom hardware or adapting existing ESP32 boards
-  - **File Structure**: Organize in `Hardware/Shields/` directory with subdirectories for each shield type
 
 </div>
 
