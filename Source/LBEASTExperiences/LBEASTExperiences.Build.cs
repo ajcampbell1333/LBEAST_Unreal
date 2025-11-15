@@ -28,6 +28,7 @@ public class LBEASTExperiences : ModuleRules
 				"Engine",
 				"LBEASTCommon",  // Interfaces and shared types
 				"LBEASTCore",    // Implementation classes (InputAdapter, ServerCommandProtocol, etc.)
+				"LBEASTAI",      // Generic AI module (for base classes: UAIScriptManager, UAIImprovManager, UAIASRManager)
 				"Sockets",        // For GoKart ECU UDP communication
 				"Networking",     // For GoKart ECU UDP communication
 				"EnhancedInput",  // For GoKart input handling
@@ -43,7 +44,8 @@ public class LBEASTExperiences : ModuleRules
 			{
 				"Slate",
 				"SlateCore",
-				"AIFacemask",      // Implementation details - not exposed in public API
+				"LBEASTAI",        // Generic AI module (LLM, ASR, TTS, Audio2Face, etc.)
+				"VOIP",            // For IVOIPAudioVisitor interface (used by ASR manager)
 				"LargeHaptics",    // Implementation details - not exposed in public API
 				"EmbeddedSystems", // Implementation details - not exposed in public API
 				"RF433MHz"         // Required for SuperheroFlightExperience RF433MHz receiver

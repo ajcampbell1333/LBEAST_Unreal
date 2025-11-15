@@ -1,11 +1,12 @@
 // Copyright (c) 2025 AJ Campbell. Licensed under the MIT License.
 
-#include "AIFacemaskExperience.h"
-#include "AIFaceController.h"
+#include "AIFacemask/AIFacemaskExperience.h"
+#include "AIFacemask/AIFacemaskFaceController.h"
+#include "AIFacemask/AIFacemaskLiveActorHUDComponent.h"
 #include "EmbeddedDeviceController.h"
-#include "AIFacemaskACEScriptManager.h"
-#include "AIFacemaskACEImprov.h"
-#include "AIFacemaskASRManager.h"
+#include "AIFacemask/AIFacemaskScriptManager.h"
+#include "AIFacemask/AIFacemaskImprovManager.h"
+#include "AIFacemask/AIFacemaskASRManager.h"
 #include "ExperienceLoop/ExperienceStateMachine.h"
 #include "Networking/LBEASTServerBeacon.h"
 
@@ -16,11 +17,12 @@ AAIFacemaskExperience::AAIFacemaskExperience()
 	PrimaryActorTick.bStartWithTickEnabled = true;
 
 	// Create components
-	FaceController = CreateDefaultSubobject<UAIFaceController>(TEXT("FaceController"));
+	FaceController = CreateDefaultSubobject<UAIFacemaskFaceController>(TEXT("FaceController"));
 	CostumeController = CreateDefaultSubobject<UEmbeddedDeviceController>(TEXT("CostumeController"));
-	ACEScriptManager = CreateDefaultSubobject<UAIFacemaskACEScriptManager>(TEXT("ACEScriptManager"));
-	ACEImprovManager = CreateDefaultSubobject<UAIFacemaskACEImprovManager>(TEXT("ACEImprovManager"));
-	ACEASRManager = CreateDefaultSubobject<UAIFacemaskASRManager>(TEXT("ACEASRManager"));
+	ScriptManager = CreateDefaultSubobject<UAIFacemaskScriptManager>(TEXT("ScriptManager"));
+	ImprovManager = CreateDefaultSubobject<UAIFacemaskImprovManager>(TEXT("ImprovManager"));
+	ASRManager = CreateDefaultSubobject<UAIFacemaskASRManager>(TEXT("ASRManager"));
+	LiveActorHUD = CreateDefaultSubobject<UAIFacemaskLiveActorHUDComponent>(TEXT("LiveActorHUD"));
 
 	// Create Server Beacon for automatic discovery
 	ServerBeacon = CreateDefaultSubobject<ULBEASTServerBeacon>(TEXT("ServerBeacon"));
@@ -102,54 +104,75 @@ bool AAIFacemaskExperience::InitializeExperienceImpl()
 		UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: Narrative state machine initialized with %d states"), DefaultStates.Num());
 	}
 
-	// Initialize ACE Script Manager (pre-baked script collections for NVIDIA ACE)
-	if (ACEScriptManager)
+	// Initialize Script Manager (pre-baked script collections)
+	if (ScriptManager)
 	{
-		// NOOP: TODO - Configure NVIDIA ACE server base URL from project settings or config
-		FString ACEServerBaseURL = TEXT("http://localhost:8000");  // Default to localhost
+		// NOOP: TODO - Configure AI server base URL from project settings or config
+		FString AIServerBaseURL = TEXT("http://localhost:8000");  // Default to localhost
 		
-		if (ACEScriptManager->InitializeScriptManager(ACEServerBaseURL))
+		if (ScriptManager->InitializeScriptManager(AIServerBaseURL))
 		{
-			UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: ACE Script Manager initialized"));
+			UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: Script Manager initialized"));
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("AIFacemaskExperience: ACE Script Manager initialization failed, continuing without script automation"));
+			UE_LOG(LogTemp, Warning, TEXT("AIFacemaskExperience: Script Manager initialization failed, continuing without script automation"));
 		}
 	}
 
-	// Initialize ACE Improv Manager (real-time improvised responses using local LLM + TTS + Audio2Face)
-	if (ACEImprovManager)
+	// Initialize Improv Manager (real-time improvised responses using local LLM + TTS + Audio2Face)
+	if (ImprovManager)
 	{
-		if (ACEImprovManager->InitializeImprovManager())
+		if (ImprovManager->InitializeImprovManager())
 		{
-			UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: ACE Improv Manager initialized (local LLM + TTS + Audio2Face)"));
+			UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: Improv Manager initialized (local LLM + TTS + Audio2Face)"));
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("AIFacemaskExperience: ACE Improv Manager initialization failed, continuing without improv responses"));
+			UE_LOG(LogTemp, Warning, TEXT("AIFacemaskExperience: Improv Manager initialization failed, continuing without improv responses"));
 		}
 	}
 
-	// Initialize ACE ASR Manager (converts player voice to text for improv responses)
-	if (ACEASRManager)
+	// Initialize ASR Manager (converts player voice to text for improv responses)
+	if (ASRManager)
 	{
-		if (ACEASRManager->InitializeASRManager())
+		if (ASRManager->InitializeASRManager())
 		{
-			UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: ACE ASR Manager initialized (player voice → text for improv)"));
+			UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: ASR Manager initialized (player voice → text for improv)"));
 			
 			// NOOP: TODO - Register ASR Manager as visitor with VOIPManager
 			// Find VOIPManager component and register ASRManager as audio visitor
-			// This keeps AIFacemask module decoupled from VOIP module
+			// This keeps AI module decoupled from VOIP module
 			// Example:
 			// if (UVOIPManager* VOIPManager = FindComponentByClass<UVOIPManager>())
 			// {
-			//     VOIPManager->RegisterAudioVisitor(ACEASRManager);
+			//     VOIPManager->RegisterAudioVisitor(ASRManager);
 			// }
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("AIFacemaskExperience: ACE ASR Manager initialization failed, continuing without voice input"));
+			UE_LOG(LogTemp, Warning, TEXT("AIFacemaskExperience: ASR Manager initialization failed, continuing without voice input"));
+		}
+	}
+
+	// Initialize Live Actor HUD (stereo VR HUD overlay for live actors)
+	// Only initialize on client (not on dedicated server)
+	if (LiveActorHUD && GetWorld()->GetNetMode() != NM_DedicatedServer)
+	{
+		if (ScriptManager && ImprovManager)
+		{
+			if (LiveActorHUD->InitializeHUD(ScriptManager, ImprovManager))
+			{
+				UE_LOG(LogTemp, Log, TEXT("AIFacemaskExperience: Live Actor HUD initialized (client-only, stereo VR overlay)"));
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("AIFacemaskExperience: Live Actor HUD initialization failed, continuing without HUD"));
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("AIFacemaskExperience: Cannot initialize Live Actor HUD - ScriptManager or ImprovManager not available"));
 		}
 	}
 
@@ -301,10 +324,10 @@ void AAIFacemaskExperience::OnNarrativeStateChanged(FName OldState, FName NewSta
 	
 	// State changes are triggered by live actor's wireless trigger buttons
 	// Each state change triggers automated AI facemask performances via NVIDIA ACE
-	// Trigger ACE script for the new state (if script manager is available and auto-trigger is enabled)
-	if (ACEScriptManager && ACEScriptManager->bAutoTriggerOnStateChange)
+	// Trigger script for the new state (if script manager is available and auto-trigger is enabled)
+	if (ScriptManager && ScriptManager->bAutoTriggerOnStateChange)
 	{
-		ACEScriptManager->HandleNarrativeStateChanged(OldState, NewState, NewStateIndex);
+		ScriptManager->HandleNarrativeStateChanged(OldState, NewState, NewStateIndex);
 	}
 	
 	// Override this function in Blueprint to trigger additional game events based on state changes

@@ -32,7 +32,7 @@
 			]
 		},
 		{
-			"Name": "AIFacemask",
+			"Name": "AI",
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
 			"PlatformAllowList": [
@@ -133,6 +133,14 @@
 			"Name": "OSC",
 			"Enabled": true,
 			"Optional": false,
+			"SupportedTargetPlatforms": [
+				"Win64"
+			]
+		},
+		{
+			"Name": "TurboLink",
+			"Enabled": true,
+			"Optional": true,
 			"SupportedTargetPlatforms": [
 				"Win64"
 			]

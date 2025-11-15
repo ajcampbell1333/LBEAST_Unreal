@@ -8,10 +8,10 @@
 #include "AIFacemaskExperience.generated.h"
 
 // Forward declarations
-class UAIFaceController;
+class UAIFacemaskFaceController;
 class UEmbeddedDeviceController;
-class UAIFacemaskACEScriptManager;
-class UAIFacemaskACEImprovManager;
+class UAIFacemaskScriptManager;
+class UAIFacemaskImprovManager;
 class UAIFacemaskASRManager;
 
 /**
@@ -65,23 +65,27 @@ public:
 
 	/** AI Face controller component (autonomous, driven by Neural Face) */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LBEAST|AI Facemask|Components")
-	TObjectPtr<UAIFaceController> FaceController;
+	TObjectPtr<UAIFacemaskFaceController> FaceController;
 
 	/** Embedded systems controller for wireless trigger buttons embedded in costume/clothes */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LBEAST|AI Facemask|Components")
 	TObjectPtr<UEmbeddedDeviceController> CostumeController;
 
-	/** ACE Script Manager for pre-baked script collections and automatic script triggering */
+	/** Script Manager for pre-baked script collections and automatic script triggering */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LBEAST|AI Facemask|Components")
-	TObjectPtr<UAIFacemaskACEScriptManager> ACEScriptManager;
+	TObjectPtr<UAIFacemaskScriptManager> ScriptManager;
 
-	/** ACE Improv Manager for real-time improvised responses (local LLM + TTS + Audio2Face) */
+	/** Improv Manager for real-time improvised responses (local LLM + TTS + Audio2Face) */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LBEAST|AI Facemask|Components")
-	TObjectPtr<UAIFacemaskACEImprovManager> ACEImprovManager;
+	TObjectPtr<UAIFacemaskImprovManager> ImprovManager;
 
-	/** ACE ASR Manager for converting player voice to text (Automatic Speech Recognition) */
+	/** ASR Manager for converting player voice to text (Automatic Speech Recognition) */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LBEAST|AI Facemask|Components")
-	TObjectPtr<UAIFacemaskASRManager> ACEASRManager;
+	TObjectPtr<UAIFacemaskASRManager> ASRManager;
+
+	/** Live Actor HUD Component (stereo VR HUD overlay for live actors) */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LBEAST|AI Facemask|Components")
+	TObjectPtr<class UAIFacemaskLiveActorHUDComponent> LiveActorHUD;
 
 	/** Server beacon for automatic discovery/connection */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LBEAST|AI Facemask|Components")

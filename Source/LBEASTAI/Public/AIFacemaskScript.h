@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AIFacemaskACEScript.generated.h"
+#include "AIFacemaskScript.generated.h"
 
 /**
  * Script execution mode
@@ -82,7 +82,7 @@ enum class ELBEASTACEEmotionPreset : uint8
  * - RealTime: Text → TTS → Audio-to-Face (generated on-the-fly, supports improv)
  */
 USTRUCT(BlueprintType)
-struct FAIFacemaskACEScriptLine
+struct FAIFacemaskScriptLine
 {
 	GENERATED_BODY()
 
@@ -130,7 +130,11 @@ struct FAIFacemaskACEScriptLine
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LBEAST|ACE Script")
 	bool bIsImprovLine = false;
 
-	FAIFacemaskACEScriptLine()
+	/** Whether this script line has been spoken (tracks completion state for HUD) */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "LBEAST|ACE Script")
+	bool bHasBeenSpoken = false;
+
+	FAIFacemaskScriptLine()
 		: TextPrompt(TEXT(""))
 		, VoiceType(ELBEASTACEVoiceType::Default)
 		, EmotionPreset(ELBEASTACEEmotionPreset::Neutral)
@@ -153,7 +157,7 @@ struct FAIFacemaskACEScriptLine
  * When narrative state changes, the corresponding script is triggered and played sequentially.
  */
 USTRUCT(BlueprintType)
-struct FAIFacemaskACEScript
+struct FAIFacemaskScript
 {
 	GENERATED_BODY()
 
@@ -167,7 +171,7 @@ struct FAIFacemaskACEScript
 
 	/** Script lines to perform (played sequentially) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|ACE Script")
-	TArray<FAIFacemaskACEScriptLine> ScriptLines;
+	TArray<FAIFacemaskScriptLine> ScriptLines;
 
 	/** Whether to loop this script (repeat when finished) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|ACE Script")
@@ -185,7 +189,7 @@ struct FAIFacemaskACEScript
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LBEAST|ACE Script")
 	bool bIsFullyPreBaked = false;
 
-	FAIFacemaskACEScript()
+	FAIFacemaskScript()
 		: AssociatedStateName(NAME_None)
 		, Description(TEXT(""))
 		, bLoopScript(false)
@@ -209,7 +213,7 @@ struct FAIFacemaskACEScript
  * 5. AIFaceController receives and applies facial animation in real-time
  */
 USTRUCT(BlueprintType)
-struct FAIFacemaskACEScriptCollection
+struct FAIFacemaskScriptCollection
 {
 	GENERATED_BODY()
 
@@ -219,7 +223,7 @@ struct FAIFacemaskACEScriptCollection
 
 	/** Scripts mapped by narrative state name */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|ACE Script")
-	TMap<FName, FAIFacemaskACEScript> ScriptsByState;
+	TMap<FName, FAIFacemaskScript> ScriptsByState;
 
 	/** Whether to auto-trigger scripts on narrative state changes */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|ACE Script")
@@ -229,7 +233,7 @@ struct FAIFacemaskACEScriptCollection
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LBEAST|ACE Script")
 	bool bIsFullyPreBaked = false;
 
-	FAIFacemaskACEScriptCollection()
+	FAIFacemaskScriptCollection()
 		: CollectionName(TEXT("Default"))
 		, bAutoTriggerOnStateChange(true)
 		, bIsFullyPreBaked(false)
@@ -238,7 +242,7 @@ struct FAIFacemaskACEScriptCollection
 	/**
 	 * Get script for a specific narrative state (const version)
 	 */
-	const FAIFacemaskACEScript* GetScriptForState(FName StateName) const
+	const FAIFacemaskScript* GetScriptForState(FName StateName) const
 	{
 		return ScriptsByState.Find(StateName);
 	}
@@ -246,7 +250,7 @@ struct FAIFacemaskACEScriptCollection
 	/**
 	 * Get script for a specific narrative state (non-const version for modification)
 	 */
-	FAIFacemaskACEScript* GetScriptForState(FName StateName)
+	FAIFacemaskScript* GetScriptForState(FName StateName)
 	{
 		return ScriptsByState.Find(StateName);
 	}

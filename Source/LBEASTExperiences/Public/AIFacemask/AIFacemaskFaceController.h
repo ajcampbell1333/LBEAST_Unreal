@@ -5,7 +5,9 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Engine/Texture2D.h"
-#include "AIFaceController.generated.h"
+#include "IWebSocket.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "AIFacemaskFaceController.generated.h"
 
 /**
  * Facial animation data structure - receives output from NVIDIA ACE
@@ -77,12 +79,12 @@ struct FAIFaceConfig
  * - Live actor controls experience flow via wrist buttons, not facial animation
  */
 UCLASS(ClassGroup=(LBEAST), meta=(BlueprintSpawnableComponent))
-class AIFACEMASK_API UAIFaceController : public UActorComponent
+class LBEASTEXPERIENCES_API UAIFacemaskFaceController : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:	
-	UAIFaceController();
+	UAIFacemaskFaceController();
 
 	/** Configuration for this AI face controller */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LBEAST|AI Face")
@@ -97,6 +99,26 @@ public:
 	bool InitializeAIFace(const FAIFaceConfig& InConfig);
 
 	/**
+	 * Connect to NVIDIA ACE endpoint to receive streaming facial animation data
+	 * @return true if connection was successful
+	 */
+	UFUNCTION(BlueprintCallable, Category = "LBEAST|AI Face")
+	bool ConnectToACEEndpoint();
+
+	/**
+	 * Disconnect from NVIDIA ACE endpoint
+	 */
+	UFUNCTION(BlueprintCallable, Category = "LBEAST|AI Face")
+	void DisconnectFromACEEndpoint();
+
+	/**
+	 * Check if connected to NVIDIA ACE endpoint
+	 * @return true if connected
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LBEAST|AI Face")
+	bool IsConnected() const { return bIsConnected; }
+
+	/**
 	 * Receive and apply facial animation data from NVIDIA ACE
 	 * Called automatically when NVIDIA ACE sends new facial animation data
 	 * @param AnimationData - Facial animation data from NVIDIA ACE (blend shapes + textures)
@@ -106,6 +128,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
@@ -115,15 +138,46 @@ private:
 	/** Apply received facial texture to target mesh */
 	void ApplyFacialTextureToMesh(UTexture2D* FacialTexture);
 
+	/** Parse JSON facial animation data from NVIDIA ACE */
+	bool ParseFacialAnimationData(const FString& JsonString, FFacialAnimationData& OutAnimationData);
+
+	/** Create texture from base64 image data */
+	UTexture2D* CreateTextureFromBase64(const FString& Base64Data);
+
+	/** Handle WebSocket connection opened */
+	void OnWebSocketConnected();
+
+	/** Handle WebSocket connection closed */
+	void OnWebSocketConnectionClosed(int32 StatusCode, const FString& Reason, bool bWasClean);
+
+	/** Handle WebSocket message received */
+	void OnWebSocketMessageReceived(const FString& Message);
+
+	/** Handle WebSocket error */
+	void OnWebSocketError(const FString& Error);
+
 	/** Current facial animation data from NVIDIA ACE */
 	FFacialAnimationData CurrentAnimationData;
 
 	/** Whether the system is initialized */
 	bool bIsInitialized = false;
 
-	/** Timer for receiving updates from NVIDIA ACE */
-	float UpdateTimer = 0.0f;
+	/** Whether connected to NVIDIA ACE endpoint */
+	bool bIsConnected = false;
+
+	/** WebSocket connection to NVIDIA ACE endpoint */
+	TSharedPtr<IWebSocket> WebSocket;
+
+	/** Dynamic material instance for facial texture updates */
+	UPROPERTY()
+	TObjectPtr<UMaterialInstanceDynamic> DynamicMaterial = nullptr;
+
+	/** Blend shape name mapping (NVIDIA ACE names → Unreal morph target names) */
+	UPROPERTY(EditAnywhere, Category = "LBEAST|AI Face")
+	TMap<FName, FName> BlendShapeNameMapping;
+
+	/** Material parameter name for facial texture */
+	UPROPERTY(EditAnywhere, Category = "LBEAST|AI Face", meta = (DisplayName = "Facial Texture Parameter Name"))
+	FName FacialTextureParameterName = TEXT("FacialTexture");
 };
-
-
 
