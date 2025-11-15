@@ -17,7 +17,9 @@ This is a brand new plugin as of November 2025. Parts of it are not fully fleshe
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Unreal Engine](https://img.shields.io/badge/Unreal%20Engine-5.5.4-blue.svg)](https://www.unrealengine.com/)
 
-## Overview
+---
+
+## 📖 Overview
 
 LBEAST is a comprehensive SDK for developing VR and AR Location-Based Entertainment (LBE) experiences. This repository contains the **Unreal Engine 5.5.4** implementation of the LBEAST SDK.
 
@@ -112,7 +114,7 @@ LBEAST uses **OpenXR exclusively** for all HMD and hand tracking access through 
 
 ---
 
-## Philosophy
+## 💭 Philosophy
 
 <details>
 <summary><strong>Why LBEAST?</strong></summary>
@@ -198,7 +200,9 @@ Developers with little or no experience with C++ may struggle to put LBEAST to i
 
 </details>
 
-## Three-Tier Architecture
+---
+
+## 🏗️ Three-Tier Architecture
 
 LBEAST uses a modular three-tier architecture for code organization and server/client deployment.
 
@@ -508,7 +512,9 @@ Experience->NumberOfPlayers = 4;     // VR players
 
 </details>
 
-## Standard Pop-up Layout
+---
+
+## 🏗️ Standard Pop-up Layout
 
 > **Note:** The Standard Pop-up Layout is **recommended but not required**. LBEAST can be deployed in any configuration that meets your needs. This standard format is optimized for rapid pop-up deployments in public venues.
 
@@ -813,7 +819,7 @@ For standard LBEAST installations, the following hardware configuration provides
 
 ---
 
-## Features
+## ✨ Features
 
 ### Experience Genre Templates (Drag-and-Drop Solutions)
 
@@ -2468,7 +2474,9 @@ git clone --recursive https://github.com/yourusername/yourproject.git
 
 > **📌 Note:** Unlike Unity's Package Manager, Unreal Engine doesn't have native "add plugin from Git URL" functionality in the editor. The methods above provide Git-based distribution alternatives. Git submodules are the most common approach for version-controlled plugin distribution.
 
-## Quick Start
+---
+
+## 🎯 Quick Start
 
 <details>
 <summary><strong>Option A: Use Experience Genre Templates (Recommended for Rapid Deployment)</strong></summary>
@@ -2556,14 +2564,16 @@ All components and actors are fully Blueprint-compatible with exposed properties
 
 </details>
 
-## Architecture
+---
+
+## 🏛️ Architecture
 
 <details>
 <summary><strong>Module Structure</strong></summary>
 
 <div style="margin-left: 20px;">
 
-## Module Structure
+## 📦 Module Structure
 
 ```
 LBEAST/
@@ -2598,7 +2608,7 @@ LBEAST/
 
 <div style="margin-left: 20px;">
 
-## Networking
+## 🌐 Networking
 
 LBEAST v0.1.0 focuses on **local LAN multiplayer** using Unreal's built-in replication and Gameplay Ability System (GAS):
 
@@ -2615,7 +2625,7 @@ LBEAST v0.1.0 focuses on **local LAN multiplayer** using Unreal's built-in repli
 
 <div style="margin-left: 20px;">
 
-## Hardware Integration
+## ⚙️ Hardware Integration
 
 All hardware communication is **abstracted** through interfaces:
 
@@ -2640,7 +2650,7 @@ This allows you to:
 
 <div style="margin-left: 20px;">
 
-## Use Cases
+## 💡 Use Cases
 
 LBEAST is designed for **commercial LBE installations** including:
 
@@ -2660,7 +2670,7 @@ LBEAST is designed for **commercial LBE installations** including:
 
 <div style="margin-left: 20px;">
 
-## Dedicated Server & Server Manager
+## 🖥️ Dedicated Server & Server Manager
 
 > **Terminology Note:** 
 > - **"Command Console"** (operations terminology) = The UI Panel (admin interface) used by Operations Technicians to monitor and control the experience
@@ -2862,7 +2872,7 @@ The Command Protocol (UDP port 7779) **can work over the internet** with proper 
 
 ---
 
-## Network Configuration
+## ⚙️ Network Configuration
 
 LBEAST requires reliable network communication between game engine servers, ECUs (embedded control units), VR clients, and console interfaces. This section details network setup options and recommended configurations.
 
@@ -3134,7 +3144,7 @@ LBEAST requires reliable network communication between game engine servers, ECUs
 
 ---
 
-## Embedded System Philosophy
+## 🤖 Embedded System Philosophy
 
 <details>
 <summary><strong>Microcontrollers vs. PLCs</strong></summary>
@@ -3400,21 +3410,29 @@ For any experience running one year or longer, LBEAST's author recommends consid
 
 </details>
 
-## Support
+---
+
+## 💬 Support
 
 - **Issues:** [github.com/ajcampbell1333/lbeast_unreal/issues](https://github.com/ajcampbell1333/lbeast_unreal/issues)
 - **Discussions:** [github.com/ajcampbell1333/lbeast_unreal/discussions](https://github.com/ajcampbell1333/lbeast_unreal/discussions)
 - **Unity Version:** [github.com/ajcampbell1333/lbeast_unity](https://github.com/ajcampbell1333/lbeast_unity)
 
-## License
+The LBEAST Author may be available for dev contracts and consultations: [https://ajcampbell.info](https://ajcampbell.info)
+
+---
+
+## 📄 License
 
 Copyright (c) 2025 AJ Campbell
 
 Licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
-## Contributing
+---
 
-LBEAST is open-source under the MIT License. Contributions are welcome!
+## 🤝 Contributing
+
+LBEAST is open-source under the MIT License. Got ideas for how to make LBEAST better? Contributions are welcome!
 
 <details>
 <summary><strong>Development Workflow</strong></summary>
@@ -3423,11 +3441,13 @@ LBEAST is open-source under the MIT License. Contributions are welcome!
 
 ### Development Workflow
 
-1. Fork this repository
+1. Fork this repository and clone it (
+   `git clone https://github.com/your-username/lbeast_unreal.git`)
 2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+3. Add your changes (`git add .`)
+4. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+5. Push to the branch (`git push origin feature/AmazingFeature`)
+6. Open a Pull Request
 
 </div>
 
@@ -3449,7 +3469,9 @@ LBEAST is open-source under the MIT License. Contributions are welcome!
 
 </details>
 
-## Credits
+---
+
+## 👤 Credits
 
 Created by **AJ Campbell**.
 
