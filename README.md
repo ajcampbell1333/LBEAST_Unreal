@@ -3234,6 +3234,17 @@ In most cases, fully custom PCBs may be unnecessary for just about any XR LBE in
 </details>
 
 <details>
+<summary><strong>Why a Universal Shield for almost all LBE installations?</strong></summary>
+
+<div style="margin-left: 20px;">
+
+In the 80s, the JAMMA spec allowed new games to hot-swap into existing arcade boxes as PCB cards that could be easily pulled and placed. The LBEAST Universal Shield aims to accomplish the same goal, but for a much larger variety of hardware. A given experience might have hydraulics, haptics, various power sources, and/or need to connect multiple MCUs in a network. Also, a development team may prefer this or that MCU dev kit as their go-to default platform. It would be marvelous for a single shield to support MOST use cases of any-MCU-to-any-collection-of-hardware. LBEAST Universal Shield recommends ESP32-S3 by default since it has the most robust onboard wireless capabilities, but dev teams may have unique requirements for which they prefer a different MCU. In such cases, they need only an adapter to fit to the ESP32's slot on the Universal Shield. Obviously, there may be moments of necessary customization (e.g. a custom STM-based PCB that self-contains an adpater to the shield), but if you can use the exact same board to power most LBE stations at a venue that has several stations, then just like 80s arcades... the venue's job installing a new experience at a given station becomes drastically simplified, not to mention the dev team is far less likely to need to design any custom PCBs from scratch. Interoperability is the future!
+
+</div>
+
+</details>
+
+<details>
 <summary><strong>Extra Protection Against Elements</strong></summary>
 
 <div style="margin-left: 20px;">
@@ -3345,6 +3356,10 @@ For any experience running one year or longer, LBEAST's author recommends consid
   - **Documentation**: Include schematics (PDF), PCB layouts (PDF), BOM (CSV/Excel), and assembly instructions
   - **Purpose**: Provide reference designs for developers building custom hardware or adapting existing ESP32 boards
   - **File Structure**: Organize in `Hardware/Shields/` directory with subdirectories for each shield type
+- [ ] **Additional ECU Firmware Implementation** - Complete firmware for remaining experience ECUs:
+  - **WristButton_ECU**: Wireless trigger button controller for AIFacemaskExperience (embedded in live actor costumes, battery-powered, WiFi/Bluetooth communication)
+  - **MovingPlatform_ECU**: Motion platform controller for MovingPlatformExperience (similar to GunshipExperience_ECU, uses same 4-gang actuator system, single-player standing platform)
+  - **CarSim_ECU**: Motion platform controller for CarSimExperience (similar to GunshipExperience_ECU, uses same 4-gang actuator system, optimized for driving simulation motion profiles)
 
 </div>
 
@@ -3366,6 +3381,43 @@ For any experience running one year or longer, LBEAST's author recommends consid
   - **Router API Connectivity**: Support for enterprise router APIs (Ubiquiti UniFi, Cisco, pfSense, MikroTik RouterOS, etc.) to programmatically query and manage DHCP reservations. Automatic device discovery by querying router for all LBEAST device reservations.
   - **Network-Wide IP Refresh**: Queue network-wide IP address rotation via router API - updates all DHCP reservations simultaneously, then triggers network-wide NAT punchthrough to re-establish all connections. Optional module for advanced users with professional routers. Consumer router users must manually update IPs in router admin panel and console (see Network Configuration documentation).
   - **Scheduled Rotation**: Configure IP rotation schedules (morning/evening, before/after hours) that trigger router API bulk updates. Prevents IP changes during work hours or mid-session. Router DHCP lease times and reservation rules handle timing enforcement.
+
+- [ ] **Pro Audio Mixer Templates** - UMG widgets for Pro Audio mixer interface templates:
+  - **Mixer Widget Template**: Pre-built UMG widget template for professional audio console control (Behringer X32, Yamaha, Allen & Heath, etc.)
+  - **Channel Strip Widgets**: Reusable channel strip UMG widgets (fader, mute, bus sends, EQ controls)
+  - **Master Section Widget**: Master fader and output controls
+  - **Virtual-to-Physical Mapping UI**: Visual interface for mapping UI channels to physical hardware channels
+  - **Bidirectional Sync Display**: Real-time updates when physical board changes are made
+  - **Console-Specific Templates**: Pre-configured layouts for supported console types (X32, M32, Wing, QL, CL, SQ, dLive, etc.)
+
+- [ ] **ProLighting Templates** - UMG widgets for ProLighting DMX control interface templates:
+  - **Lighting Console Widget Template**: Pre-built UMG widget template for DMX lighting control (Art-Net, USB DMX)
+  - **Fixture Control Widgets**: Reusable fixture control UMG widgets (intensity, color, fade controls)
+  - **Fixture Registry UI**: Visual interface for managing fixture registry and virtual fixtures
+  - **Fade Engine Controls**: Time-based fade controls and preview
+  - **Art-Net Discovery UI**: Interface for discovering and configuring Art-Net nodes
+  - **Fixture Type Templates**: Pre-configured layouts for fixture types (Dimmable, RGB, RGBW, Moving Head, Custom)
+
+- [ ] **Experience Template Monitoring Widgets** - UMG widgets for default monitoring interface for each experience template:
+  - **AIFacemaskExperience Monitoring Widget**: Real-time monitoring for AI facemask experience (narrative state, player count, AI pipeline status)
+  - **GunshipExperience Monitoring Widget**: Real-time monitoring for gunship experience (platform state, gun station status, player positions)
+  - **MovingPlatformExperience Monitoring Widget**: Real-time monitoring for moving platform (platform tilt, vertical position, safety status)
+  - **FlightSimExperience Monitoring Widget**: Real-time monitoring for flight sim (gyroscope state, HOTAS input, continuous rotation status)
+  - **CarSimExperience Monitoring Widget**: Real-time monitoring for car sim (platform motion, driving state, throttle/steering)
+  - **EscapeRoomExperience Monitoring Widget**: Real-time monitoring for escape room (puzzle state, door locks, sensor readings)
+  - **GoKartExperience Monitoring Widget**: Real-time monitoring for go-kart experience (vehicle state, throttle effects, track position)
+  - **SuperheroFlightExperience Monitoring Widget**: Real-time monitoring for superhero flight (winch state, flight mode, gesture recognition)
+  - **Common Monitoring Features**: Player count, experience state, connection status, error logging, performance metrics
+
+- [ ] **Main Console Interface Widget** - UMG widget for the main console interface that houses all monitoring and control widgets:
+  - **Main Console Widget Template**: Pre-built UMG widget template serving as the primary operations console interface
+  - **Tabbed Interface**: Tab system for organizing different console sections (ProAudio, ProLighting, Experience Monitors, Network Config, etc.)
+  - **Widget Container System**: Framework for embedding and managing child widgets (ProAudio mixer, ProLighting console, experience monitoring widgets)
+  - **Layout Management**: Resizable panels, dockable windows, and customizable layouts for different operator preferences
+  - **Navigation System**: Menu system for switching between console sections and accessing different monitoring interfaces
+  - **Status Bar**: Global status bar showing system-wide information (server status, network status, active experiences)
+  - **Toolbar**: Quick access toolbar for common operations (start/stop experiences, emergency stop, system reset)
+  - **Multi-Experience Support**: Ability to monitor and control multiple experiences simultaneously from single console interface
 
 </div>
 
