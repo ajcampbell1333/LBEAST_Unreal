@@ -32,7 +32,7 @@
 			]
 		},
 		{
-			"Name": "AI",
+			"Name": "LBEASTAI",
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
 			"PlatformAllowList": [

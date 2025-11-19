@@ -1,9 +1,11 @@
 /*
- * LBEAST Gunship Experience ECU
+ * LBEAST Gunship Experience - Parent ECU (GunshipExperience_ECU)
  * 
- * Combined embedded control unit for GunshipExperience motion platform.
+ * Parent embedded control unit for GunshipExperience motion platform.
+ * Uses the Universal Shield (primary ECU for the experience, usually named same as experience).
  * Integrates both scissor lift control and 4-gang actuator system control
  * into a single ECU for complete 4DOF motion platform control.
+ * Interfaces with child ECUs (Gun_ECU) for per-station gun control.
  * 
  * This ECU uses the ActuatorSystem_Controller.h and ScissorLift_Controller.h headers
  * to eliminate code duplication and provide modular, reusable controllers.
@@ -40,7 +42,7 @@
  * 
  * Protocol: Binary LBEAST protocol
  * 
- * Channel Mapping (Game Engine → Gunship ECU):
+ * Channel Mapping (Game Engine → Parent ECU):
  * - Channel 0: Pitch (float, degrees or normalized -1.0 to +1.0)
  * - Channel 1: Roll (float, degrees or normalized -1.0 to +1.0)
  * - Channel 2: TranslationY / Forward-Reverse (float, cm or normalized -1.0 to +1.0)
@@ -54,7 +56,7 @@
  * - Channel 100: Button event update interval (int32, ms) - server-controlled telemetry rate
  * - Channel 101: Telemetry update interval (int32, ms) - server-controlled telemetry rate
  * 
- * Channel Mapping (Gunship ECU → Game Engine):
+ * Channel Mapping (Parent ECU → Game Engine):
  * - Channel 100: FTiltState struct (pitch and roll feedback)
  * - Channel 101: FScissorLiftState struct (Y and Z translation feedback)
  * - Channel 310: FGunButtonEvents struct (all 4 stations, fast updates, default 20 Hz)
@@ -99,7 +101,7 @@ struct FPlatformMotionCommand {
   float Duration;       // seconds
 };
 
-// Gun ECU state struct (internal storage, received from each Gun ECU)
+// Child ECU state struct (internal storage, received from each child ECU)
 struct FGunECUState {
   // Button states
   bool Button0State;           // Left thumb button (pressed = true)
@@ -196,7 +198,7 @@ bool motionInProgress = false;
 // Game state management
 bool playSessionActive = false;  // Play session state (controls gun firing authorization)
 unsigned long lastGameStateUpdate = 0;
-const unsigned long GAME_STATE_UPDATE_INTERVAL_MS = 100;  // Send game state to Gun ECUs at 10 Hz
+const unsigned long GAME_STATE_UPDATE_INTERVAL_MS = 100;  // Send game state to child ECUs at 10 Hz
 
 // Telemetry update rate control (server-controlled)
 unsigned long buttonEventUpdateInterval = 50;   // Button events: 20 Hz (50ms) - fast updates
@@ -204,17 +206,17 @@ unsigned long telemetryUpdateInterval = 1000;   // Telemetry: 1 Hz (1000ms) - sl
 unsigned long lastButtonEventTime = 0;
 unsigned long lastTelemetryTime = 0;
 
-// Gun ECU state storage (4 stations)
+// Child ECU state storage (4 stations)
 const uint8_t NUM_GUN_STATIONS = 4;
 FGunECUState gunECUStates[NUM_GUN_STATIONS];
 unsigned long lastGunECUTelemetry[NUM_GUN_STATIONS] = {0, 0, 0, 0};
-const unsigned long GUN_ECU_TIMEOUT_MS = 2000;  // 2 second timeout for Gun ECU telemetry
-IPAddress gunECU_IPs[NUM_GUN_STATIONS];  // Store IP addresses of Gun ECUs (discovered via incoming packets)
-uint16_t gunECU_Ports[NUM_GUN_STATIONS] = {8888, 8889, 8890, 8891};  // Gun ECU TX ports (Gun ECUs send to this port)
+const unsigned long GUN_ECU_TIMEOUT_MS = 2000;  // 2 second timeout for child ECU telemetry
+IPAddress gunECU_IPs[NUM_GUN_STATIONS];  // Store IP addresses of child ECUs (discovered via incoming packets)
+uint16_t gunECU_Ports[NUM_GUN_STATIONS] = {8888, 8889, 8890, 8891};  // Child ECU TX ports (child ECUs send to this port)
 
-// UDP socket for receiving from Gun ECUs (separate from game engine RX)
+// UDP socket for receiving from child ECUs (separate from game engine RX)
 WiFiUDP gunECU_UDP;
-const uint16_t GUN_ECU_RX_PORT = 8892;  // Port to receive Gun ECU telemetry
+const uint16_t GUN_ECU_RX_PORT = 8892;  // Port to receive child ECU telemetry
 
 // =====================================
 // Setup
@@ -294,11 +296,11 @@ void setup() {
   // Initialize TX for sending feedback to Unreal
   LBEAST_Wireless_TX_Init(ssid, password, unrealIP, unrealPort);
   
-  // Initialize UDP socket for receiving from Gun ECUs
+  // Initialize UDP socket for receiving from child ECUs
   gunECU_UDP.begin(GUN_ECU_RX_PORT);
-  Serial.printf("Gun ECU telemetry listener started on port %d\n", GUN_ECU_RX_PORT);
-  
-  // Initialize Gun ECU state arrays
+  Serial.printf("Child ECU telemetry listener started on port %d\n", GUN_ECU_RX_PORT);
+
+  // Initialize child ECU state arrays
   for (uint8_t i = 0; i < NUM_GUN_STATIONS; i++) {
     gunECUStates[i].Button0State = false;
     gunECUStates[i].Button1State = false;
@@ -356,14 +358,14 @@ void loop() {
   // Process incoming LBEAST commands from game engine
   LBEAST_ProcessIncoming();
   
-  // Process incoming telemetry from Gun ECUs
+  // Process incoming telemetry from child ECUs
   ProcessGunECUTelemetry();
   
   // Update both controllers
   liftController.update();
   actuatorController.update();
   
-  // Send game state to Gun ECUs (play session active/inactive)
+  // Send game state to child ECUs (play session active/inactive)
   unsigned long currentTime = millis();
   if (currentTime - lastGameStateUpdate >= GAME_STATE_UPDATE_INTERVAL_MS) {
     SendGameStateToGunECUs();
@@ -486,7 +488,7 @@ void LBEAST_HandleBool(uint8_t channel, bool value) {
     // Channel 9: Play session active (from game engine)
     playSessionActive = value;
     Serial.printf("ECU: Play session %s\n", value ? "ACTIVE" : "INACTIVE");
-    // Game state will be sent to Gun ECUs in main loop
+    // Game state will be sent to child ECUs in main loop
   }
 }
 
@@ -581,7 +583,7 @@ void SendPositionFeedback() {
 }
 
 // =====================================
-// Gun ECU Telemetry Processing
+// Child ECU Telemetry Processing
 // =====================================
 
 void ProcessGunECUTelemetry() {
@@ -637,7 +639,7 @@ void ProcessGunECUTelemetry() {
         if (gunECU_IPs[i] == IPAddress(0, 0, 0, 0)) {
           gunECU_IPs[i] = senderIP;
           stationID = i;
-          Serial.printf("Gunship ECU: Discovered Gun ECU station %d at IP %s\n", i, senderIP.toString().c_str());
+          Serial.printf("Parent ECU: Discovered child ECU station %d at IP %s\n", i, senderIP.toString().c_str());
           break;
         }
       }
@@ -653,12 +655,12 @@ void ProcessGunECUTelemetry() {
   // Parse data based on channel and type
   if (packetType == 0) {  // BOOL
     if (channel >= 10 && channel <= 13) {
-      // Button state (combined - Gun ECU sends combined state)
-      // Note: Gun ECU currently sends combined button state
+      // Button state (combined - child ECU sends combined state)
+      // Note: child ECU currently sends combined button state
       // Individual button parsing would require separate channels (e.g., 10+n for button 0, 11+n for button 1)
       bool buttonState = (buffer[3] != 0);
       gunECUStates[stationID].Button0State = buttonState;  // For now, treat as combined
-      gunECUStates[stationID].Button1State = buttonState;  // TODO: Parse individual buttons when Gun ECU sends them separately
+      gunECUStates[stationID].Button1State = buttonState;  // TODO: Parse individual buttons when child ECU sends them separately
     } else if (channel >= 80 && channel <= 83) {
       // Fire command active (Channel 80+n)
       bool wasFiring = gunECUStates[stationID].FireCommandActive;
@@ -737,11 +739,11 @@ void ProcessGunECUTelemetry() {
 // =====================================
 
 void SendGameStateToGunECUs() {
-  // Send play session state to all known Gun ECUs
+  // Send play session state to all known child ECUs
   for (uint8_t i = 0; i < NUM_GUN_STATIONS; i++) {
     if (gunECU_IPs[i] != IPAddress(0, 0, 0, 0)) {
       // Channel 9: Play session active (bool)
-      // Use the TX template's send function but target Gun ECU IP
+      // Use the TX template's send function but target child ECU IP
       uint8_t packet[5];
       packet[0] = 0xAA;  // Start marker
       packet[1] = 0;      // BOOL type
@@ -755,7 +757,7 @@ void SendGameStateToGunECUs() {
       }
       packet[4] = crc;
       
-      // Send to Gun ECU
+      // Send to child ECU
       gunECU_UDP.beginPacket(gunECU_IPs[i], gunECU_Ports[i]);
       gunECU_UDP.write(packet, 5);
       gunECU_UDP.endPacket();

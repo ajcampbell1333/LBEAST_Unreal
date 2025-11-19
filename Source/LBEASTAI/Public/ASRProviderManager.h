@@ -12,6 +12,8 @@
 class UASRProviderRiva;
 class UASRProviderNIM;
 class UAIGRPCClient;
+class UASRTranscriptionCallbackProxy;
+class UASRProviderManager;
 
 /**
  * ASR Provider Type
@@ -75,6 +77,22 @@ enum class EASRProviderType : uint8
  * });
  * ```
  */
+UCLASS()
+class LBEASTAI_API UASRTranscriptionCallbackProxy : public UObject
+{
+	GENERATED_BODY()
+
+public:
+	void Initialize(UASRProviderManager* InOwner, TFunction<void(const FASRResponse&)> InCallback);
+
+	UFUNCTION()
+	void HandleResponse(const FASRResponse& Response);
+
+private:
+	TFunction<void(const FASRResponse&)> NativeCallback;
+	TWeakObjectPtr<UASRProviderManager> Owner;
+};
+
 UCLASS(BlueprintType)
 class LBEASTAI_API UASRProviderManager : public UObject
 {
@@ -163,6 +181,8 @@ public:
 	bool ActiveProviderSupportsStreaming() const;
 
 private:
+	friend class UASRTranscriptionCallbackProxy;
+
 	/** The currently active ASR provider */
 	UPROPERTY()
 	TScriptInterface<IASRProvider> ActiveProvider;
@@ -179,6 +199,10 @@ private:
 	UPROPERTY()
 	TObjectPtr<UAIGRPCClient> GRPCClientRef;
 
+	/** Active callback proxy objects to keep them alive until responses arrive */
+	UPROPERTY()
+	TArray<TObjectPtr<UASRTranscriptionCallbackProxy>> ActiveCallbackProxies;
+
 	/**
 	 * @brief Automatically detects the provider type from the endpoint URL.
 	 * @param EndpointURL The URL to analyze.
@@ -189,5 +213,7 @@ private:
 	/** Container manager for auto-starting containers (optional) */
 	UPROPERTY()
 	TObjectPtr<class UContainerManagerDockerCLI> ContainerManager;
+
+	void HandleCallbackProxyFinished(UASRTranscriptionCallbackProxy* Proxy);
 };
 

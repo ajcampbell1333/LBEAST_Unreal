@@ -5,6 +5,25 @@
 #include "ASRProviderNIM.h"
 #include "ContainerManagerDockerCLI.h"
 
+void UASRTranscriptionCallbackProxy::Initialize(UASRProviderManager* InOwner, TFunction<void(const FASRResponse&)> InCallback)
+{
+	Owner = InOwner;
+	NativeCallback = MoveTemp(InCallback);
+}
+
+void UASRTranscriptionCallbackProxy::HandleResponse(const FASRResponse& Response)
+{
+	if (NativeCallback)
+	{
+		NativeCallback(Response);
+	}
+
+	if (Owner.IsValid())
+	{
+		Owner->HandleCallbackProxyFinished(this);
+	}
+}
+
 UASRProviderManager::UASRProviderManager()
 {
 	ActiveProvider = nullptr;
@@ -237,12 +256,13 @@ void UASRProviderManager::RequestTranscription(const FASRRequest& Request, TFunc
 		return;
 	}
 
-	// Convert TFunction to delegate for interface call
+	// Convert TFunction to dynamic delegate via callback proxy
+	UASRTranscriptionCallbackProxy* CallbackProxy = NewObject<UASRTranscriptionCallbackProxy>(this);
+	CallbackProxy->Initialize(this, MoveTemp(Callback));
+	ActiveCallbackProxies.Add(CallbackProxy);
+
 	FOnASRResponseReceived DelegateCallback;
-	DelegateCallback.BindLambda([Callback](const FASRResponse& Response)
-	{
-		Callback(Response);
-	});
+	DelegateCallback.BindUFunction(CallbackProxy, TEXT("HandleResponse"));
 
 	// Forward request to active provider
 	ActiveProvider->RequestASRTranscription(Request, DelegateCallback);
@@ -327,5 +347,15 @@ EASRProviderType UASRProviderManager::AutoDetectProviderType(const FString& Endp
 	
 	// Default to NIM for other ports (Parakeet, Canary, etc.)
 	return EASRProviderType::NIM;
+}
+
+void UASRProviderManager::HandleCallbackProxyFinished(UASRTranscriptionCallbackProxy* Proxy)
+{
+	if (!Proxy)
+	{
+		return;
+	}
+
+	ActiveCallbackProxies.Remove(Proxy);
 }
 

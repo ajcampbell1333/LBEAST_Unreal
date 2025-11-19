@@ -227,8 +227,11 @@ bool UContainerManagerDockerCLI::ExecuteDockerCommand(const FString& Command, bo
 	FString StdErr;
 	int32 ReturnCode = 0;
 
+	const FString CommandLine = FString::Printf(TEXT("/C %s"), *Command);
+
 	bool bSuccess = FPlatformProcess::ExecProcess(
-		*Command,
+		TEXT("cmd.exe"),
+		*CommandLine,
 		&ReturnCode,
 		bCaptureOutput ? &StdOut : nullptr,
 		bCaptureOutput ? &StdErr : nullptr
@@ -313,8 +316,10 @@ bool UContainerManagerDockerCLI::CheckDockerCLI() const
 	FString StdErr;
 	int32 ReturnCode = 0;
 
+	const FString Params = TEXT("/C docker --version");
 	bool bSuccess = FPlatformProcess::ExecProcess(
-		TEXT("docker --version"),
+		TEXT("cmd.exe"),
+		*Params,
 		&ReturnCode,
 		&StdOut,
 		&StdErr

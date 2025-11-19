@@ -19,34 +19,67 @@ Located in `../Base/Examples/`:
 | **`ScissorLift_Controller.ino`** | Standalone scissor lift control | Use when you only need vertical translation |
 | **`ActuatorSystem_Controller.ino`** | Standalone 4-actuator system control | Use when you only need pitch/roll/lateral (no vertical) |
 
-### **Combined ECU**
+### **Parent ECU**
 
 Located in `GunshipExperience/`:
 
 | File | Description | Use Case |
 |------|-------------|----------|
-| **`GunshipExperience_ECU.ino`** | Combined ECU for complete 4DOF control | Use for GunshipExperience (combines both modules) |
+| **`GunshipExperience_ECU.ino`** | Parent ECU for complete 4DOF control (uses Universal Shield) | Use for GunshipExperience (combines both modules, interfaces with child ECUs) |
 
-### **Gun ECUs (Per-Station Controllers)**
+### **Child ECUs (Per-Station Controllers)**
 
-**Note:** Gun ECU firmware examples are planned for future releases. For now, see **[Gunship_Hardware_Specs.md](Gunship_Hardware_Specs.md)** for complete hardware specifications.
+**Note:** Child ECU firmware example (`Gun_ECU.ino`) is available. See **Hardware Specification** below for solenoid/driver details.
 
 **Architecture:**
-- **4× Gun ECUs** (one per player station) connect to the Primary Gunship ECU in a star topology
-- Each Gun ECU handles:
+- **4× Child ECUs** (one per player station, `Gun_ECU.ino`) connect to the parent ECU (`GunshipExperience_ECU.ino`) in a star topology
+- Each child ECU handles:
   - Dual thumb button input (debounced, rate-limited)
   - N× solenoid kicker control (with optional redundancy and thermal management)
-  - SteamVR Ultimate tracker pose reading (or relay from Primary ECU)
-  - Telemetry reporting to Primary Gunship ECU (10–30 Hz)
-- **Connection:** Wired Ethernet (recommended, < 1 ms latency) or WiFi to Primary Gunship ECU
+  - SteamVR Ultimate tracker pose reading (or relay from parent ECU)
+  - Telemetry reporting to parent ECU (10–30 Hz)
+- **Connection:** Wired Ethernet (recommended, < 1 ms latency) or WiFi to parent ECU
 - **Protocol:** LBEAST UDP binary protocol (same as engine communication)
 
-**Primary Gunship ECU:**
-- Aggregates data from all 4× Gun ECUs
+**Parent ECU (GunshipExperience_ECU):**
+- Uses the Universal Shield (primary ECU for the experience)
+- Aggregates data from all 4× child ECUs
 - Controls scissor lift platform directly (pitch/roll/Y/Z translation)
 - Relays fused gun/platform state to game engine via wireless UDP
 
-For complete hardware specifications, communication architecture, and ECU implementation details, see **[Gunship_Hardware_Specs.md](Gunship_Hardware_Specs.md)**.
+---
+
+## 🔩 Hardware Specification (Child ECU Haptics)
+
+**Default haptic:** Dual 24 V pull-type solenoids inside the gun chassis, driven by the child ECU for each station.
+
+### Recommended Baseline
+
+- **Solenoids:** 2× Johnson/Guardian pull-type (24 V, 20–40 N @ 5‑8 mm stroke).  
+- **Drivers:** 2× Pololu G2 High-Power Motor Driver 24v13 (one per solenoid).  
+- **Cooling:** Small aluminum heatsink + 40–50 mm fan per driver module.  
+- **Supply:** 24 VDC rail, budget 3–5 A per gun (72–120 W).  
+- **Cost:** ≈ $150–$200 per station (solenoids + drivers + cooling + ECU).
+
+### Redundancy & Thermal Logic
+
+- Install **N ≥ 1** solenoids; ECU alternates sessions using the coolest coil (< 80 °C).  
+- Each solenoid has an NTC sensor; driver modules also monitored.  
+- PWM duty throttles (100 → 50 %) if *all* coils/driver modules exceed 70 °C; hard shutdown at 85 °C.  
+- Telemetry exposes: solenoid temps array, active solenoid ID, total solenoid count, PWM throttle %, thermal shutdown flags.
+
+### Mechanical & Electrical Notes
+
+- Recoil mass is coupled to handle chassis; use elastomer pads to reduce audible ringing.  
+- Rubber-mount SteamVR trackers and add software filtering (10–20 Hz low-pass) to suppress solenoid-induced jitter.  
+- Driver stage: logic-level MOSFET or H-bridge with flyback diode; IBT‑2 modules OK for prototypes, Pololu G2 recommended for production.  
+- Harnessing: locking connectors with strain relief; star-ground at PSU return; separate logic and coil wiring as needed.
+
+### Network / ECU Architecture
+
+- Each gun is a **child ECU** (ESP32/STM32/etc.) sending telemetry (buttons, temps, fire state) to the **parent ECU**; receives play-session and E-stop commands.  
+- Parent ECU aggregates four child ECUs, drives the motion base, and relays fused state to the engine via UDP.  
+- Recommended topology: Ethernet star (parent ↔ 4 child ECUs) + Wi‑Fi link to the game server.
 
 ---
 
@@ -136,7 +169,7 @@ ESP32 GPIO 34 ──[4-20mA Sensor]── Actuator 2 Position (via 250Ω resisto
 ESP32 GPIO 35 ──[4-20mA Sensor]── Actuator 3 Position (via 250Ω resistor)
 ```
 
-**Note:** See `COST_ANALYSIS.md` for complete hardware bill of materials. For gun hardware specifications (solenoid kickers, drivers, thermal management), see **[Gunship_Hardware_Specs.md](Gunship_Hardware_Specs.md)**.
+**Note:** See `COST_ANALYSIS.md` for complete hardware bill of materials. Child ECU haptic details are summarized in the **Hardware Specification** section above.
 
 ---
 
@@ -363,13 +396,27 @@ See `COST_ANALYSIS.md` in `Source/LBEASTExperiences/` for complete hardware cost
 
 ---
 
-## 🔗 Related Documentation
+## 🔁 IO Flow Snapshot
 
-- **[Base/Templates/README.md](../../Base/Templates/README.md)** - Using wireless templates
-- **[Base/Examples/README.md](../../Base/Examples/README.md)** - Base example documentation
-- **[COST_ANALYSIS.md](../../../Source/LBEASTExperiences/COST_ANALYSIS.md)** - Complete cost breakdown
-- **[Gunship_Hardware_Specs.md](Gunship_Hardware_Specs.md)** - Complete hardware specifications for gun solenoid kickers (solenoids, drivers, thermal management, communication architecture)
-- **[GunshipExperience.h](../../../Source/LBEASTExperiences/Public/GunshipExperience.h)** - Unreal API
+```
+Child ECU (Gun_ECU) ──▶ Parent ECU (GunshipExperience_ECU) ──▶ Game Engine ──▶ Console / VR Players
+```
+
+| Link | Direction | Status | Notes |
+|------|-----------|--------|-------|
+| Child → Parent | Telemetry (UDP, 20 Hz default) | ✅ | Buttons, fire intensity, redundancy temps, PWM throttle, faults |
+| Parent → Child | Game state (UDP, 10 Hz + on-demand) | ✅ | Play session active, emergency stop (fire command relay TBD) |
+| Server → Parent | Motion/control | ✅ | Ch0‑9 floats/bools + struct packets (`FPlatformMotionCommand`) |
+| Parent → Server | Motion feedback + gun telemetry | ✅ | Ch100/101 feedback structs, Ch310 button events, Ch311 gun telemetry |
+| Server → Console | Telemetry display | ⚠️ | Parsing done; UMG console widget pending |
+| Server ↔ VR Players | Button/fire replication | ❌ | Deferred (future VR transport work) |
+
+**Channel reference**
+
+- **Game engine → parent:** Ch0‑4 (pitch/roll/Y/Z/duration), Ch7 (E‑stop), Ch9 (play session), Ch100/101 (rate control), Ch200 struct for full command.  
+- **Parent → engine:** Ch100/101 feedback structs, `FGunButtonEvents` (Ch310, configurable 20 Hz), `FGunTelemetry` (Ch311, configurable 1 Hz).  
+- **Child → parent:** Per-station channels (10+n button, 20+n fire intensity, 30+n temps, etc.) plus redundancy/driver telemetry.  
+- **Parent → child:** Ch9 play session (authorizes firing) and Ch7 E-stop; fire command propagation planned.
 
 ---
 

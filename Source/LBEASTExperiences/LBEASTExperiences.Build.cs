@@ -26,6 +26,7 @@ public class LBEASTExperiences : ModuleRules
 				"Core",
 				"CoreUObject",
 				"Engine",
+				"UMG",
 				"LBEASTCommon",  // Interfaces and shared types
 				"LBEASTCore",    // Implementation classes (InputAdapter, ServerCommandProtocol, etc.)
 				"LBEASTAI",      // Generic AI module (for base classes: UAIScriptManager, UAIImprovManager, UAIASRManager)

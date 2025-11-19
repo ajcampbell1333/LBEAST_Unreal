@@ -25,7 +25,8 @@ FirmwareExamples/
 │       └── DoorLock_Example.ino                 # Main example (all platforms)
 │
 └── GunshipExperience/              # Gunship experience specific examples
-    ├── GunshipExperience_ECU.ino   # Combined ECU for 4DOF motion platform
+    ├── GunshipExperience_ECU.ino   # Parent ECU for 4DOF motion platform (uses Universal Shield)
+    ├── Gun_ECU.ino                  # Child ECU for per-station gun control
     └── README.md                    # GunshipExperience firmware documentation
 ```
 
@@ -119,7 +120,7 @@ Examples are organized by experience type:
   - `ActuatorSystem_Controller.ino` - Standalone 4-actuator hydraulic control
   - `ButtonMotor_Example.ino` - Generic button & motor example
 - **EscapeRoom/** - Escape room specific (door locks, props, sensors)
-- **GunshipExperience/** - Gunship experience (4DOF motion platform ECU)
+- **GunshipExperience/** - Gunship experience (parent ECU for 4DOF motion platform, child ECUs for per-station gun control)
 - **AIFacemask/** - (Future) Live actor costume examples
 - **MovingPlatform/** - (Future) Motion platform sensor examples
 

@@ -57,6 +57,10 @@ struct LBEASTAI_API FLLMResponse
 	UPROPERTY(BlueprintReadOnly, Category = "LLM")
 	FString ResponseText;
 
+	/** Indicates whether the provider call succeeded */
+	UPROPERTY(BlueprintReadOnly, Category = "LLM")
+	bool bSuccess = false;
+
 	/** Whether the response is complete (vs partial/streaming) */
 	UPROPERTY(BlueprintReadOnly, Category = "LLM")
 	bool bIsComplete = true;
@@ -66,7 +70,8 @@ struct LBEASTAI_API FLLMResponse
 	FString ErrorMessage;
 
 	FLLMResponse()
-		: bIsComplete(true)
+		: bSuccess(false)
+		, bIsComplete(true)
 	{}
 };
 

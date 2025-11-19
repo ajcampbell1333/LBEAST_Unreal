@@ -13,6 +13,7 @@
 #include "Engine/TextureRenderTarget2D.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Misc/Base64.h"
+#include "Serialization/BulkData.h"
 
 UAIFacemaskFaceController::UAIFacemaskFaceController()
 {
@@ -388,7 +389,7 @@ UTexture2D* UAIFacemaskFaceController::CreateTextureFromBase64(const FString& Ba
 	}
 
 	// Copy image data to texture
-	void* TextureData = Texture->GetPlatformData()->Mips[0].BulkData.Lock(LOCK_WRITE_ONLY);
+	void* TextureData = Texture->GetPlatformData()->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
 	FMemory::Memcpy(TextureData, UncompressedData.GetData(), UncompressedData.Num());
 	Texture->GetPlatformData()->Mips[0].BulkData.Unlock();
 

@@ -123,7 +123,7 @@ void ULLMProviderManager::RequestResponse(const FLLMRequest& Request, TFunction<
 	}
 
 	// Forward request to current provider
-	CurrentProvider->RequestLLMResponse(Request, Callback);
+	CurrentProvider->RequestResponse(Request, Callback);
 }
 
 FString ULLMProviderManager::GetCurrentProviderName() const

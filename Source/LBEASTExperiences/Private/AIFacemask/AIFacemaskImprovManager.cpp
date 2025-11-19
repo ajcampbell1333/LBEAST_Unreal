@@ -254,8 +254,7 @@ void UAIFacemaskImprovManager::RequestAudio2FaceConversion(const FString& AudioF
 		return;
 	}
 
-	FString Base64Audio;
-	FBase64::Encode(AudioData, Base64Audio);
+	const FString Base64Audio = FBase64::Encode(AudioData);
 
 	// Build Audio2Face request JSON
 	TSharedPtr<FJsonObject> RequestJson = MakeShareable(new FJsonObject);

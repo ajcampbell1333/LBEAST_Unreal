@@ -1,22 +1,22 @@
 /*
- * LBEAST Gunship Experience - Gun ECU
+ * LBEAST Gunship Experience - Child ECU (Gun_ECU)
  * 
  * Embedded control unit for a single gun station in GunshipExperience.
- * One Gun ECU per player station (4 total) connects to Primary Gunship ECU in star topology.
+ * One child ECU per player station (4 total) connects to parent ECU (GunshipExperience_ECU) in star topology.
  * 
- * This ECU handles:
+ * This child ECU handles:
  * - Dual thumb button input (debounced, rate-limited)
  * - N× solenoid kicker control (with optional redundancy and thermal management)
- * - SteamVR Ultimate tracker pose reading (or relay from Primary ECU)
- * - Telemetry reporting to Primary Gunship ECU (10–30 Hz)
+ * - SteamVR Ultimate tracker pose reading (or relay from parent ECU)
+ * - Telemetry reporting to parent ECU (10–30 Hz)
  * 
  * Functionality:
- * - Receives fire commands from Primary Gunship ECU or game engine
+ * - Receives fire commands from parent ECU or game engine
  * - Controls solenoid kickers with pulse envelope (50–200 ms)
  * - Monitors solenoid temperatures (NTC thermistors)
  * - Implements redundancy: alternates between N solenoids based on temperature
  * - Implements throttling: reduces PWM duty if thermal limits exceeded
- * - Reports button states, tracker pose, and telemetry to Primary ECU
+ * - Reports button states, tracker pose, and telemetry to parent ECU
  * 
  * Supported Platforms:
  * - ESP32 (built-in WiFi/Ethernet) - Recommended for this application
@@ -29,7 +29,7 @@
  * - Jetson Nano (built-in WiFi/Ethernet) - GPIO via Jetson GPIO library
  * 
  * Communication Modes:
- * - Wired Ethernet (recommended): Lower latency, more reliable for Gun ECU → Primary ECU
+ * - Wired Ethernet (recommended): Lower latency, more reliable for child ECU → parent ECU
  *   * Set COMMUNICATION_MODE = COMM_MODE_ETHERNET
  *   * Configure Ethernet PHY pins in configuration section
  * - Wireless WiFi: More flexible deployment, higher latency
@@ -43,12 +43,12 @@
  * - N× NTC thermistors (10 kΩ @ 25°C) for solenoid temperature monitoring
  * - 1× NTC thermistor for PWM driver temperature monitoring (optional)
  * - Dual thumb buttons (GPIO inputs with pull-up)
- * - SteamVR Ultimate tracker (or receive pose from Primary ECU)
+ * - SteamVR Ultimate tracker (or receive pose from parent ECU)
  * - 24V PSU (3–5A per station)
  * 
  * Protocol: Binary LBEAST protocol
- * Channel Mapping (Gun ECU → Primary Gunship ECU):
- * - Ch10+n (n=0..3): Fire command bools (engine→station ECU), or station→primary ECU status
+ * Channel Mapping (Child ECU → Parent ECU):
+ * - Ch10+n (n=0..3): Fire command bools (engine→child ECU), or child ECU→parent ECU status
  * - Ch20+n: Intensity (0.0–1.0) or envelope index
  * - Ch30+n: Telemetry (active solenoid temp or duty proxy) as float
  * - Ch40+n (if redundant): Active solenoid ID (0 to N-1) as int32
@@ -73,7 +73,7 @@
 // =====================================
 
 // Communication mode: WIFI or ETHERNET
-// Wired Ethernet recommended for lower latency between Gun ECUs and Primary ECU
+// Wired Ethernet recommended for lower latency between child ECUs and parent ECU
 // (all on same chassis). Wireless can be used if wiring is impractical.
 #define COMM_MODE_WIFI 0
 #define COMM_MODE_ETHERNET 1
@@ -112,9 +112,9 @@ const char* password = "your_password_here";
   // ETH_PHY_TLK110, ETH_PHY_DP83848, ETH_PHY_RTL8201
 #endif
 
-  // Primary Gunship ECU IP address (for reporting telemetry)
-IPAddress primaryGunshipECU_IP(192, 168, 1, 100);
-uint16_t primaryGunshipECU_Port = 8892;  // Port on Gunship ECU that receives Gun ECU telemetry
+  // Parent ECU (GunshipExperience_ECU) IP address (for reporting telemetry)
+IPAddress parentECU_IP(192, 168, 1, 100);
+uint16_t parentECU_Port = 8892;  // Port on parent ECU that receives child ECU telemetry
 
 // Station ID (0-3, set per ECU instance)
 const uint8_t STATION_ID = 0;  // Change this: 0, 1, 2, or 3 for each gun station
@@ -193,7 +193,7 @@ const unsigned long TELEMETRY_INTERVAL_MS = 50;  // 20 Hz telemetry rate
 bool sessionActive = false;
 unsigned long sessionStartTime = 0;
 
-// Game state (received from Primary Gunship ECU)
+// Game state (received from parent ECU)
 bool playSessionActive = false;  // Play session authorization (guns can only fire when true)
 
 // Ethernet state (ESP32 only)
@@ -261,7 +261,7 @@ void setup() {
   Serial.begin(115200);
   delay(1000);
   
-  Serial.println("\n\nLBEAST Gunship Experience - Gun ECU");
+  Serial.println("\n\nLBEAST Gunship Experience - Child ECU (Gun_ECU)");
   Serial.println("=====================================\n");
   Serial.printf("Station ID: %d\n", STATION_ID);
   Serial.printf("Number of Solenoids: %d\n", numSolenoids);
@@ -300,12 +300,12 @@ void setup() {
     Serial.println("Initializing WiFi...");
     LBEAST_Wireless_Init(ssid, password, 8888 + STATION_ID);  // Unique port per station
     
-    // Configure TX for sending telemetry to Primary Gunship ECU
+    // Configure TX for sending telemetry to parent ECU
     extern IPAddress LBEAST_TargetIP;
     extern uint16_t LBEAST_TargetPort;
     extern bool LBEAST_Initialized;
-    LBEAST_TargetIP = primaryGunshipECU_IP;
-    LBEAST_TargetPort = primaryGunshipECU_Port;
+    LBEAST_TargetIP = parentECU_IP;
+    LBEAST_TargetPort = parentECU_Port;
     LBEAST_Initialized = true;  // Mark TX as initialized (WiFi already connected)
     
     Serial.println("WiFi mode initialized");
@@ -325,8 +325,8 @@ void setup() {
     extern bool LBEAST_Initialized;
     extern WiFiUDP LBEAST_UDP;
     
-    LBEAST_TargetIP = primaryGunshipECU_IP;
-    LBEAST_TargetPort = primaryGunshipECU_Port;
+    LBEAST_TargetIP = parentECU_IP;
+    LBEAST_TargetPort = parentECU_Port;
     
     // Start UDP listener for RX (WiFiUDP works with Ethernet on ESP32)
     LBEAST_UDP.begin(8888 + STATION_ID);
@@ -334,21 +334,21 @@ void setup() {
     
     Serial.println("Ethernet mode initialized");
     Serial.printf("UDP listening on port %d\n", 8888 + STATION_ID);
-    Serial.printf("Target: %s:%d\n", primaryGunshipECU_IP.toString().c_str(), primaryGunshipECU_Port);
+    Serial.printf("Target: %s:%d\n", parentECU_IP.toString().c_str(), parentECU_Port);
     #else
     Serial.println("ERROR: Ethernet mode requires ESP32. Falling back to WiFi.");
     LBEAST_Wireless_Init(ssid, password, 8888 + STATION_ID);
     extern IPAddress LBEAST_TargetIP;
     extern uint16_t LBEAST_TargetPort;
     extern bool LBEAST_Initialized;
-    LBEAST_TargetIP = primaryGunshipECU_IP;
-    LBEAST_TargetPort = primaryGunshipECU_Port;
+    LBEAST_TargetIP = parentECU_IP;
+    LBEAST_TargetPort = parentECU_Port;
     LBEAST_Initialized = true;
     #endif
   }
   
-  Serial.println("\nGun ECU Ready!");
-  Serial.println("Waiting for commands from Primary Gunship ECU...\n");
+  Serial.println("\nChild ECU Ready!");
+  Serial.println("Waiting for commands from parent ECU...\n");
   Serial.println("Channel Mapping:");
   Serial.println("  Ch 10+n: Fire command (bool)");
   Serial.println("  Ch 20+n: Fire intensity (float, 0.0-1.0)");
@@ -379,7 +379,7 @@ void loop() {
   // Read tracker pose (placeholder - implement based on tracker integration)
   // ReadTrackerPose();  // TODO: Implement tracker reading
   
-  // Send telemetry to Primary Gunship ECU
+  // Send telemetry to parent ECU
   unsigned long currentTime = millis();
   if (currentTime - lastTelemetryTime >= TELEMETRY_INTERVAL_MS) {
     SendTelemetry();
@@ -681,7 +681,7 @@ void LBEAST_HandleBool(uint8_t channel, bool value) {
       }
     }
   } else if (channel == 9) {
-    // Channel 9: Play session active (from Primary Gunship ECU)
+    // Channel 9: Play session active (from parent ECU)
     playSessionActive = value;
     Serial.printf("ECU: Play session %s\n", value ? "ACTIVE" : "INACTIVE");
     // If play session becomes inactive, stop firing immediately
@@ -730,7 +730,7 @@ void SendTelemetry() {
   LBEAST_SendBool(10 + STATION_ID, button0State || button1State);  // Combined button state
   
   // TODO: Send individual button states on separate channels when needed
-  // Ch 11+n: Button 0, Ch 12+n: Button 1 (if Gunship ECU needs individual parsing)
+  // Ch 11+n: Button 0, Ch 12+n: Button 1 (if parent ECU needs individual parsing)
   
   // Fire intensity (Ch 20+n)
   LBEAST_SendFloat(20 + STATION_ID, fireIntensity);
@@ -780,7 +780,7 @@ void ReadTrackerPose() {
   // TODO: Implement SteamVR Ultimate tracker reading
   // Options:
   // 1. Direct tracker reading via USB/Serial if tracker supports it
-  // 2. Receive pose from Primary Gunship ECU (if centralized tracker relay)
+  // 2. Receive pose from parent ECU (if centralized tracker relay)
   // 3. Use OpenVR/SteamVR API if running on PC-based ECU (Raspberry Pi, Jetson)
   
   // For now, pose remains at origin
