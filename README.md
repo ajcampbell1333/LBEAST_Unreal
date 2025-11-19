@@ -70,6 +70,7 @@ LBEAST uses **OpenXR exclusively** for all HMD and hand tracking access through 
 - [Dedicated Server & Server Manager](#dedicated-server--server-manager)
 - [Network Configuration](#network-configuration)
 - [Embedded System Philosophy](#embedded-system-philosophy)
+- [Embedded System Nuts & Bolts](#-embedded-system-nuts--bolts)
 - [Roadmap](#-roadmap)
 - [Support](#support)
 - [License](#license)
@@ -142,11 +143,11 @@ VR devs need a leg up. The industry has been in a funding desert since the Pande
 I get where investors are coming from. We're 10 years into modern VR. They need proof of ROI. We need to deliver in the black. We need better tools. We were building cars without factories.
 
 
-A better analogy - Movie Theaters:
-If a Hollywood studio invested millions on a new film before the streaming era, they'd be sunk if there were no 35mm projector and no movie theaters hungry to roll the next hit.
+**A good analogy for 21st century VR Distro - Movie Theaters:**
+If a Hollywood studio invested millions on a new film in the 80s, they'd be sunk if there were no 35mm projector and no movie theaters hungry to roll the next hit.
 
-An even better analogy - the JAMMA Arcade Spec:
-In 1985, the arcade industry was in a slump. All the arcade boxes were proprietary. Venues had to buy a new arcade box for every game. Devs had to design a whole arcade box for just THEIR game. Enter the JAMMA Spec. Suddenly venues could leave the same box in place and swap a card, and suddenly it's a new game! Same hardware, fresh regular content. Devs could focus on the game knowing reliable hardware was already on-site.
+**An even better analogy - the JAMMA Arcade Spec:**
+In 1985, the arcade industry was in a slump. All the arcade boxes were proprietary. Venues had to buy a new arcade box for every game. Devs had to design a whole arcade box for just THEIR game. Enter the JAMMA Spec. Suddenly venues could leave the same box in place and swap a card, and it's a new game! Same hardware, fresh regular content. Devs could focus on the game knowing reliable hardware was already on-site.
 
 We need that for the VR industry:
 * Devs need to be able to focus on dev, not hardware
@@ -165,7 +166,7 @@ Enter LBEAST. Free, open-source, plug-n-play across multiple genres.
 
 <div style="margin-left: 20px;">
 
-LBEAST is for professional teams building commercial Location-Based Entertainment installations. It's a professional-grade toolchain designed for teams of programmers and technical artists.
+LBEAST is for VR venues, trade show designers, and professional dev teams designing  permanent, semi-permanent, or pop-up Location-Based Entertainment installations. LBEAST is a professional-grade toolchain designed for teams of programmers and technical artists.
 
 **Target audiences:**
 - **Theme park attraction designers/engineers/production staff** - Building immersive attractions with motion platforms, embedded systems, and live actor integration
@@ -2920,7 +2921,7 @@ LBEAST requires reliable network communication between game engine servers, ECUs
 **Setup Walkthrough:**
 
 1. **Identify Device MAC Addresses**
-   - Each ECU (Gunship ECU, Gun ECUs) has a unique MAC address
+   - Each ECU (parent ECU, child ECUs) has a unique MAC address
    - Document MAC addresses for all LBEAST devices
    - Methods to obtain MAC:
      - Serial monitor output during device boot
@@ -2940,11 +2941,11 @@ LBEAST requires reliable network communication between game engine servers, ECUs
    - Open LBEAST Command Console
    - Navigate to Network Configuration
    - Manually enter IP address and UDP port for each device:
-     - Gunship ECU: IP address, port 8888
-     - Gun ECU Station 0: IP address, port 8888
-     - Gun ECU Station 1: IP address, port 8889
-     - Gun ECU Station 2: IP address, port 8890
-     - Gun ECU Station 3: IP address, port 8891
+     - Parent ECU (GunshipExperience_ECU): IP address, port 8888
+     - Child ECU Station 0 (Gun_ECU): IP address, port 8888
+     - Child ECU Station 1 (Gun_ECU): IP address, port 8889
+     - Child ECU Station 2 (Gun_ECU): IP address, port 8890
+     - Child ECU Station 3 (Gun_ECU): IP address, port 8891
      - Game Engine Server: IP address, port 8888
    - Save configuration
 
@@ -3057,12 +3058,12 @@ LBEAST requires reliable network communication between game engine servers, ECUs
 ### UDP Port Configuration
 
 **Default Port Assignments:**
-- **Game Engine Server**: 8888 (receives from Gunship ECU, sends to Gunship ECU)
-- **Gunship ECU**: 8888 (receives from Game Engine), 8892 (receives from Gun ECUs)
-- **Gun ECU Station 0**: 8888 (receives from Gunship ECU)
-- **Gun ECU Station 1**: 8889 (receives from Gunship ECU)
-- **Gun ECU Station 2**: 8890 (receives from Gunship ECU)
-- **Gun ECU Station 3**: 8891 (receives from Gunship ECU)
+- **Game Engine Server**: 8888 (receives from parent ECU, sends to parent ECU)
+- **Parent ECU (GunshipExperience_ECU)**: 8888 (receives from Game Engine), 8892 (receives from child ECUs)
+- **Child ECU Station 0 (Gun_ECU)**: 8888 (receives from parent ECU)
+- **Child ECU Station 1 (Gun_ECU)**: 8889 (receives from parent ECU)
+- **Child ECU Station 2 (Gun_ECU)**: 8890 (receives from parent ECU)
+- **Child ECU Station 3 (Gun_ECU)**: 8891 (receives from parent ECU)
 - **Command Console**: 7778 (Server Beacon), 7779 (Command Protocol)
 
 **Port Conflicts:**
@@ -3234,11 +3235,11 @@ In most cases, fully custom PCBs may be unnecessary for just about any XR LBE in
 </details>
 
 <details>
-<summary><strong>Why a Universal Shield for almost all LBE installations?</strong></summary>
+<summary><strong>Why use a Universal Shield for almost all LBE installations?</strong></summary>
 
 <div style="margin-left: 20px;">
 
-In the 80s, the JAMMA spec allowed new games to hot-swap into existing arcade boxes as PCB cards that could be easily pulled and placed. The LBEAST Universal Shield aims to accomplish the same goal, but for a much larger variety of hardware. A given experience might have hydraulics, haptics, various power sources, and/or need to connect multiple MCUs in a network. Also, a development team may prefer this or that MCU dev kit as their go-to default platform. It would be marvelous for a single shield to support MOST use cases of any-MCU-to-any-collection-of-hardware. LBEAST Universal Shield recommends ESP32-S3 by default since it has the most robust onboard wireless capabilities, but dev teams may have unique requirements for which they prefer a different MCU. In such cases, they need only an adapter to fit to the ESP32's slot on the Universal Shield. Obviously, there may be moments of necessary customization (e.g. a custom STM-based PCB that self-contains an adpater to the shield), but if you can use the exact same board to power most LBE stations at a venue that has several stations, then just like 80s arcades... the venue's job installing a new experience at a given station becomes drastically simplified, not to mention the dev team is far less likely to need to design any custom PCBs from scratch. Interoperability is the future!
+In the 80s, the JAMMA spec allowed new games to hot-swap into existing arcade boxes as PCB cards that could be easily pulled and placed. The LBEAST Universal Shield aims to accomplish the same goal, but for a much larger variety of hardware. A given experience might have hydraulics, haptics, servo motors, linear actuators, various power sources, and/or need to connect multiple MCUs in a network. Also, a development team may prefer this or that MCU dev kit as their go-to default platform. It would be marvelous for a single shield to support MOST use cases of any-MCU-to-any-collection-of-hardware. LBEAST Universal Shield recommends ESP32-S3 by default since it has the most robust onboard wireless capabilities, but dev teams may have unique requirements for which they prefer a different MCU. In such cases, they need only an adapter to fit to the ESP32's slot on the Universal Shield. Obviously, there may be moments of necessary customization (e.g. a custom STM-based PCB that self-contains an adpater to the shield), but if you can use the exact same board to power most LBE stations at a venue that has several stations, then just like 80s arcades... the venue's job installing a new experience at a given station becomes drastically simplified, not to mention the dev team is far less likely to need to design any custom PCBs from scratch. Interoperability is the future!
 
 </div>
 
@@ -3250,6 +3251,107 @@ In the 80s, the JAMMA spec allowed new games to hot-swap into existing arcade bo
 <div style="margin-left: 20px;">
 
 For any experience running one year or longer, LBEAST's author recommends considering conformal coating or potting for several copies of show board back-ups with exposed hot-swap connectors. With half a dozen hot-swap copies of well-designed module/shield combos, an Ops Tech can count on nearly uninterrupted show control. They may not achieve 100% up-time as is promised with PLCs, but PLCs also rarely achieve ACTUAL 100% up-time. They simply come with contingencies provided by brands. With microcontrollers, you could save a lot of budget, but the contingencies are roll-your-own or roll-the-dice. LBEAST's author encourages developers and venues not to roll the dice: use backups on backups when deploying small-batch microcontroller PCB shields and modules.
+
+</div>
+
+</details>
+
+---
+
+## 🔧 Embedded System Nuts & Bolts
+
+<details>
+<summary><strong>Power Input</strong></summary>
+
+<div style="margin-left: 20px;">
+
+Many large haptics, hydraulics, pneumatics, and motors in use for XR LBE enhancement are powered by 12V or 24V batteries, especially in pop-up scenarios. LBEAST aims to enable flexible deployment at trade shows and arcades alike. The recommended power input setup is a 12V or 24V battery bank installed inside any system using high-current components. LBEAST recommends an onboard battery charger matched to the battery pack for convenience. Off-hours, batteries can be topped off with extension cables that should be cleared away during use to prevent trip hazards. Battery packs must be sized to the draw of the system, unique to every experience. Generally, QTY4 100AH LiFePO4 packs on-hand is a good ballpark per experience. LBEAST ECU templates are all designed expecting 12-24V nominal input (29.2V max from LiFePO4 at max charge). If your power requirements don't match this, the LBEAST PCBs are all open-source and would need small adjustments to power regulation.
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>Supported ECU Motherboards (ESP32, STM32, Arduino)</strong></summary>
+
+<div style="margin-left: 20px;">
+
+Each experience may need one or more Electronic Control Unit (ECU) to function properly. It is likely that 80% of all LBEAST experiences can function with one ECU or fewer. In such cases, LBEAST recommends you plug a development board of your choice (ESP32, STM32, or Arduino) into the Universal Shield's motherboard slot, and consider that device your "Mother/Parent ECU" for the experience. The original Universal Shield reference design is out-of-the-box ready for ESP32-S3-WROOM1. It communicates with all high-current equipment over a galvanically isolated CAN adapter. There are personality adapters available to slot into the motherboard with STM32, Arduino, and other ESP variants. If your desired target motherboard is not supported as a personality adapter yet, consider building an adapter in KiCAD (the go-to free open-source PCB design tool) and submitting a pull request. Your help for this community is greatly appreciated.
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>Peripheral Advanced Embedded Support (Jetson Nano and Raspberry Pi)</strong></summary>
+
+<div style="margin-left: 20px;">
+
+There may be rare scenarios for which you need more capability than any of the three motherboard platforms can provide. For instance, if you need an OS or interface onboard a tiny device for quick debugging and config, but maybe you don't want a full-blown PC/smartphone/tablet dedicated to such a small task, Raspberry Pi is a best-of-both-worlds. Pi can plug into any aux port on the Universal Shield and act as a child to the Parent ECU. Likewise, if you need high-end graphics or AI model training/inference in a tiny custom mobile package, Jetson Nano can use the aux port on the Universal Shield and become a child to the Parent ECU too.
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>LBEAST Universal Child Aux Port for Non-ECU (i.e. non-Smart) Modules</strong></summary>
+
+<div style="margin-left: 20px;">
+
+If you prefer, you can offload ICs or sensors or anything from the motherboard through the aux ports without needing a child ECU to register with the parent. The parent has the built-in ability to control one PWM signal and one ADC per port out-of-the-box. For example, you can plug the LBEAST Temperature Sensor Module (just a cheap temperature sensor over ethernet) across any length of cable to place the sensor as desired behind a wall panel, inside a couch cushion, etc. The Motherboard supports 8 aux ports, each contain 1 ADC and 1 PWM. Any child module that needs more advanced functionality must become a smart module (i.e. custom-designed child ECU board w/ ESP32, STM32, Nano, Pi, or Jetson).
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>Child ECUs A.K.A. Smart Modules</strong></summary>
+
+<div style="margin-left: 20px;">
+
+If you need a non-smart peripheral to expand its functions beyond a simple sensor or interface, you can design any embedded PCB and connect it to the motherboard wirelessly or over ethernet. LBEAST module templates can get you started. They have ethernet already mapped for data, power, parent PWM, and parent ADC. Your smart signals will automatically map to the parent according to the CAT-5 Pin Layout.
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>CAT-5 Pin Layout</strong></summary>
+
+<div style="margin-left: 20px;">
+
+Pin 1: Ethernet RX+  
+Pin 2: Ethernet RX-  
+Pin 3: Ethernet TX+  
+Pin 4: GND  
+Pin 5: +3V3 (if you need the motherboard to power your device)  
+Pin 6: Ethernet TX-  
+Pin 7: ADC from the Motherboard  
+Pin 8: PWM from the Motherboard
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>Wireless Child ECUs</strong></summary>
+
+<div style="margin-left: 20px;">
+
+If the IO to the child ECU doesn't need extremely low latency, the developer should consider interfacing it with the parent wirelessly. In fact, an off-the-shelf ESP32 module from Amazon can become a child ECU with just a couple lines of code. This is why LBEAST favors ESP32 over other platforms, since it most commonly integrates WiFi and Bluetooth onboard as rapid-prototyping options with several available libraries. ESP-NOW for wireless board-to-board is recommended for fastest setup, though the motherboard needs a router to talk to the game server.
+
+**NOTE:** There will be a 10GB/s version of the Universal Shield eventually, but it may not be available in Alpha. If you know how to design firmware, this is a big area of interest and the community would appreciate your contributions here.
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>Hard-wired Child ECUs</strong></summary>
+
+<div style="margin-left: 20px;">
+
+Some experiences may require best-in-class latency between the Universal Shield and its child-ECUs. The quintessential example is the Gunship Experience. Each player has rapid-fire input capability with several button inputs that must feed data back to the Universal Shield, which relays it to the server wirelessly. If there are multiple wireless round-trips, noticeable latency can appear in the motion-to-photon responsiveness of the gun. To cut down on this as much as possible, the venue can go from fully wireless to fully wired in stages. The child-ECUs (one for each gun) can send button input data over ethernet cables instead of over-the-air back to the Universal Shield, and then the Universal Shield's router can optionally run ethernet back to the console instead of sending real-time updates over-the-air. All wired and wireless options are on-the-table venue-side for battling latency. The developer needs only package their child-ECU data packets in the same form as the Gun ECU example, and everything will work whether over-the-air or wired in the same way.
 
 </div>
 
@@ -3312,7 +3414,7 @@ For any experience running one year or longer, LBEAST's author recommends consid
 
 ### ✅ Completed (v0.1.2)
 - ✅ **VR Player Transport (Server ↔ VR Clients)** - Bidirectional communication between game server and VR players for replicating OpenXR HMD and hand tracking data across LAN multiplayer experiences. Integrates with Unreal Replication for state synchronization. Enables gesture recognition for remote players in 6DOF multiplayer experiences.
-- ✅ **Guns Subsystem (Per-Station Solenoid Kicker)** - Per-station embedded controllers with dual thumb buttons, 24V solenoid kicker for haptic recoil, SteamVR Ultimate tracker on gun nose. Station ECUs sync over UDP to primary Gunship ECU, which relays aggregated per-station state to game engine. Engine-side APIs include real-time tracker node per gun transform, event/delegate surface for fire presses, fire rate gating, safety lockouts, and per-station ID mapping.
+- ✅ **Guns Subsystem (Per-Station Solenoid Kicker)** - Per-station embedded controllers (child ECUs) with dual thumb buttons, 24V solenoid kicker for haptic recoil, SteamVR Ultimate tracker on gun nose. Child ECUs sync over UDP to parent ECU (GunshipExperience_ECU), which relays aggregated per-station state to game engine. Engine-side APIs include real-time tracker node per gun transform, event/delegate surface for fire presses, fire rate gating, safety lockouts, and per-station ID mapping.
 - ✅ **Virtual Scissor Lift Platform Representation** - SteamVR Ultimate tracker on platform chassis with engine-side transform fusion (commanded pose vs tracker pose). Performance optimization module with responsiveness measurement and rolling KPIs. Unity GameObject locator for easy attachment of chopper/gunship/spaceship meshes. Grounded/In-Flight state management with safety interlocks.
 - ✅ **LBEASTAI Module Architecture** - Complete low-level AI API module with decoupled architecture. Includes LLM providers (Ollama, OpenAI-compatible), ASR providers (NVIDIA Riva, Parakeet, Canary, Whisper), container management, HTTP/gRPC clients, and base manager classes (AIScriptManager, AIImprovManager, AIASRManager). Fully extensible provider system with hot-swapping support. AIFacemaskExperience refactored to use LBEASTAI base classes.
 - ✅ **Finishing AIFacemask functionality** - Complete all NOOP implementations for NVIDIA ACE service integration:
@@ -3453,6 +3555,7 @@ For any experience running one year or longer, LBEAST's author recommends consid
 - [ ] **RenderTexture Arrays and Matrices** - Support for RenderTexture arrays and matrices with hardware-agnostic output to video spheres, 360 video, stereoscopic 3D billboards, stereoscopic 360 video, LED walls, projectors (front projection, rear projection, variable-depth projection), and drone swarm renderers. Enables synchronized multi-display installations for immersive LBE experiences.
 - [ ] **OTA Firmware Updates** - Implement and test OTA (Over-The-Air) firmware flashing for ESP32-based reference design, APT package management for Raspberry Pi and Jetson Nano, and ESP32-as-wireless-adapter for STM32 OTA based on the rounakdatta open-source project. **Note:** The rounakdatta project will be included as a git submodule when implementing OTA functionality.
 - [ ] **3D-Printable 1/8th-Scale Platform Model** - Design a 3D-printable 1/8th-scale model of the scissor lift and tilt platform with complete ECU prototype integration capability for use in off-site network debugging. Enables developers to test network configurations, firmware updates, and communication protocols without requiring access to full-scale hardware. Includes mounting points for ESP32 ECUs, mock actuators, and all necessary interfaces for full system validation.
+- [ ] **10GB/s High-Throughput Variant of the Universal Shield (LBEAST GigaShield)** - High-performance variant of the Universal Shield designed for applications requiring ultra-high bandwidth data transfer. Supports 10GB/s throughput for demanding LBE installations requiring massive sensor arrays, high-resolution video streaming, or real-time data processing at scale.
 
 </div>
 
