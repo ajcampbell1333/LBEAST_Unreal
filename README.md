@@ -87,27 +87,27 @@ LBEAST uses **OpenXR exclusively** for all HMD and hand tracking access through 
 <div style="margin-left: 20px;">
 
 **Low-Level APIs:**
-- [LBEASTAI API README](https://github.com/ajcampbell1333/lbeast_unreal/blob/main/Plugins/LBEAST/Source/LBEASTAI/README.md) - `Plugins/LBEAST/Source/LBEASTAI/README.md`
-- [VRPlayerTransport README](https://github.com/ajcampbell1333/lbeast_unreal/blob/main/Plugins/LBEAST/Source/LBEASTCore/Public/VRPlayerTransport/README.md) - `Plugins/LBEAST/Source/LBEASTCore/Public/VRPlayerTransport/README.md`
-- [Input README](https://github.com/ajcampbell1333/lbeast_unreal/blob/main/Plugins/LBEAST/Source/LBEASTCore/Public/Input/README.md) - `Plugins/LBEAST/Source/LBEASTCore/Public/Input/README.md`
-- [VOIP README](https://github.com/ajcampbell1333/lbeast_unreal/blob/main/Plugins/LBEAST/Source/VOIP/README.md) - `Plugins/LBEAST/Source/VOIP/README.md`
-- [EmbeddedSystems README](https://github.com/ajcampbell1333/lbeast_unreal/blob/main/Plugins/LBEAST/Source/EmbeddedSystems/README.md) - `Plugins/LBEAST/Source/EmbeddedSystems/README.md`
-- [ProLighting README](https://github.com/ajcampbell1333/lbeast_unreal/blob/main/Plugins/LBEAST/Source/ProLighting/README.md) - `Plugins/LBEAST/Source/ProLighting/README.md`
+- [LBEASTAI API README](https://github.com/ajcampbell1333/lbeast_unreal/blob/main/Source/LBEASTAI/README.md) - `Source/LBEASTAI/README.md`
+- [VRPlayerTransport README](https://github.com/ajcampbell1333/lbeast_unreal/blob/main/Source/LBEASTCore/Public/VRPlayerTransport/README.md) - `Source/LBEASTCore/Public/VRPlayerTransport/README.md`
+- [Input README](https://github.com/ajcampbell1333/lbeast_unreal/blob/main/Source/LBEASTCore/Public/Input/README.md) - `Source/LBEASTCore/Public/Input/README.md`
+- [VOIP README](https://github.com/ajcampbell1333/lbeast_unreal/blob/main/Source/VOIP/README.md) - `Source/VOIP/README.md`
+- [EmbeddedSystems README](https://github.com/ajcampbell1333/lbeast_unreal/blob/main/Source/EmbeddedSystems/README.md) - `Source/EmbeddedSystems/README.md`
+- [ProLighting README](https://github.com/ajcampbell1333/lbeast_unreal/blob/main/Source/ProLighting/README.md) - `Source/ProLighting/README.md`
 
 **Experience Genre Templates:**
-- [AIFacemask Experience README](https://github.com/ajcampbell1333/lbeast_unreal/blob/main/Plugins/LBEAST/Source/LBEASTExperiences/Private/AIFacemask/README.md) - `Plugins/LBEAST/Source/LBEASTExperiences/Private/AIFacemask/README.md`
+- [AIFacemask Experience README](https://github.com/ajcampbell1333/lbeast_unreal/blob/main/Source/LBEASTExperiences/Private/AIFacemask/README.md) - `Source/LBEASTExperiences/Private/AIFacemask/README.md`
 
 **Firmware Examples:**
-- [FirmwareExamples README](https://github.com/ajcampbell1333/lbeast_unreal/blob/main/Plugins/LBEAST/FirmwareExamples/README.md) - `Plugins/LBEAST/FirmwareExamples/README.md`
-- [GunshipExperience README](https://github.com/ajcampbell1333/lbeast_unreal/blob/main/Plugins/LBEAST/FirmwareExamples/GunshipExperience/README.md) - `Plugins/LBEAST/FirmwareExamples/GunshipExperience/README.md`
-- [FlightSimExperience README](https://github.com/ajcampbell1333/lbeast_unreal/blob/main/Plugins/LBEAST/FirmwareExamples/FlightSimExperience/README.md) - `Plugins/LBEAST/FirmwareExamples/FlightSimExperience/README.md`
-- [SuperheroFlightExperience README](https://github.com/ajcampbell1333/lbeast_unreal/blob/main/Plugins/LBEAST/FirmwareExamples/SuperheroFlightExperience/README.md) - `Plugins/LBEAST/FirmwareExamples/SuperheroFlightExperience/README.md`
-- [EscapeRoom README](https://github.com/ajcampbell1333/lbeast_unreal/blob/main/Plugins/LBEAST/FirmwareExamples/EscapeRoom/README.md) - `Plugins/LBEAST/FirmwareExamples/EscapeRoom/README.md`
-- [Base Examples README](https://github.com/ajcampbell1333/lbeast_unreal/blob/main/Plugins/LBEAST/FirmwareExamples/Base/Examples/README.md) - `Plugins/LBEAST/FirmwareExamples/Base/Examples/README.md`
-- [Base Templates README](https://github.com/ajcampbell1333/lbeast_unreal/blob/main/Plugins/LBEAST/FirmwareExamples/Base/Templates/README.md) - `Plugins/LBEAST/FirmwareExamples/Base/Templates/README.md`
+- [FirmwareExamples README](https://github.com/ajcampbell1333/lbeast_unreal/blob/main/FirmwareExamples/README.md) - `FirmwareExamples/README.md`
+- [GunshipExperience README](https://github.com/ajcampbell1333/lbeast_unreal/blob/main/FirmwareExamples/GunshipExperience/README.md) - `FirmwareExamples/GunshipExperience/README.md`
+- [FlightSimExperience README](https://github.com/ajcampbell1333/lbeast_unreal/blob/main/FirmwareExamples/FlightSimExperience/README.md) - `FirmwareExamples/FlightSimExperience/README.md`
+- [SuperheroFlightExperience README](https://github.com/ajcampbell1333/lbeast_unreal/blob/main/FirmwareExamples/SuperheroFlightExperience/README.md) - `FirmwareExamples/SuperheroFlightExperience/README.md`
+- [EscapeRoom README](https://github.com/ajcampbell1333/lbeast_unreal/blob/main/FirmwareExamples/EscapeRoom/README.md) - `FirmwareExamples/EscapeRoom/README.md`
+- [Base Examples README](https://github.com/ajcampbell1333/lbeast_unreal/blob/main/FirmwareExamples/Base/Examples/README.md) - `FirmwareExamples/Base/Examples/README.md`
+- [Base Templates README](https://github.com/ajcampbell1333/lbeast_unreal/blob/main/FirmwareExamples/Base/Templates/README.md) - `FirmwareExamples/Base/Templates/README.md`
 
 **Examples & Utilities:**
-- [ServerManager README](https://github.com/ajcampbell1333/lbeast_unreal/blob/main/Plugins/LBEAST/Source/Examples/ServerManager/README.md) - `Plugins/LBEAST/Source/Examples/ServerManager/README.md`
+- [ServerManager README](https://github.com/ajcampbell1333/lbeast_unreal/blob/main/Source/Examples/ServerManager/README.md) - `Source/Examples/ServerManager/README.md`
 
 </div>
 
