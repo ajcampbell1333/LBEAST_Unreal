@@ -25,23 +25,11 @@
   "erc": {
     "erc_exclusions": [
       [
-        "lib_symbol_mismatch|1739900|1282700|a371565c-211e-4877-82d2-1b71818adbf4|00000000-0000-0000-0000-000000000000|||",
-        ""
-      ],
-      [
         "lib_symbol_mismatch|1879600|1282700|a371565c-211e-4877-82d2-1b71818adbf4|00000000-0000-0000-0000-000000000000|||",
         ""
       ],
       [
-        "multiple_net_names|2006600|1549400|e47cae49-93bb-4fc0-96fb-ca8bae2300ea|fcd176c7-81b6-4ab9-9c8f-e6b1c9f78a4c|/67960650-84cc-4502-bcc3-41421fb0fa99|/67960650-84cc-4502-bcc3-41421fb0fa99|/67960650-84cc-4502-bcc3-41421fb0fa99",
-        ""
-      ],
-      [
         "multiple_net_names|2146300|1549400|e47cae49-93bb-4fc0-96fb-ca8bae2300ea|fcd176c7-81b6-4ab9-9c8f-e6b1c9f78a4c|/67960650-84cc-4502-bcc3-41421fb0fa99|/67960650-84cc-4502-bcc3-41421fb0fa99|/67960650-84cc-4502-bcc3-41421fb0fa99",
-        ""
-      ],
-      [
-        "pin_to_pin|1511300|977900|5f61ce73-4213-4f14-9903-d00b6dcc9201|5e140ed9-250e-4e75-9015-a86d11e5bdc8|/67960650-84cc-4502-bcc3-41421fb0fa99|/67960650-84cc-4502-bcc3-41421fb0fa99|/67960650-84cc-4502-bcc3-41421fb0fa99",
         ""
       ],
       [
@@ -277,7 +265,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "LBEAST_Universal_Shield.kicad_pro",
+    "filename": "LBEAST_Universal_Shield.kicad_sch_test.kicad_pro",
     "version": 3
   },
   "net_settings": {

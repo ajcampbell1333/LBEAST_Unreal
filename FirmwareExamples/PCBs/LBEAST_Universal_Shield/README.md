@@ -2,7 +2,36 @@
 
 ## Overview
 
-Multi-platform core shield providing unified hardware design for all LBEAST ECU firmware. Supports ESP32-S3, STM32, and Arduino as parent ECUs via personality adapters. Provides 8× CAT5 aux ports for Ethernet-based child ECUs (Raspberry Pi, Jetson Nano, or any Ethernet-capable device).
+Multi-platform universal shield providing unified hardware design for all LBEAST ECU firmware. Drives high-current devices over CAN. Supports ESP32-S3 as motherboard ECU or STM32/Arduino as motherboard via personality adapters. Provides 8× CAT5 aux ports for child ECUs (your choice of Pi/Jetson/ESP32/STM32/Arduino via WiFi/Bluetooth/Ethernet-adapter).
+
+**High-Level Component Diagram:**
+```
+          ┌────────────────────────────────────────┐
+          |                                        │
+    ┌─────▲───────┐    ┌───────┐ +5V               │
+    │ Barrel Jack │───→│LM2576 │────┐       ┌──────▼───────┐
+    │  12V/24V    │    │ Buck  │    │       │ 12/24V Fan   │
+    └─────────────┘    └───────┘    │       └───────┬──────┘
+                           │+5V     │               ▼
+                           │        │  ┌────────────────────────┐
+                           │        └─→│         ESP32-S3       │
+                           │           │      (Motherboard)     │
+                           │           └──▲──────────────▲──────┘
+                           │              │              │
+                           │         ┌────▼────┐    ┌────▼────┐
+                           │         │LAN8720A │    │ADM3057E │
+                           │         │Ethernet │    │ CAN-FD  │
+                           │         └────▲────┘    └────▲────┘
+                           │              │              │
+                           │              │         ┌────▼─────┐
+                           │              │         │CAN 3-pin │
+                           │              │         └──────────┘         
+                    ┌──────▼──────────────▼──────────────────┐   
+                    │  Aux Ports: J1 J2 J3 J4 J5 J6 J7 J8    │   
+                    │  (8× RJ45: Ethernet + 5V + ADC/PWM)    │   
+                    └────────────────────────────────────────┘   
+                                              
+```
 
 ## Project Files
 
@@ -27,14 +56,13 @@ Buck Converter (LM2576: 12V/24V → 5V, 60V max input)
     │
     ├─→ 5V directly to Aux Port Pins 4 (≥5.0A total across 8 ports)
     │
-    └─→ 5V to Shield 3.3V LDO (AP2112K-3.3TRG1 or AMS1117-3.3, ≥2A)
+    └─→ MCU 3.3V Output (ESP32-S3 pins 1-2, 3.3V_OUT)
             ↓
-        Shield 3.3V LDO Output
-            └─→ Shield Logic Components (LAN8720A, LEDs)
+        Shield Logic Components (LAN8720A, LEDs)
 ```
 
 **Key Points:**
-- Buck converter (LM2576) handles 12V/24V input (up to 29.2V for fully charged 24V LiFePO4)
+- Buck converter (LM2576HVS-5) handles 12V/24V input (up to 29.2V for fully charged 24V LiFePO4)
 - Aux port power: 5V directly from buck converter (≥5.0A total capacity)
 - Shield logic: 3.3V from shield LDO or MCU 3.3V output (via adapter)
 - High-current MCUs (ESP32-S3, STM32F407): Adapter routes MCU 3.3V directly
@@ -51,24 +79,91 @@ Buck Converter (LM2576: 12V/24V → 5V, 60V max input)
 - Reset: ESP32-S3 EN pin (GPIO3) or separate GPIO
 
 **Power Management:**
-- **LM2576** (TO-220/TO-263) - Buck converter (12V/24V → 5V, ≥5A, 60V max input)
-- **AP2112K-3.3TRG1 or AMS1117-3.3** (SOT-223) - 3.3V LDO (5V → 3.3V, ≥2A) for shield logic only
+- **LM2576HVS-5** (TO-220/TO-263) - Buck converter (12V/24V → 5V, ≥5A, 60V max input)
+- **3.3V Power:** ESP32-S3 pins 1-2 (3.3V_OUT) provide 3.3V for shield logic components. No separate 3.3V LDO required for ESP32-S3.
 
 **CAN Transceiver:**
 - **ADM3057E** - Isolated CAN-FD transceiver (3kV isolation)
-- VIO: +3.3V (logic supply)
-- VCC: +5V (isoPower supply)
-- VISOOUT → VISOIN (jump required)
+- VIO: +3.3V (logic supply) - decoupled with C14 (100nF)
+- VCC: +5V (isoPower supply) - decoupled with C15 (100nF) and C16 (4.7µF tantalum)
+- VISOOUT → VISOIN (Kelvin jumper required on PCB layout)
+- VISOIN/VISOOUT: Isolated supply - decoupled with C17 (100nF) and C18 (4.7µF tantalum)
+- CAN termination: 120Ω resistor (R12) switchable via SW1 (DIP switch) across CANH/CANL
 
 **LEDs (3 total):**
-- Power LED (Red): +3.3V → R1 (270Ω) → LED → GND
-- Ethernet Link LED (Green): LAN8720A LED1 → R2 (270Ω) → LED → GND
-- Ethernet Speed LED (Green): LAN8720A LED2 → R3 (270Ω) → LED → GND
+- Power LED (Red): +3.3V → R4 (270Ω) → D1 → GND
+- Ethernet Link LED (Green): LAN8720A LED1 → R5 (270Ω) → D2 → GND
+- Ethernet Speed LED (Green): LAN8720A LED2 → R6 (270Ω) → D3 → GND
+
+**Resistors (v0.1.4 - 12 total):**
+
+| Reference | Value | Purpose | Notes |
+|-----------|-------|---------|-------|
+| R1 | 10 kΩ | Polarity protection MOSFET gate pull-down | Pulls gate of IRF9540N P-channel MOSFET to GND for reverse polarity protection |
+| R2 | 1 kΩ | Buck converter voltage divider (upper) | Forms feedback divider with R3 for LM2576 output regulation |
+| R3 | 326Ω | Buck converter voltage divider (lower) | Forms feedback divider with R2 for LM2576 5V output regulation |
+| R4 | 270Ω | Power LED current limiting | Limits current through red power indicator LED (D1) |
+| R5 | 270Ω | Ethernet Link LED current limiting | Limits current through green LAN LED1 (D2, link status) |
+| R6 | 270Ω | Ethernet Speed LED current limiting | Limits current through green LAN LED2 (D3, speed indicator) |
+| R7 | 49.9Ω (49R9) | LAN8720A RBIAS pull-down | Sets bias current for LAN8720A internal reference |
+| R8 | 10 kΩ | ESP32-S3 RESET_N pull-up | Pull-up resistor for LAN8720A RESET_N pin (active LOW) |
+| R9 | 4.7 kΩ | LAN8720A MDIO pull-up | Pull-up resistor for ESP32-S3 GPIO18 (MDIO) management interface |
+| R10 | 100Ω | Fan FET gate resistor | Current limiting resistor for IRLZ44N MOSFET gate drive (GPIO42) |
+| R11 | 10 kΩ | Fan FET gate pull-down | Pull-down resistor for fan MOSFET gate (prevents floating when GPIO42 is high-Z) |
+| R12 | 120Ω | CAN bus termination resistor | Switchable termination resistor across CANH/CANL (via SW1) |
+
+**Capacitors (v0.1.4 - 18 total):**
+
+| Reference | Value | Type | Purpose | Notes |
+|-----------|-------|------|---------|-------|
+| C1 | 100nF | Non-polarized | Barrel jack output decoupling | High-frequency noise filtering on power input |
+| C2 | 10µF | Polarized | Barrel jack output decoupling | Bulk capacitance for power input smoothing |
+| C3 | 100nF | Non-polarized | Buck converter input decoupling | High-frequency noise filtering on LM2576 input |
+| C4 | 100nF | Non-polarized | Buck converter output decoupling | High-frequency noise filtering on 5V output |
+| C5 | 10µF | Polarized | Buck converter output decoupling | Bulk capacitance for 5V output smoothing |
+| C6 | 10µF | Polarized | ESP32-S3 3.3V output decoupling | Bulk capacitance for ESP32 3.3V_OUT smoothing |
+| C7 | 100nF | Non-polarized | ESP32-S3 3.3V output decoupling | High-frequency noise filtering on ESP32 3.3V_OUT |
+| C8 | 100nF | Non-polarized | LAN8720A VDD2 decoupling | Power supply decoupling for LAN8720A VDD2 pin |
+| C9 | 100nF | Non-polarized | LAN8720A VDDCR decoupling | Power supply decoupling for LAN8720A VDDCR pin |
+| C10 | 100nF | Non-polarized | LAN8720A VDD1A decoupling | Power supply decoupling for LAN8720A VDD1A pin |
+| C11 | 100nF | Non-polarized | LAN8720A VDDIO decoupling | Power supply decoupling for LAN8720A VDDIO pin |
+| C12 | 10pF | Non-polarized | 25MHz crystal load capacitor (XTAL1) | Crystal oscillator load capacitor for XTAL1 |
+| C13 | 10pF | Non-polarized | 25MHz crystal load capacitor (XTAL2) | Crystal oscillator load capacitor for XTAL2 |
+| C14 | 100nF | Non-polarized | ADM3057E VIO decoupling | High-frequency noise filtering on CAN transceiver logic supply |
+| C15 | 100nF | Non-polarized | ADM3057E VCC decoupling | High-frequency noise filtering on CAN transceiver isoPower supply |
+| C16 | 4.7µF | Polarized (Tantalum) | ADM3057E VCC bulk decoupling | Bulk capacitance for CAN transceiver isoPower supply smoothing |
+| C17 | 100nF | Non-polarized | ADM3057E VISO decoupling | High-frequency noise filtering on CAN transceiver isolated supply (VISOIN/VISOOUT) |
+| C18 | 4.7µF | Polarized (Tantalum) | ADM3057E VISO bulk decoupling | Bulk capacitance for CAN transceiver isolated supply smoothing |
+
+**Diodes (v0.1.4 - 5 total):**
+
+| Reference | Type | Value | Purpose | Notes |
+|-----------|------|-------|---------|-------|
+| D1 | LED | LED | Red status LED for 3V power | Power indicator LED, current limited by R4 (270Ω) |
+| D2 | LED | LED | Green status LED for LAN LED1 pin | Ethernet link status indicator, driven by LAN8720A LED1, current limited by R5 (270Ω) |
+| D3 | LED | LED | Green status LED for LAN LED2 pin | Ethernet speed indicator, driven by LAN8720A LED2, current limited by R6 (270Ω) |
+| D4 | Schottky Diode | SS14 | Flyback diode for MCU fan protection | Protects MCU from inductive kickback when fan MOSFET switches off (cathode on +VIN, anode on FAN_SW) |
+| D5 | Zener Diode | BZX84C12 | Polarity protection MOSFET gate protection | 12V zener diode protects IRF9540N gate from overvoltage (cathode to gate, anode to source) |
+
+**MOSFETs (v0.1.4 - 2 total):**
+
+| Reference | Type | Part Number | Purpose | Notes |
+|-----------|------|-------------|---------|-------|
+| Q1 | P-channel MOSFET | IRF9540N | Reverse polarity protection | High-side switch at barrel jack input. Source to +24_12V, Drain to buck converter input. Gate pulled to GND via R1 (10kΩ) with zener protection (D5). Prevents damage from inverted power supply connections. |
+| Q2 | N-channel MOSFET | IRLZ44N | Fan control switch | Low-side switch for 12/24V fan. Drain to FAN_SW, Source to GND. Gate driven by ESP32-S3 GPIO42 via R10 (100Ω). Gate pull-down via R11 (10kΩ). Flyback diode D4 protects from inductive kickback. |
+
+**Switches (v0.1.4 - 1 total):**
+
+| Reference | Type | Part Number | Purpose | Notes |
+|-----------|------|-------------|---------|-------|
+| SW1 | DIP Switch | SW_DIP_x01 | CAN bus termination control | Single-pole switch to enable/disable 120Ω termination resistor (R12) across CANH/CANL. Required for proper CAN bus operation (only end nodes should have termination). |
 
 ### Connectors
 
 **Power:**
-- **Kycon KLDVHCX-0202-A-LT** - 2.1mm DC barrel jack (12V/24V input, vertical mount, ~15-20mm shell height)
+- **Schematic Symbol:** Kycon KLDX-0202-A (horizontal mount, 2.0mm center pin) - Used in schematic because footprint is available in KiCad built-in libraries. Pin pattern is identical to vertical mount variant.
+- **BOM Part (Manufacturing):** Kycon KLDVX-0202-A (vertical mount, 2.0mm center pin, ~15-20mm shell height) - **Use this for actual PCB assembly.** Vertical mount is required for potting compatibility. Barrel orientation is 90° from mount plane (vertical) vs. parallel (horizontal) for KLDX variant.
+- **Note:** The KLDX-0202-A symbol can be used in schematic, but order KLDVX-0202-A for manufacturing. The barrel jack can be ordered separately and excluded from BOM during manufacture if necessary.
 - 12V/24V header: Passthrough for motors/solenoids
 - 5V header: To MCU VIN (via adapter)
 
@@ -78,26 +173,19 @@ Buck Converter (LM2576: 12V/24V → 5V, 60V max input)
   - Add a large through-hole window directly under the MCU socket so airflow can pass through the board when a fan is mounted below the module.
   - Flank the 44-pin MCU header with four plated mounting holes (M2/M2.5) laid out on a 40×40 mm square to accept standard standoffs for 40 mm fans. The same pattern works for top- or bottom-mounted fans; leave clearance for the ESP32 heat shield.
 - **Electrical**:
-  - Add a 2-pin JST-PH (or locking equivalent) header near the MCU slot labelled `FAN_PWR` (Pin 1 = +VIN 12/24 V, Pin 2 = FAN_SW).
+  - Add a **JST-XH 2-pin** header near the MCU slot labelled `FAN_PWR` (Pin 1 = +VIN 12/24 V, Pin 2 = FAN_SW).
   - Route Pin 1 to the raw 12 V/24 V rail immediately after the barrel jack (ahead of the LM2576 buck) with the same fuse/polyswitch protection as the rest of the VIN net.
-  - Route Pin 2 to the drain of a logic-level N‑channel MOSFET (e.g., AO3400A/AOZ1282) so the MCU can switch the low side of the fan; tie the source to GND and add a 10 kΩ gate pull-down plus ~100 Ω gate resistor.
-  - Place a flyback diode (1N5819 or SS14) across the fan connector (cathode on +VIN, anode on FAN_SW) to clamp inductive kick when the MOSFET turns off.
+  - Route Pin 2 to the drain of **IRLZ44N** N-channel MOSFET (Q2) so the MCU can switch the low side of the fan; tie the source to GND and add a 10 kΩ gate pull-down (R11) plus 100 Ω gate resistor (R10).
+  - Place a flyback diode (SS14, D4) across the fan connector (cathode on +VIN, anode on FAN_SW) to clamp inductive kick when the MOSFET turns off.
   - Provide a 0.1 µF/50 V snubber capacitor near the connector if the harness run is long (>0.5 m).
-  - Default control pin suggestion: reserve ESP32-S3 `GPIO42` (Pad 26) for `FAN_CTRL`. This GPIO is currently unused on the shield and supports high-current drive; route it through the adapter header to the MOSFET gate. Other MCUs can remap as needed.
+  - Connect ESP32-S3 `GPIO42` (Pad 26) to the MOSFET gate via the adapter header. This GPIO is reserved for `FAN_CTRL` and supports high-current drive. Other MCUs can remap as needed.
   - Label the net `FAN_CTRL` so firmware can PWM the fan if desired; recommend a 25 kHz PWM to stay out of the audible band.
 
 **Ethernet:**
-- **Adam Tech MTJ-883X1** (main) - RJ45 jack, vertical mount, 16.38mm shell height
-- **Adam Tech MTJ-883X1** (8× aux ports) - Same as main connector
-
-**E-Stop:**
-- **2-pin pin header** (2.54mm pitch) - Emergency stop input (2-wire switch)
-- Pin 1: E-Stop signal (to MCU interrupt pin via adapter, with RC debouncing)
-- Pin 2: GND
-- Hardware debouncing: 10kΩ pull-up + 100nF capacitor (1ms time constant)
+- **Adam Tech MTJ-883X1** (8× aux ports) - RJ45 jack, vertical mount, 16.38mm shell height
 
 **CAN Bus:**
-- **3-pin connector** (vibration-resistant recommended: Phoenix Contact MSTB, Deutsch DT, Molex MX150, or JST EH)
+- **JST-XH 3-pin connector** (vibration-resistant alternatives: Phoenix Contact MSTB, Deutsch DT, Molex MX150, or JST EH)
 - Pin 1: CANH
 - Pin 2: CANL
 - Pin 3: CAN_GND (always routed on PCB, even if unused in 2-wire networks)
@@ -107,18 +195,133 @@ Buck Converter (LM2576: 12V/24V → 5V, 60V max input)
 
 ## Pin Mappings
 
+### ESP32-S3-WROOM-1 Complete 44-Pin Pinout (2×22 Header)
+
+**Pin Numbering:** Left column (pins 1-22) top to bottom, right column (pins 23-44) top to bottom.
+
+| Pin | GPIO | Function | Notes |
+|-----|------|----------|-------|
+| 1 | - | 3.3V_OUT | 3.3V power output (from onboard regulator) |
+| 2 | - | 3.3V_OUT | 3.3V power output (from onboard regulator) |
+| 3 | GPIO3 | EN | Enable (active HIGH, reset when LOW) |
+| 4 | GPIO4 | GPIO4 / ADC1_CH3 | Aux Port 3 ADC |
+| 5 | GPIO5 | GPIO5 / ADC1_CH4 | Aux Port 2 ADC |
+| 6 | GPIO6 | GPIO6 / ADC1_CH5 | Aux Port 3 ADC |
+| 7 | GPIO7 | GPIO7 / ADC1_CH6 | Aux Port 4 ADC |
+| 8 | GPIO15 | GPIO15 / LEDC_CH3 | Aux Port 4 PWM |
+| 9 | GPIO16 | GPIO16 / LEDC_CH4 | Aux Port 5 PWM |
+| 10 | GPIO17 | GPIO17 | LAN8720A MDC (Ethernet management clock) |
+| 11 | GPIO18 | GPIO18 | LAN8720A MDIO (Ethernet management data) |
+| 12 | GPIO8 | GPIO8 / ADC1_CH7 | Aux Port 5 ADC |
+| 13 | GPIO3 | GPIO3 | General purpose I/O (also EN function on pin 3) |
+| 14 | GPIO46 | GPIO46 | General purpose I/O (E-Stop interrupt capable) |
+| 15 | GPIO9 | GPIO9 / ADC1_CH8 | Aux Port 6 ADC |
+| 16 | GPIO10 | GPIO10 / ADC1_CH9 | Aux Port 7 ADC |
+| 17 | GPIO11 | GPIO11 / ADC2_CH0 | Aux Port 8 ADC |
+| 18 | GPIO12 | GPIO12 / LEDC_CH0 | Aux Port 1 PWM |
+| 19 | GPIO13 | GPIO13 / LEDC_CH1 | Aux Port 2 PWM |
+| 20 | GPIO14 | GPIO14 / LEDC_CH2 | Aux Port 3 PWM |
+| 21 | - | VIN | 5V power input (to onboard regulator) |
+| 22 | - | GND | Ground |
+| 23 | - | GND | Ground |
+| 24 | GPIO43 | U0TXD | UART0 TX (GPIO43) |
+| 25 | - | NC | No Connect |
+| 26 | GPIO1 | GPIO1 / LEDC_CH5 | Aux Port 6 PWM |
+| 27 | GPIO2 | GPIO2 / LEDC_CH6 | Aux Port 7 PWM |
+| 28 | GPIO42 | GPIO42 / Pad 26 | General purpose I/O (reserved for FAN_CTRL per README) |
+| 29 | GPIO41 | GPIO41 / Pad 29 | CAN RXD (ADM3057E) |
+| 30 | GPIO40 | GPIO40 / Pad 30 | CAN TXD (ADM3057E) |
+| 31 | GPIO39 | GPIO39 | LAN8720A TXD0 (Ethernet transmit data 0) |
+| 32 | GPIO38 | GPIO38 | General purpose I/O |
+| 33 | GPIO37 | GPIO37 | General purpose I/O |
+| 34 | GPIO36 | GPIO36 | General purpose I/O |
+| 35 | GPIO35 | GPIO35 | General purpose I/O |
+| 36 | GPIO0 | GPIO0 / ADC1_CH0 | Boot strap pin (unused, kept free to avoid boot mode conflicts) |
+| 37 | GPIO45 | GPIO45 | General purpose I/O (E-Stop interrupt capable) |
+| 38 | GPIO46 | GPIO46 | General purpose I/O (E-Stop interrupt capable) |
+| 39 | GPIO47 | GPIO47 | General purpose I/O (E-Stop interrupt capable) |
+| 40 | GPIO21 | GPIO21 / LEDC_CH7 | Aux Port 8 PWM |
+| 41 | GPIO20 | GPIO20 | General purpose I/O |
+| 42 | GPIO44 | U0RXD | UART0 RX (GPIO44) |
+| 43 | - | GND | Ground |
+| 44 | - | GND | Ground |
+
+**Note:** This pinout is based on standard ESP32-S3-WROOM-1 dev board layouts. Verify against your specific board's datasheet. GPIO assignments for Aux Ports, Ethernet, and CAN match the mappings documented below.
+
+### ESP32-S3 Electrical Type Map (KiCad Pin Properties)
+
+**Use this map to set the "Electrical type" property for each pin in your ESP32-S3 symbol:**
+
+| Pin | GPIO | Electrical Type | Reason |
+|-----|------|----------------|--------|
+| 1 | - | Power output | 3.3V_OUT (power source) |
+| 2 | - | Power output | 3.3V_OUT (power source) |
+| 3 | GPIO3 | Input | EN (enable/reset input) |
+| 4 | GPIO4 | Input | ADC pin (analog input) - Aux Port 3 ADC |
+| 5 | GPIO5 | Input | ADC pin (analog input) |
+| 6 | GPIO6 | Input | ADC pin (analog input) |
+| 7 | GPIO7 | Input | ADC pin (analog input) |
+| 8 | GPIO15 | Output | PWM output (LEDC_CH3) |
+| 9 | GPIO16 | Output | PWM output (LEDC_CH4) |
+| 10 | GPIO17 | Bidirectional | MDC (I2C-like, bidirectional) |
+| 11 | GPIO18 | Bidirectional | MDIO (I2C-like, bidirectional) |
+| 12 | GPIO8 | Input | ADC pin (analog input) |
+| 13 | GPIO3 | Bidirectional | General purpose I/O (also EN function) |
+| 14 | GPIO46 | Bidirectional | General purpose I/O (E-Stop interrupt capable) |
+| 15 | GPIO9 | Input | ADC pin (analog input) |
+| 16 | GPIO10 | Input | ADC pin (analog input) |
+| 17 | GPIO11 | Input | ADC pin (analog input) |
+| 18 | GPIO12 | Output | PWM output (LEDC_CH0) |
+| 19 | GPIO13 | Output | PWM output (LEDC_CH1) |
+| 20 | GPIO14 | Output | PWM output (LEDC_CH2) |
+| 21 | - | Power input | VIN (5V power input) |
+| 22 | - | Power input | GND (ground) |
+| 23 | - | Power input | GND (ground) |
+| 24 | GPIO43 | Output | UART0 TX (serial transmit) |
+| 25 | - | Unspecified | NC (No Connect) |
+| 26 | GPIO1 | Input | ADC pin (analog input) - Aux Port 8 ADC (J8 pin 7) |
+| 27 | GPIO2 | Output | PWM output (LEDC_CH6) |
+| 28 | GPIO42 | Bidirectional | General purpose I/O (reserved for FAN_CTRL) |
+| 29 | GPIO41 | Bidirectional | CAN RXD (bidirectional CAN receive) |
+| 30 | GPIO40 | Bidirectional | CAN TXD (bidirectional CAN transmit) |
+| 31 | GPIO39 | Output | LAN8720A TXD0 (Ethernet transmit data 0) |
+| 32 | GPIO38 | Bidirectional | General purpose I/O |
+| 33 | GPIO37 | Bidirectional | General purpose I/O |
+| 34 | GPIO36 | Bidirectional | General purpose I/O |
+| 35 | GPIO35 | Bidirectional | General purpose I/O |
+| 36 | GPIO0 | Input | General purpose I/O (boot strap pin, unused) |
+| 37 | GPIO45 | Bidirectional | General purpose I/O (E-Stop interrupt capable) |
+| 38 | GPIO46 | Bidirectional | General purpose I/O (E-Stop interrupt capable) |
+| 39 | GPIO47 | Bidirectional | General purpose I/O (E-Stop interrupt capable) |
+| 40 | GPIO21 | Output | PWM output (LEDC_CH7) - Aux Port 8 PWM (J8 pin 8) |
+| 41 | GPIO20 | Bidirectional | General purpose I/O |
+| 42 | GPIO44 | Input | UART0 RX (serial receive) |
+| 43 | - | Power input | GND (ground) |
+| 44 | - | Power input | GND (ground) |
+
+**Summary:**
+- **Power output**: Pins 1, 2 (3.3V_OUT)
+- **Power input**: Pin 21 (VIN), Pins 22, 23, 43, 44 (GND)
+- **Input**: Pins 3 (EN), 4-8, 12, 15-17, 26 (ADC pins), 42 (UART0 RX)
+- **Output**: Pins 8-9, 18-20, 24 (UART0 TX), 27, 31, 40 (PWM outputs)
+- **Bidirectional**: Pins 10-11 (MDC/MDIO), 13-14, 28-30 (CAN), 32-35, 37-39 (general GPIOs)
+- **Unspecified**: Pin 25 (NC)
+- **Unused**: Pin 36 (GPIO0 - boot strap pin, kept free to avoid boot mode conflicts)
+
 ### ESP32-S3 Aux Port ADC/PWM
 
-| Aux Port | ADC GPIO | ADC Channel | PWM GPIO | PWM LEDC Channel |
-|----------|----------|-------------|----------|------------------|
-| 1 | GPIO4 | ADC1_CH3 | GPIO12 | LEDC_CH0 |
-| 2 | GPIO5 | ADC1_CH4 | GPIO13 | LEDC_CH1 |
-| 3 | GPIO6 | ADC1_CH5 | GPIO14 | LEDC_CH2 |
-| 4 | GPIO7 | ADC1_CH6 | GPIO15 | LEDC_CH3 |
-| 5 | GPIO8 | ADC1_CH7 | GPIO16 | LEDC_CH4 |
-| 6 | GPIO9 | ADC1_CH8 | GPIO1 | LEDC_CH5 |
-| 7 | GPIO10 | ADC1_CH9 | GPIO2 | LEDC_CH6 |
-| 8 | GPIO11 | ADC2_CH0 | GPIO39 | LEDC_CH7 |
+| Aux Port | ADC GPIO | ADC Pin | ADC Channel | PWM GPIO | PWM Pin | PWM LEDC Channel |
+|----------|----------|---------|-------------|----------|---------|------------------|
+| J1 | GPIO11 | Pin 17 | ADC2_CH0 | GPIO9 | Pin 15 | LEDC_CH4 |
+| J2 | GPIO10 | Pin 16 | ADC1_CH9 | GPIO2 | Pin 27 | LEDC_CH6 |
+| J3 | GPIO4 | Pin 4 | ADC1_CH3 | GPIO12 | Pin 18 | LEDC_CH0 |
+| J4 | GPIO5 | Pin 5 | ADC1_CH4 | GPIO13 | Pin 19 | LEDC_CH1 |
+| J5 | GPIO6 | Pin 6 | ADC1_CH5 | GPIO14 | Pin 20 | LEDC_CH2 |
+| J6 | GPIO7 | Pin 7 | ADC1_CH6 | GPIO15 | Pin 8 | LEDC_CH3 |
+| J7 | GPIO8 | Pin 12 | ADC1_CH7 | GPIO16 | Pin 9 | LEDC_CH4 |
+| J8 | GPIO1 | Pin 26 | ADC1_CH0 | GPIO21 | Pin 40 | LEDC_CH7 |
+
+**Note:** GPIO0 (boot strap pin) was previously used for J8 ADC but has been freed to avoid boot mode conflicts. J8 now uses GPIO1 for ADC and GPIO21 for PWM.
 
 **KiCAD Net Labels:**
 - ADC: `AUX1_ADC` through `AUX8_ADC`
@@ -126,16 +329,50 @@ Buck Converter (LM2576: 12V/24V → 5V, 60V max input)
 
 ### LAN8720A Ethernet PHY
 
-| LAN8720A Pin | ESP32-S3 GPIO | ESP32-S3 Pin | Function |
-|--------------|---------------|--------------|----------|
-| MDC | GPIO17 | Pin 10 | Management Data Clock |
-| MDIO | GPIO18 | Pin 11 | Management Data I/O |
-| RESET_N | EN (GPIO3) | Pin 3 | Reset (active LOW) |
-| XTAL1/XTAL2 | External 25MHz crystal | - | Clock (3225 SMD recommended) |
+**MII/RMII Interface (Ethernet Data):**
 
-**Ethernet Signals:**
-- TXP/TXN → Main connector (J5) and all 8 aux ports (pins 1-2)
-- RXP/RXN → Main connector (J5) and all 8 aux ports (pins 3, 6)
+| LAN8720A Pin | ESP32-S3 GPIO | ESP32-S3 Pin | Function | Notes |
+|--------------|---------------|--------------|----------|-------|
+| TXD0 | GPIO39 | Pin 31 | Transmit Data 0 | RMII transmit data bit 0 |
+| TXD1 | GPIO37 | Pin 33 | Transmit Data 1 | RMII transmit data bit 1 |
+| TXEN | GPIO20 | Pin 41 | Transmit Enable | RMII transmit enable |
+| RXD0 | GPIO35 | Pin 35 | Receive Data 0 | RMII receive data bit 0 |
+| RXD1 | GPIO36 | Pin 34 | Receive Data 1 | RMII receive data bit 1 |
+| RXER | - | - | Receive Error | No Connect (NC) |
+| CRS_DV | GPIO38 | Pin 32 | Carrier Sense / Data Valid | RMII carrier sense and data valid |
+| REF_CLK | - | - | Reference Clock | No Connect (NC) - LAN8720A uses external 25MHz crystal |
+
+**Management Interface (SMI):**
+
+| LAN8720A Pin | ESP32-S3 GPIO | ESP32-S3 Pin | Function | Notes |
+|--------------|---------------|--------------|----------|-------|
+| MDC | GPIO17 | Pin 10 | Management Data Clock | SMI clock signal |
+| MDIO | GPIO18 | Pin 11 | Management Data I/O | SMI bidirectional data |
+
+**Control Signals:**
+
+| LAN8720A Pin | ESP32-S3 GPIO | ESP32-S3 Pin | Function | Notes |
+|--------------|---------------|--------------|----------|-------|
+| RESET_N | EN (GPIO3) | Pin 3 | Reset (active LOW) | Reset control, active LOW |
+| INT | - | - | Interrupt | No Connect (NC) |
+
+**Clock:**
+
+| LAN8720A Pin | Connection | Notes |
+|--------------|------------|-------|
+| XTAL1 | External 25MHz crystal (3225 SMD recommended) | Crystal connection |
+| XTAL2 | External 25MHz crystal (3225 SMD recommended) | Crystal connection |
+| - | 10pF decoupling capacitors | One capacitor from XTAL1 to GND, one from XTAL2 to GND |
+| Exposed pad (VSS) | Ground pour + thermal vias | Stitch the VQFN thermal pad to the 3.3 V ground plane during PCB layout for heat spreading and signal reference |
+
+**Ethernet Differential Signals (to RJ45 Connectors):**
+
+| LAN8720A Pin | Destination | Notes |
+|--------------|-------------|-------|
+| TXP/TXN | All 8 aux ports pins 1-2 | Transmit differential pair |
+| RXP/RXN | All 8 aux ports pins 3, 6 | Receive differential pair |
+
+**Note:** TXD0 is assigned to GPIO39 (Pin 31), which is optimal because it's adjacent to other Ethernet pins (GPIO37 TXD1, GPIO38 CRS_DV) and was previously unused (GPIO39 was freed when J8 PWM was reassigned to GPIO21).
 
 ### ADM3057E CAN Transceiver
 
@@ -155,12 +392,6 @@ Buck Converter (LM2576: 12V/24V → 5V, 60V max input)
 | GNDISO | CAN connector Pin 3 | Isolated ground |
 
 **Note:** GPIO4/5 are used for aux port ADCs, so CAN uses GPIO40/41.
-
-### E-Stop
-
-- **Signal:** ESP32-S3 interrupt-capable GPIO (GPIO45, GPIO46, or GPIO47 recommended)
-- **Hardware Debouncing:** 10kΩ pull-up (R6) + 100nF capacitor (C11) = 1ms time constant
-- **Net Labels:** `E_STOP_RAW` (before filter), `E_STOP` (after filter, to MCU)
 
 ## Aux Port Pinout (CAT5 T568B)
 
@@ -191,13 +422,12 @@ Buck Converter (LM2576: 12V/24V → 5V, 60V max input)
 | Qty | Component | Part Number | Purpose | Unit Cost |
 |-----|-----------|-------------|---------|-----------|
 | 1 | Ethernet PHY | LAN8720A | 100 Mbps Ethernet | $1.50 |
-| 1 | Ethernet connector (main) | Adam Tech MTJ-883X1 | Main RJ45 | $0.53 |
-| 8 | Ethernet connector (aux) | Adam Tech MTJ-883X1 | Aux ports 1-8 | $0.53 × 8 |
-| 1 | DC barrel jack | Kycon KLDVHCX-0202-A-LT | 12-24V input | $0.60 |
-| 1 | Buck converter | LM2576 | 12V/24V → 5V (60V max) | $3.00 |
-| 1 | 3.3V LDO | AP2112K-3.3TRG1 or AMS1117-3.3 | Shield logic power | $0.25 |
+| 8 | Ethernet connector (aux) | Adam Tech MTJ-883X1 | Aux ports 1-8 (any can serve as router interface) | $0.53 × 8 |
+| 1 | DC barrel jack | Kycon KLDVX-0202-A | 12-24V input, vertical mount (2.0mm center pin) | $0.60 |
+**Note:** Schematic uses KLDX-0202-A symbol (horizontal mount, available in KiCad libraries), but BOM lists KLDVX-0202-A (vertical mount) for actual manufacturing. Pin patterns are identical; only barrel orientation differs. Can be ordered separately and excluded from BOM during manufacture if needed.
+| 1 | Buck converter | LM2576HVS-5 | 12V/24V → 5V (60V max) | $3.00 |
+| - | 3.3V LDO | N/A (ESP32-S3 provides 3.3V via pins 1-2) | Shield logic power from MCU | $0.00 |
 | 1 | CAN transceiver | ADM3057E | Isolated CAN-FD | $5.50 |
-| 1 | E-Stop connector | 2-pin pin header | Emergency stop | $0.10 |
 | 1 | MCU header | 44-pin 2×22 stacking | ESP32-S3 interface | $1.20 |
 | - | Misc (caps, resistors, LEDs, protection) | - | Standard components | ~$2.00 |
 | 1 (opt) | 40 mm fan | Sunon HA40101V4-1000U-A99 | Optional MCU cooling fan (12 V PWM) | $3.50 |
@@ -234,6 +464,14 @@ Buck Converter (LM2576: 12V/24V → 5V, 60V max input)
 - **Shield Logic Power:** 3.3V from shield LDO or MCU 3.3V (≥2A capacity)
 - **CAN Bus:** Isolated CAN-FD (ADM3057E, 3kV isolation)
 - **Connectors:** All vertical mount with tall shells (16.38mm) for potting
+
+## External Systems
+
+### E-Stop Systems
+
+**Note:** E-Stop (Emergency Stop) systems are implemented externally, upstream from the shield board. The E-Stop contactor/relay must be located as close to the battery/power supply as possible, immediately after the main circuit breaker, before the barrel jack. This ensures all power (high-current loads + shield board) is cut at the source when E-Stop is activated.
+
+For complete E-Stop system design, sizing, compliance, and testing guidance, see: **[E-Stop & Safety Considerations](../ESTOP_&_Safety_Considerations.md)**
 
 ## Research Folder
 

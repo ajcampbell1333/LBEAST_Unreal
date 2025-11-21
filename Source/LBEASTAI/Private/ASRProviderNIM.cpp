@@ -87,3 +87,6 @@ ENIMASRModelType UASRProviderNIM::DetectModelType(const FString& InEndpointURL) 
 	return ENIMASRModelType::AutoDetect;
 }
 
+
+
+

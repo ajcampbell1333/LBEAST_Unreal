@@ -207,7 +207,7 @@
 					)
 				)
 			)
-			(pin bidirectional line
+			(pin output line
 				(at -22.86 12.7 0)
 				(length 2.54)
 				(name "GPIO15"
@@ -225,7 +225,7 @@
 					)
 				)
 			)
-			(pin bidirectional line
+			(pin output line
 				(at -22.86 10.16 0)
 				(length 2.54)
 				(name "GPIO16"
@@ -279,7 +279,7 @@
 					)
 				)
 			)
-			(pin bidirectional line
+			(pin input line
 				(at -22.86 2.54 0)
 				(length 2.54)
 				(name "GPIO8"
@@ -333,7 +333,7 @@
 					)
 				)
 			)
-			(pin bidirectional line
+			(pin input line
 				(at -22.86 -5.08 0)
 				(length 2.54)
 				(name "GPIO9"
@@ -351,7 +351,7 @@
 					)
 				)
 			)
-			(pin bidirectional line
+			(pin input line
 				(at -22.86 -7.62 0)
 				(length 2.54)
 				(name "GPIO10"
@@ -369,7 +369,7 @@
 					)
 				)
 			)
-			(pin bidirectional line
+			(pin input line
 				(at -22.86 -10.16 0)
 				(length 2.54)
 				(name "GPIO11"
@@ -387,7 +387,7 @@
 					)
 				)
 			)
-			(pin bidirectional line
+			(pin output line
 				(at -22.86 -12.7 0)
 				(length 2.54)
 				(name "GPIO12"
@@ -405,7 +405,7 @@
 					)
 				)
 			)
-			(pin bidirectional line
+			(pin output line
 				(at -22.86 -15.24 0)
 				(length 2.54)
 				(name "GPIO13"
@@ -423,7 +423,7 @@
 					)
 				)
 			)
-			(pin bidirectional line
+			(pin output line
 				(at -22.86 -17.78 0)
 				(length 2.54)
 				(name "GPIO14"
@@ -531,7 +531,7 @@
 					)
 				)
 			)
-			(pin bidirectional line
+			(pin output line
 				(at 22.86 22.86 180)
 				(length 2.54)
 				(name "GPIO1"
@@ -549,7 +549,7 @@
 					)
 				)
 			)
-			(pin bidirectional line
+			(pin output line
 				(at 22.86 20.32 180)
 				(length 2.54)
 				(name "GPIO2"
@@ -621,7 +621,7 @@
 					)
 				)
 			)
-			(pin bidirectional line
+			(pin output line
 				(at 22.86 10.16 180)
 				(length 2.54)
 				(name "GPIO39"
@@ -711,7 +711,7 @@
 					)
 				)
 			)
-			(pin bidirectional line
+			(pin input line
 				(at 22.86 -2.54 180)
 				(length 2.54)
 				(name "GPIO0"
@@ -876,5 +876,4 @@
 		)
 		(embedded_fonts no)
 	)
-
-
+)
