@@ -810,6 +810,41 @@ The following features are planned for Universal Shield v2.0:
   - Pin mapping: Match MCU GPIO to shield's ADC/PWM/Ethernet/CAN interfaces
   - Form factor: Adapter must fit within enclosure constraints
 
+### Universal Shield Variants (Via vs. Header Mounting)
+- **Purpose:** Create three mounting variants of the Universal Shield to support different ESP32-S3 module attachment methods
+- **Variants:**
+  - **Variant 1 (Current):** Uses vias defined in custom ESP32-S3 footprint - module soldered directly to PCB
+  - **Variant 2:** 22-pin male headers (2×11) - module plugs into headers for removable/replaceable installation
+  - **Variant 3:** 22-pin female headers (2×11) - module mounts on headers for stackable/stacked configurations
+- **Implementation:** Create three separate PCB designs with identical functionality but different ESP32-S3 mounting footprints
+- **Benefits:**
+  - **Via mounting (Variant 1):** Permanent, low-profile installation, best for production deployments
+  - **Male headers (Variant 2):** Removable module, easier debugging and firmware updates, module replacement without desoldering
+  - **Female headers (Variant 3):** Stackable configuration, allows shield stacking or module-on-top mounting
+- **Use cases:**
+  - **Variant 1:** Production installations where module won't need replacement
+  - **Variant 2:** Development, prototyping, or installations requiring easy module access
+  - **Variant 3:** Multi-shield stacking or custom module-on-shield configurations
+
+### LBEAST Child Shield (LBCS)
+- **Purpose:** Create a simplified, cost-optimized variant of the Universal Shield (LBUS) with only 1 aux port instead of 8
+- **Design:** Same core functionality as LBUS but with reduced aux port count
+  - **Parent ECU:** ESP32-S3 (same as LBUS) with Ethernet, CAN, and all standard interfaces
+  - **Aux Ports:** 1× CAT5 aux port (vs. 8× on LBUS)
+  - **Power:** Same 5V power architecture (reduced capacity for single port)
+  - **Form Factor:** Smaller PCB footprint due to reduced connector count
+- **Benefits:**
+  - **Cost reduction:** Fewer connectors, reduced PCB size, lower BOM cost
+  - **Simplified design:** Ideal for installations requiring only one child ECU connection
+  - **Space efficiency:** Smaller form factor for compact installations
+  - **Same functionality:** Full parent ECU capabilities (Ethernet, CAN, ADC/PWM) in a streamlined package
+- **Use cases:**
+  - Single child ECU installations (e.g., one Raspberry Pi, one Jetson, one ESP32 child)
+  - Cost-sensitive projects where 8-port capability is unnecessary
+  - Compact installations with space constraints
+  - Distributed systems where each parent ECU only needs to connect to one child device
+- **Naming:** "LBCS" (LBEAST Child Shield) - short name for documentation and references
+
 </div>
 
 </details>

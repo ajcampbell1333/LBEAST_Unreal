@@ -3276,22 +3276,132 @@ Many large haptics, hydraulics, pneumatics, and motors in use for XR LBE enhance
 
 <div style="margin-left: 20px;">
 
-Each experience may need one or more Electronic Control Unit (ECU) to function properly. It is likely that 80% of all LBEAST experiences can function with one ECU or fewer. In such cases, LBEAST recommends you plug a development board of your choice (ESP32, STM32, or Arduino) into the Universal Shield's motherboard slot, and consider that device your "Mother/Parent ECU" for the experience. The original Universal Shield reference design is out-of-the-box ready for ESP32-S3-WROOM1. It communicates with all high-current equipment over a galvanically isolated CAN adapter. There are personality adapters available to slot into the motherboard with STM32, Arduino, and other ESP variants. If your desired target motherboard is not supported as a personality adapter yet, consider building an adapter in KiCAD (the go-to free open-source PCB design tool) and submitting a pull request. Your help for this community is greatly appreciated.
+Each experience may need one or more Electronic Control Unit (ECU) to function properly. It is likely that 80% of all LBEAST experiences can function with one ECU or fewer. In such cases, LBEAST recommends you plug a development board of your choice (ESP32, STM32, or Arduino) into the Universal Shield's motherboard slot, and consider that device your "Mother/Parent ECU" for the experience. The original Universal Shield reference design is out-of-the-box ready for ESP32-S3-WROOM1. It communicates with all high-current equipment over a galvanically isolated CAN adapter. There are personality adapters available to slot into the motherboard with STM32, Arduino, and other ESP variants. If your desired target motherboard is not supported as a personality adapter yet, consider building an adapter in KiCAD (the go-to free open-source PCB design tool) and submitting a pull request. Your contribution to this community is greatly appreciated.
+
+</div>
+
+</details>
+
+
+<details>
+<summary><strong>Why is Raspberry Pi not the default for embedded design?</strong></summary>
+
+<div style="margin-left: 20px;">
+
+Each developer has a current platform with which they're most familiar. Some communities are larger and more passionate than others. It is often asked, "Why didn't you make Pi the default option for LBEAST? Instead, you designed a Universal Shield that simply gives more capabilities to platforms that are less feature-rich than Pi."
+
+It's a valid concern, and Pi was considered as a default motherboard option for embedded systems networking in LBEAST. To be clear, Raspberry Pi developers can indeed use only Pi and nothing else as their embedded hardware in an LBEAST project. The only concern is that the embedded examples that interface with LBEAST's game engine templates are written for smaller systems than Pi, so using Pi (or other SBCs) instead would typically mean translating those examples from C to Python. If a Pi dev wants to do that and submit a pull request, they are welcome and encouraged to do so.
+
+But there's a reason it is not considered high priority. The author of LBEAST deployed dozens of LBE installations to trade shows like CES, Comic-Con, and others on behalf of major Hollywood studios and big brands. Through that experience, he discovered he was rebuilding fairly similar tech stacks for each, and the similarities needed to become some kind of standard framework someday to speed up the whole process of standing up a new XR pop-up installation. The goal was to deliver wow-factor as close to a theme park ride as possible, but on a shoestring budget. So cost-consciousness was baked into the cake from the beginning.
+
+That's why LBEAST is hyperfocused on a no-extra-weight hardware methodology. Some professional projects were built with simple Bluetooth button clickers. Some were built with Arduino. And others were built with very feature-rich SBCs like Pi. After running the gamut of options, a Goldilocks scenario emerged from the noise. 
+
+Basic microcontrollers (Arduino, ESP32, STM32, etc.) are often feature-rich enough to handle every task required in a modern LBE LAN. Pi, Nano, NUC, and other SBCs can do great things in these networks, but they tend to be overkill because they try to be all-things-at-once. You usually don't need a GPU on your embedded components when there's a dedicated game engine server in the LAN, for instance. SBCs have a bunch of hardware by default that would go to waste in most LBEs. They're the porridge-too-hot side of the Goldilocks equation on embedded design.
 
 </div>
 
 </details>
 
 <details>
-<summary><strong>Peripheral Advanced Embedded Support (Jetson Nano and Raspberry Pi)</strong></summary>
+<summary><strong>Why LBEAST Favors Microntollers over Single-Board Computers (SBCs):</strong></summary>
 
 <div style="margin-left: 20px;">
 
-There may be rare scenarios for which you need more capability than any of the three motherboard platforms can provide. For instance, if you need an OS or interface onboard a tiny device for quick debugging and config, but maybe you don't want a full-blown PC/smartphone/tablet dedicated to such a small task, Raspberry Pi is a best-of-both-worlds. Pi can plug into any aux port on the Universal Shield and act as a child to the Parent ECU. Likewise, if you need high-end graphics or AI model training/inference in a tiny custom mobile package, Jetson Nano can use the aux port on the Universal Shield and become a child to the Parent ECU too.
+LBE LANs are typically a left-hand-right-hand setup where the right hand is a game engine server and monitor console, and the left hand is a network of small embedded devices that can hide inside a chassis, in a wall, in a prop, or in the lining of an actor's clothes. In all cases, LBE needs the device to over-index on tiny size above robust processing specs.
+
+Typically, an off-the-shelf bluetooth clicker or 433MHz RF clicker is not feature-rich enough to satisfy the variety of tasks in most LBEs, whereas Intel NUC is often a nuke-in-the-gunfight when you consider a need to hide a NUC-sized device inside a prop, or especially in the lining of clothes. Jetson and Pi are smaller and smaller, but typically not small enough. One might argue that LBUS has a LARGER than Pi but the theory is that it operates on ESP by default because ESP is great at decoupling from its shield if it needs to shrink, and its smallest form (C3) can be ridiculously tiny.
+
+For this and  many other reasons, LBEAST favors ESP32 by default. It is not as single-purpose-processor-capable as STM32, and it's not as general-purpose-processor-capable as an SBC. But Expressif drastically over-indexes on the exact features LBEs need:
+* tiniest size (see Pico Click open-source project)
+* fast enough for most tasks (many times faster than Arduino)
+* Bluetooth and WiFi plug-n-play onboard with no extra attention needed
+* stupid numbers of ADCs and PWMs available for custom module breakout
+
+Expressif is the clear Goldilocks pick, but LBEAST seeks not to lock anyone into an unfamiliar platform. ESP is easy because "if it runs on Arduino, it runs on ESP too." But the shield is "universal" because it is built for ESP first only becuase we had to start somewhere. With personality adapters, we seek to provide access to any  platform of choice.  That includes rare situations where it makes sense to bring in the big guns like Pi or Nano. Since LBUS is stacked with ethernet ports, it can take a back seat at will to any of the SBCs, though its primary purpose is to act as the motherboard of all the embedded hardware in a given installation in most cases.
+</div>
+</details>
+
+<details>
+<summary><strong>Single-Board Computer Support (Jetson Nano,  Raspberry Pi, Intel NUC, etc.)</strong></summary>
+
+<div style="margin-left: 20px;">
+
+
+There may be rare scenarios for which you need the big guns. For instance, if you need an OS or interface onboard a tiny device for quick debugging/config inside the chassis of a hydraulic system, but maybe you don't want a full-blown PC/smartphone/tablet dedicated to such a small task, Raspberry Pi is a great pick. Pi can plug into any aux port on the Universal Shield and act as a child to LBUS, or the other way around. Likewise, if you need high-end graphics or AI model training/inference in a tiny custom mobile package, Jetson Nano can use the aux port on the Universal Shield and become a child to the Parent ECU too.
 
 </div>
 
 </details>
+
+<details>
+<summary><strong>Is LBUS capable of networking with multiple copies of itself?</strong></summary>
+
+<div style="margin-left: 20px;">
+
+Technically, in alpha... sort of. When we get to beta, absolutely.
+
+The main concern is power. LBUS pipes out Power-over-Ethernet (PoE) to any module you plug into its aux ports, IF IT CAN HANDLE THE LOAD. If you plug 8 microcontrollers into it, you will max out its power output capacity when all 8 of those ports are under their heaviest loads at once. The shield will get warm, but it is designed to handle that. It is NOT, however, designed to power all its ports PLUS all the ports of a 2nd copy unit.
+
+If you imagine plugging two LBUS units into each other, you can easily picture overloading the first one if the second one is drawing power from the first, and all ports are in continuous use on both. What if the second unit plugs into a battery and draws separate power though? In future versions of LBUS, this will be fine. In alpha, don't do it. There is no regulation across ports in the current alpha design. It won't explode immediately, but it will be senstitive to static and EMI.
+
+In alpha, it is assumed the LBUS will provide power to the aux ports, not the other way around. Obviously, if two LBUS units are set up one at either end of the other over ethernet, they would attempt to provide power to each other simultaneously. There could be a voltage differential with possibility of damaging one of them when that differential spikes (through static or EMI). Diodes and switches will protect those ports in future upgrades, but those are not in place yet.
+
+SBCs like Pi or Jetson do not intake power over ethernet, so they can safely interface with LBUS even in alpha. Likewise, any microcontroller that is not self-powered can plug into an alpha aux port and receive its power from the shield. But don't plug a battery into your Arduino while it's connected to an LBUS aux port. It's the same issue as two LBUS units. The child device should not turn on its own power source if it's connected on ethernet pin 4 (the 5V power rail). It won't explode, but it will be in danger of damage through interference spikes. 
+
+Alpha LBUS is set up to assume the connected device wants +5V on pin 4. Any microcontroller can connect via the LBEAST Child Shield or any other ehternet interface and receive power, but the moment that device tries to send power back, you'll have radio and static concerns. 
+</div>
+</details>
+
+<details>
+<summary><strong>How could we consider LBUS show-ready when its ports have power regulation issues?</strong></summary>
+
+<div style="margin-left: 20px;">
+We don't. LBEAST Alpha is very much NOT show-ready. It is not meant to be deployed professionally yet. Alpha is for showing progress to the community in case other devs want to get involved. Beta is when we will attempt first trials in professional productions. Only tech demos built by devs who fully understand these limitations should be in the works prior to Beta. Use LBEAST at your own risk professionally only if you fully understand the current limitatations and are able to work around them.
+
+For instance, in alpha, you should only plug two LBUS units into each other over an ethernet cable that has pin 4 severed. Then everything will be fine. Pins 1,2,3, and 6 are the ethernet data pins in a typical CAT5 cable, so in alpha, it is assumed you will only use those and not the others for a multi-LBUS network. Although situations where you need multiple LBUS units will be fairly rare anyway, this limitation is annoying and not ready for primetime. It's a big part of why the whole project is still considered alpha.
+
+If you really need a multi-LBUS network right away, you can buy data-only CAT5 cables on Amazon. Most have all 8 pins wired, but you can find some that only have the 4 data pins wired. Those will work for the alpha LBUS out-of-the-box if both LBUS units are powered separately. 
+
+In general, LBEAST's author recommends you consider making LBUS units independent of each other in any case. The EMI issues will be solved, but you don't actually need to plug LBUS units into each other at all when running a successful LBE with mutliple LBUS units in play. The recommended setup is a unique UDP pipe for each LBUS unit back to the game engine server and/or wireless communcation across. LBUS-to-LBUS over ethernet is a stretch goal for the project, but it is expected to be rare. It's considered a high priority for Beta only because it represents potential for damaged equipment for technicians who fail to read this fine print.
+</div>
+</details>
+
+
+<details>
+<summary><strong>Is it legal to deploy DIY PCBs in trade shows/malls/theme park installations?</strong></summary>
+
+<div style="margin-left: 20px;">
+The author of LBEAST is no expert on regulatory issues arising from use of the code or hardware designs in this open-source project. He disclaims any liability arising from use of any content, code, or hardware designs herein. 
+
+There are state-by-state theme park attraction regulations (typically adopting ASTM standards in the U.S.) and federal circuit board electro-magnetic interference certifications (via the F.C.C.) to consider, and there may be other relevant regulations in your locale.
+
+F.C.C. compliance for EMC is a known concern. It can be achieved through the Supplier's Declaration of Conformity (SDoC). It is the common means for manufacturers to legally sell and distribute open-source PCBs and shields connected to several popular platforms (Aruino, ESP, etc.) after achieving certified test results on EMI compliance through accredited testing facilities. 
+
+For any given manufacturer, achieving compliance typically costs $5-10k before the FCC grants right to distribute. PCB EMI compliance can cost a LOT more than that in some case, but LBUS is designed to fall into the category of "unintentional radiators" i.e. the device does not intend to emit its own RF signals though it may often be in close quarters with devices that do. This category requires fewer restrictions than PCBs that have onboard RF hardware, which contributes to a faster testing cycle to qualify for SDoC.
+
+
+</div>
+</details>
+
+
+
+<details>
+<summary><strong>Who is making the boards?</strong></summary>
+
+<div style="margin-left: 20px;">
+
+Currently, no one.
+
+The author of LBEAST has no plans to become a primary manufacturer of LBUS. He is a Tech Lead with a decade of experience deploying LBE to major trade shows. If he isn't booked on a contract deploying an LBEAST project for someone else, he may be available to help you with yours. He will do his best to help any community member navigate the murky compliance waters in the early days of LBEAST as time allows.
+
+Since LBUS is an open-source design, any community member or company can jump in and profit by providing FCC-compliant hardware for sale to the community. In lieu of a manufacturer doing so, each venue would be responsible for compliance individually. If you're showing an LBE at a trade show and not offering it for sale, you may be exempt from being considered a manufacturer. Consult the FCC. If you are selling the experience (including LBUS PCBs you manufactured directly) at a trade show or in any B2B or B2C capacity, you are required to comply via SDoc. The first seller into U.S. commerce must be certified to ensure the board does not emit harmful radio frequencies.
+
+Note that, so far, LBUS has been through zero pre-compliance testing, and the author of LBEAST is not a trained firmware engineer. He is a senior software engineer who has extensive hobbyist experience in firmware design. He is not personally qualified to complete pre-compliance checks. If a senior firmware engineer in the community can provide assistance on this front, it is greatly appreciated.
+
+This is another reason LBEAST is still considered Alpha and not ready for primetime yet. The first few professional LBEAST projects are likely to need direct FCC certification to deploy in a permanent or semi-permanent retail location. Once LBEAST has proven it has legs in professional settings, and it is likely that several PCB manufacturers will be interested in supplying the boards thereafter. Their business model is to identify popular open-source boards and make them available at very low prices on Amazon. Thus, venues would no longer need to worry about compliance.
+</div>
+</details>
+
 
 <details>
 <summary><strong>LBEAST Universal Child Aux Port for Non-ECU (i.e. non-Smart) Modules</strong></summary>
@@ -3551,6 +3661,8 @@ Some experiences may require best-in-class latency between the Universal Shield 
 - [ ] **Universal Shield UART Debug Breakout** - Add 4-pin header (GND, 3.3V, U0TXD, U0RXD) for serial debug interface, firmware programming, and UART-based module interfacing. See `FirmwareExamples/PCBs/LBEAST_Universal_Shield/README.md` for pinout details.
 - [ ] **Universal Shield DIP Switch Power Toggling** - Add DIP switches (one per aux port) to manually enable/disable 5V power output on each aux port. Prevents parallel power supply issues when connecting LBUS-to-LBUS and enables flexible power management. See `FirmwareExamples/PCBs/LBEAST_Universal_Shield/README.md` for implementation details.
 - [ ] **Universal Shield Personality Adapters** - Design and manufacture adapter PCBs to enable Universal Shield support for ESP32-WROOM-32, Arduino Uno/Mega, and STM32 (Black Pill, Nucleo, etc.) MCU platforms. Adapters handle pin mapping, power regulation (Arduino), and level shifting (Arduino) to provide platform flexibility and cost optimization. See `FirmwareExamples/PCBs/LBEAST_Universal_Shield/README.md` for design specifications.
+- [ ] **Universal Shield Variants (Via vs. Header Mounting)** - Create three mounting variants of the Universal Shield: 1) Current via-mounted design (ESP32-S3 soldered directly), 2) 22-pin male headers variant (removable module), 3) 22-pin female headers variant (stackable configuration). Each variant maintains identical functionality but supports different installation requirements (permanent, removable, or stackable). See `FirmwareExamples/PCBs/LBEAST_Universal_Shield/README.md` for variant specifications.
+- [ ] **LBEAST Child Shield (LBCS)** - Create a simplified, cost-optimized variant of the Universal Shield (LBUS) with only 1 aux port instead of 8. Maintains full parent ECU functionality (ESP32-S3, Ethernet, CAN, ADC/PWM) but with reduced connector count, smaller PCB footprint, and lower BOM cost. Ideal for single child ECU installations, cost-sensitive projects, and compact installations. See `FirmwareExamples/PCBs/LBEAST_Universal_Shield/README.md` for design specifications.
 - [ ] **Pico-Click C3 Integration** - Integrate the open-source Pico-Click C3 project (ESP32-C3 based) as the default platform for hidden embedded wireless buttons in clothing and props. Replaces current ESP8266-based implementation with improved performance (160 MHz RISC-V), dual connectivity (WiFi + Bluetooth 5.0), lower power consumption (5 µA deep sleep), and enhanced memory (400 KB SRAM). See `FirmwareExamples/README.md` for current ESP8266 examples that will be migrated.
 - [ ] **GunshipExperience HOTAS Pilot Support** - Add optional 5th player (pilot) support to GunshipExperience with HOTAS controller integration. Enables pilot-controlled flight while 4 gunners operate weapons, expanding gameplay possibilities for multi-crew vehicle experiences.
 - [ ] Advanced inverse kinematics for custom actuator configs
