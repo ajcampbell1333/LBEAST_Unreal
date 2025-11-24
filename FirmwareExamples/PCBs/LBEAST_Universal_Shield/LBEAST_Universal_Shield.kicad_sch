@@ -1705,11 +1705,10 @@
 			(embedded_fonts no)
 		)
 		(symbol "ESP32-S3-2x22:ESP32-S3-2x22"
-			(power)
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
-			(property "Reference" "#U02"
+			(property "Reference" "U"
 				(at 0 40.64 0)
 				(effects
 					(font
@@ -6501,7 +6500,7 @@
 		)
 		(uuid "719c3f38-2e17-43cc-91f9-f2c8962ff5dd")
 	)
-	(text "U5: LAN8720A (Ethernet PHY)"
+	(text "U3: LAN8720A (Ethernet PHY)"
 		(exclude_from_sim no)
 		(at 267.97 17.018 0)
 		(effects
@@ -6977,6 +6976,10 @@
 		(uuid "35f39adf-d5ff-4fd0-966d-5572a5db6e69")
 	)
 	(no_connect
+		(at 151.13 130.81)
+		(uuid "39a31558-82ea-41ac-971f-ddbca21595be")
+	)
+	(no_connect
 		(at 251.46 137.16)
 		(uuid "4634148b-1fde-49b0-bfcf-d9265955dcd2")
 	)
@@ -6987,6 +6990,10 @@
 	(no_connect
 		(at 196.85 133.35)
 		(uuid "71100707-2649-4a1c-b78b-f503b64d0b31")
+	)
+	(no_connect
+		(at 196.85 135.89)
+		(uuid "8ee4aa66-14d2-4396-8547-7437c90b0467")
 	)
 	(no_connect
 		(at 196.85 146.05)
@@ -7527,16 +7534,6 @@
 			(type default)
 		)
 		(uuid "26879ee1-da1e-4c0a-9fa0-970895879ca2")
-	)
-	(wire
-		(pts
-			(xy 196.85 135.89) (xy 199.39 135.89)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "26db1c2a-3429-40be-9af7-b9f19c423dd7")
 	)
 	(wire
 		(pts
@@ -9790,16 +9787,6 @@
 	)
 	(wire
 		(pts
-			(xy 144.78 130.81) (xy 151.13 130.81)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "c4347bee-4699-4270-a3dd-a0e46adb501b")
-	)
-	(wire
-		(pts
 			(xy 203.2 93.98) (xy 203.2 96.52)
 		)
 		(stroke
@@ -11018,17 +11005,7 @@
 		)
 		(uuid "2a93ad23-1904-4357-adb7-6feda6dab407")
 	)
-	(label "IO46"
-		(at 199.39 135.89 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "2b187a24-6794-4af6-a958-de1f5a59a7eb")
-	)
-	(label "IO13"
+	(label "IO11"
 		(at 97.79 86.36 0)
 		(effects
 			(font
@@ -11068,7 +11045,7 @@
 		)
 		(uuid "3020344e-3ec8-430a-acf9-205046436207")
 	)
-	(label "IO5"
+	(label "IO4"
 		(at 97.79 83.82 0)
 		(effects
 			(font
@@ -11078,7 +11055,7 @@
 		)
 		(uuid "32c24ec1-2a77-474f-9a08-05cd3a1c2f21")
 	)
-	(label "IO10"
+	(label "IO9"
 		(at 59.69 191.77 0)
 		(effects
 			(font
@@ -11098,7 +11075,7 @@
 		)
 		(uuid "384d5cb1-239c-4b7f-b9eb-5b8c3eb3b4a0")
 	)
-	(label "IO8"
+	(label "IO7"
 		(at 97.79 152.4 0)
 		(effects
 			(font
@@ -11118,7 +11095,7 @@
 		)
 		(uuid "39dddf7d-373e-4c98-a9e5-73108b8aa127")
 	)
-	(label "IO4"
+	(label "IO5"
 		(at 97.79 60.96 0)
 		(effects
 			(font
@@ -11158,7 +11135,7 @@
 		)
 		(uuid "3c59354d-a01e-476a-a6fb-129598cdd24e")
 	)
-	(label "IO21"
+	(label "IO15"
 		(at 97.79 177.8 0)
 		(effects
 			(font
@@ -11218,7 +11195,7 @@
 		)
 		(uuid "4abae23e-805b-4c71-b11e-ec903afc2d0b")
 	)
-	(label "IO11"
+	(label "IO10"
 		(at 22.86 180.34 0)
 		(effects
 			(font
@@ -11238,7 +11215,7 @@
 		)
 		(uuid "54b50024-7472-40ff-aa5b-1157b981ccf0")
 	)
-	(label "IO14"
+	(label "IO16"
 		(at 97.79 109.22 0)
 		(effects
 			(font
@@ -11338,7 +11315,7 @@
 		)
 		(uuid "63b13ddb-e64e-4d26-ab5d-c5b187a9a95a")
 	)
-	(label "IO9"
+	(label "IO14"
 		(at 22.86 182.88 0)
 		(effects
 			(font
@@ -11428,7 +11405,7 @@
 		)
 		(uuid "861106c6-adfc-4697-a154-2fe601f8a40d")
 	)
-	(label "IO1"
+	(label "IO6"
 		(at 97.79 175.26 0)
 		(effects
 			(font
@@ -11498,7 +11475,7 @@
 		)
 		(uuid "921cc146-8928-412c-841c-d0036063943c")
 	)
-	(label "IO7"
+	(label "IO1"
 		(at 97.79 129.54 0)
 		(effects
 			(font
@@ -11558,7 +11535,7 @@
 		)
 		(uuid "9ec095b3-9892-4d24-9b54-da3848e4bd51")
 	)
-	(label "IO15"
+	(label "IO21"
 		(at 97.79 132.08 0)
 		(effects
 			(font
@@ -11698,7 +11675,7 @@
 		)
 		(uuid "c75b544e-7486-40b5-9975-813581ff84a9")
 	)
-	(label "IO16"
+	(label "IO2"
 		(at 97.79 154.94 0)
 		(effects
 			(font
@@ -11758,17 +11735,7 @@
 		)
 		(uuid "d9e3c031-de01-4eca-b0d2-52075096c179")
 	)
-	(label "IO46"
-		(at 144.78 130.81 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "db03f7e7-0cf9-45c8-9119-cb0b23a18512")
-	)
-	(label "IO2"
+	(label "IO13"
 		(at 59.69 194.31 0)
 		(effects
 			(font
@@ -11828,7 +11795,7 @@
 		)
 		(uuid "e623dbe1-ec7b-409a-8dea-6331c7711e87")
 	)
-	(label "IO6"
+	(label "IO8"
 		(at 97.79 106.68 0)
 		(effects
 			(font
@@ -12490,7 +12457,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "145795b9-6934-4e56-a99d-5c1ed2d53425")
-		(property "Reference" "U5"
+		(property "Reference" "U3"
 			(at 267.97 84.328 0)
 			(effects
 				(font
@@ -12614,7 +12581,7 @@
 		(instances
 			(project ""
 				(path "/67960650-84cc-4502-bcc3-41421fb0fa99"
-					(reference "U5")
+					(reference "U3")
 					(unit 1)
 				)
 			)
@@ -13275,7 +13242,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Button_Switch_SMD:SW_DIP_SPSTx01_Slide_6.7x4.1mm_W6.73mm_P2.54mm_LowProfile_JPin"
 			(at 261.62 127 0)
 			(effects
 				(font
@@ -13397,7 +13364,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "3fb837ad-47a3-40c5-8194-a45fe57b7c05")
-		(property "Reference" "U2"
+		(property "Reference" "U1"
 			(at 41.91 67.31 0)
 			(effects
 				(font
@@ -13460,7 +13427,7 @@
 		(instances
 			(project ""
 				(path "/67960650-84cc-4502-bcc3-41421fb0fa99"
-					(reference "U2")
+					(reference "U1")
 					(unit 1)
 				)
 			)
@@ -13680,7 +13647,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "4d249c28-37d6-4c4e-b42b-30ce4167f3a8")
-		(property "Reference" "U8"
+		(property "Reference" "U4"
 			(at 249.936 151.13 0)
 			(effects
 				(font
@@ -13788,7 +13755,7 @@
 		(instances
 			(project ""
 				(path "/67960650-84cc-4502-bcc3-41421fb0fa99"
-					(reference "U8")
+					(reference "U4")
 					(unit 1)
 				)
 			)
@@ -15730,7 +15697,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "a371565c-211e-4877-82d2-1b71818adbf4")
-		(property "Reference" "#U02"
+		(property "Reference" "U2"
 			(at 173.99 87.63 0)
 			(effects
 				(font
@@ -15746,7 +15713,7 @@
 				)
 			)
 		)
-		(property "Footprint" "LBEASTLibrary:ESP32-S3_2x22_Header"
+		(property "Footprint" "LBEASTLibrary:ESP32-S3_2x22_Header_v3"
 			(at 173.99 176.53 0)
 			(effects
 				(font
@@ -15908,7 +15875,7 @@
 		(instances
 			(project ""
 				(path "/67960650-84cc-4502-bcc3-41421fb0fa99"
-					(reference "#U02")
+					(reference "U2")
 					(unit 1)
 				)
 			)

@@ -1,10 +1,115 @@
 # LBEAST Universal Shield
 
+**Also known as:** LBUS, Uni-Shield
+
 ## Overview
 
-Multi-platform universal shield providing unified hardware design for all LBEAST ECU firmware. Drives high-current devices over CAN. Supports ESP32-S3 as motherboard ECU or STM32/Arduino as motherboard via personality adapters. Provides 8× CAT5 aux ports for child ECUs (your choice of Pi/Jetson/ESP32/STM32/Arduino via WiFi/Bluetooth/Ethernet-adapter).
+<img src="../../../../../../Visual Reference/LBUS.png" width="100%">
 
-**High-Level Component Diagram:**
+**Plug-n-Play Embedded Systems - an Absolute Necessity for Next-Level LBE:**
+
+The LBEAST Universal Shield ("LBUS" or "Uni-Shield") is a multi-platform ECU that provides unified connectivity and control for all LBEAST firmware applications. But what is it for? What does it do? ECU? What the heck is even that?
+
+<details>
+<summary><strong>Electronic Control Unit (ECU)</strong></summary>
+
+<div style="margin-left: 20px;">
+
+It's sort of like the little computer hidden behind the dashboard in your car. It's not a supercomputer... quite the opposite. It costs a few dollars to buy a few dev boards on Amazon and deploy them as ECUs by flashing programs onto them. If you've done IoT with Arduino, ESP32, or STM32... congrats! You're an ECU programmer!
+
+ECUs are nowhere near as powerful or expensive as a smartphone, but they can be MUCH smaller and lighter, so they're great for speciatly tasks hidden in tight spaces. Custom-built processors with dedicated task lists... hardware AND firmware are built to do that task list and nothing more. You don't run a program from a list of programs. The whole ECU's operating system IS the program. It's a one-program device. That's why we say "firmware." To update or replace the latest build, you flash A.K.A. replace all the code running on the device.
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>LBUS is an ECU Network</strong></summary>
+
+<div style="margin-left: 20px;">
+
+LBUS is the ECU you should start with for LBEAST-ready installations, and it can netowrk with copies of itself or any other custom ECU that communicates over ethernet, bluetooth, 433MHz RF, and/oror Wifi. It's powered by your choice of ESP32, Arduino, or STM32. LBUS serves as Union Station for all the data in any system you build from scratch. It enables you to deploy hydraulics, haptics, big servo motors that can spin customers upside down, etc. It let's you hide Child ECUs inside the chassis of a ride, in the clothing of immersive actors, in props, and/or in the decorated walls of an AR experience.
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>Doesn't the LBE Industry already do things like this?</strong></summary>
+
+<div style="margin-left: 20px;">
+
+Most VR and AR experiences are driven by local multiplayer servers built via game engines so that co-located players can see a shared experience while an employee monitors the state of the game loop. Occasionally, these LBE events have advanced integration with a variety of other systems, including lights, pro audio, communication with smartphones and tablets for extra control.
+
+However, it is rare to see a VR experience that includes theme-park attraction technology like large hydraulic actuators or embedded ECUs in costumes worn by immersive actors, in props, and in scenery. This is because the full palette of immersive technologies is complex and expensive. VR budgets in the 2020s generally prohibit us from "next-level"-ing VR experiences in most cases. It's not that we can't integrate the tech. It has just been TOO EXPENSIVE.
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>The LBUS Fixes That!</strong></summary>
+
+<div style="margin-left: 20px;">
+
+LBUS is open-source. It's near free! And it's already fully built and running, ready for you to take and use and skin it with new assets and stand up a new LBE event in a fraction of the time!
+
+LBUS fully integrated with both major game engines (Unity/Unreal) in a ready-to-play local multiplayer server project that has a bunch of LBE templates ready-to-play. A single out-of-the-box LBUS has a bill-of-materials of less than $200 to build 5 copies. LBEAST is not a company. The PCB files are in the git repo, ready for you to send to any PCB manufacturer to order boards at a tiny fraction of the cost of using PLCs. A single LBUS unit supports 8 simultaneous child ECUs via Ethernet while providing galvanically isolated CAN-FD connectivity for high-current device control.
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>Just like JAMMA Resurrected the Arcade Industry in 1985</strong></summary>
+
+<div style="margin-left: 20px;">
+
+The whole industry was proprietary and in a big recession. Developers and venues needed a leg up. Arcade retailers were struggling with the cost of buying anew arcade box every time a new game came out.
+
+Suddenly, the JAMMA spec let them pop a new game card into the same box they already had. Games started launching 10X as fast as before. New content every day! Developers didn't have to worry about box manufacture anymore. They could just focus on the game.
+
+VR is VERY proprietary today. What if you want to build a hydraulic sim and make it feel like a theme park ride? Where do you even begin? You have to hire mechanical engineers and software engineers, and they'll build a complex sytem that works ONLY at your venue. Good luck getting 10 VR development teams to build something for that.
+
+The industry needs standard specs. If you already built a hydraulic rig to a known spec, and EVERY VR dev team knows that spec already, they can ALL starting building experiences for it. It's a chicken/egg challenge, and neither can happen first until we have a spec. That's why LBUS is critical for VR2.0.
+
+</div>
+
+</details>
+
+
+<details>
+<summary><strong>Modularity Advantage</strong></summary>
+
+<div style="margin-left: 20px;">
+
+Unlike traditional PLCs (Programmable Logic Controllers) that require proprietary hardware and software ecosystems, the Universal Shield embraces modularity through open-source microcontrollers. This approach offers several key advantages: **cost efficiency** (microcontrollers are significantly less expensive than PLCs), **flexibility** (choose the MCU platform that best fits your application), **rapid development** (standard development tools and languages), **scalability** (easily expand with additional child ECUs), and **future-proofing** (upgrade individual components without replacing entire systems). The Universal Shield's personality adapter system allows the same hardware to support multiple MCU platforms, while the 8-port Ethernet architecture enables distributed processing across a network of child ECUs, creating a flexible, scalable control architecture that adapts to project requirements.
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>Key Features</strong></summary>
+
+<div style="margin-left: 20px;">
+
+- Multi-platform support: ESP32-S3 (native) &  STM32/Arduino (via personality adapters)
+- 8× CAT5 aux ports for child ECUs (Raspberry Pi, Jetson, ESP32, STM32, Arduino)
+- Isolated CAN-FD transceiver for high-current device control
+- 100 Mbps Ethernet connectivity
+- 12V/24V input with 5V power distribution (≥5A total capacity)
+- Designed for potting and long-term installations
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>High-Level Component Diagram</strong></summary>
+
+<div style="margin-left: 20px;">
+
 ```
           ┌────────────────────────────────────────┐
           |                                        │
@@ -33,13 +138,27 @@ Multi-platform universal shield providing unified hardware design for all LBEAST
                                               
 ```
 
-## Project Files
+</div>
+
+</details>
+
+<details>
+<summary><strong>Project Files</strong></summary>
+
+<div style="margin-left: 20px;">
 
 - **LBEAST_Universal_Shield.kicad_pro** - KiCAD project file
 - **LBEAST_Universal_Shield.kicad_sch** - Schematic file
 - **LBEAST_Universal_Shield.kicad_pcb** - PCB layout file
 
-## Power Architecture
+</div>
+
+</details>
+
+<details>
+<summary><strong>Power Architecture</strong></summary>
+
+<div style="margin-left: 20px;">
 
 **Hybrid Approach:**
 ```
@@ -68,7 +187,14 @@ Buck Converter (LM2576: 12V/24V → 5V, 60V max input)
 - High-current MCUs (ESP32-S3, STM32F407): Adapter routes MCU 3.3V directly
 - Low-current MCUs (Arduino): Adapter includes 3.3V regulator (AMS1117-3.3)
 
-## Components
+</div>
+
+</details>
+
+<details>
+<summary><strong>Components</strong></summary>
+
+<div style="margin-left: 20px;">
 
 ### Primary Components
 
@@ -193,7 +319,61 @@ Buck Converter (LM2576: 12V/24V → 5V, 60V max input)
 **MCU Interface:**
 - **44-pin 2×22 stacking female header** - ESP32-S3 socket/through-hole footprint
 
-## Pin Mappings
+**UART Debug Breakout (4-pin header):**
+- **Purpose:** Serial debug interface for low-level debugging, firmware programming, and module interfacing
+- **Pinout:**
+  - Pin 1: GND (Ground)
+  - Pin 2: +3.3V (Power supply for debug modules)
+  - Pin 3: U0TXD (GPIO43, UART0 TX - serial transmit)
+  - Pin 4: U0RXD (GPIO44, UART0 RX - serial receive)
+
+### Enclosure
+
+**Standard Project Box:**
+- **Polycase LP-70F** - ABS plastic enclosure designed for the Universal Shield
+- **External dimensions:** 5.5 × 4.2 × 1.7 inches (139.7 × 106.7 × 43.2 mm)
+- **Internal dimensions:** 5.25 × 4.0 × 1.6 inches (133.4 × 101.6 × 40.6 mm)
+- **Features:**
+  - Molded-on flanges for surface mounting
+  - PCB mounting bosses in the base
+  - PCB template available from Polycase for design reference
+- **Product page:** [Polycase LP-70F](https://www.polycase.com/lp-70f)
+- **Mounting holes:** PCB corner mounting holes are sized for standard case mounting bosses (typically M2/M2.5/M3 threaded inserts)
+- **Mounting hole spacing:** 4.13" × 2.88" (mounting boss centers)
+- **PCB mounting:** PCB feet/standoffs elevate the board 0.125" (1/8") above the case floor
+
+**Potting Design:**
+- **Connector orientation:** All pluggable elements (RJ45 connectors, barrel jack, headers) are oriented vertically (perpendicular to PCB plane) to facilitate potting and prevent compound from entering connector cavities during encapsulation.
+- **Potting process:** Potting involves filling the enclosure with a protective compound that encapsulates the PCB and components, providing environmental protection (moisture, dust, vibration), electrical insulation, and thermal management. The compound cures to form a solid, protective barrier around the electronics. For the Universal Shield, potting is recommended for long-term installations in harsh environments (outdoor, industrial, automotive applications).
+- **Recommended potting compound:** Two-part polyurethane potting compound (e.g., MG Chemicals 832TC, Smooth-On Smooth-Cast 300, or similar) is recommended. Polyurethane offers good thermal conductivity, flexibility to accommodate thermal expansion, and resistance to moisture and chemicals. Avoid rigid epoxies for this application as they can crack under thermal cycling. Select a compound with a working time (pot life) of 15-30 minutes to allow proper mixing and pouring, and ensure it's rated for the operating temperature range of your installation.
+- **Potting compound volume:** To submerge the top of the PCB by at least 1/16" (0.0625"), approximately **4.5-5.0 cubic inches** of potting compound is required. This accounts for the case interior (5.25" × 4.0"), PCB standoff height (0.125"), PCB thickness (~0.062"), and minimum coverage depth (0.0625"), minus the volume displaced by the PCB and components. Order slightly more than calculated (10-20% extra) to account for mixing waste and ensure complete coverage.
+- **Connector:** Standard 2.54mm pitch (0.1") header, recommended 4-pin male header for breadboard/prototyping
+- **Common Uses:**
+  - Serial debug console (USB-to-serial adapters: FTDI, CP2102, CH340, etc.)
+  - Serial terminal interfaces (PuTTY, minicom, screen, etc.)
+  - Logic analyzers for signal debugging
+  - Firmware programming/bootloaders
+  - Interfacing with UART-based modules:
+    - Bluetooth modules (HC-05, HC-06, ESP32-BLE, etc.)
+    - WiFi modules (ESP8266, some ESP32 variants)
+    - GPS modules (NEO-6M, NEO-8M, etc.)
+    - LoRa modules (SX1278, SX1262)
+    - RFID readers (MFRC522, PN532)
+    - Barcode scanners
+    - Serial LCD displays
+    - Motor controllers
+    - Industrial sensors
+    - Many other embedded modules requiring point-to-point serial communication
+- **Note:** UART is one of the most versatile communication protocols for embedded systems, supporting a wide variety of components and debug tools. While the 8 Ethernet ports provide network-level debugging, the UART breakout provides low-level serial debugging and direct module interfacing.
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>Pin Mappings</strong></summary>
+
+<div style="margin-left: 20px;">
 
 ### ESP32-S3-WROOM-1 Complete 44-Pin Pinout (2×22 Header)
 
@@ -204,29 +384,29 @@ Buck Converter (LM2576: 12V/24V → 5V, 60V max input)
 | 1 | - | 3.3V_OUT | 3.3V power output (from onboard regulator) |
 | 2 | - | 3.3V_OUT | 3.3V power output (from onboard regulator) |
 | 3 | GPIO3 | EN | Enable (active HIGH, reset when LOW) |
-| 4 | GPIO4 | GPIO4 / ADC1_CH3 | Aux Port 3 ADC |
-| 5 | GPIO5 | GPIO5 / ADC1_CH4 | Aux Port 2 ADC |
-| 6 | GPIO6 | GPIO6 / ADC1_CH5 | Aux Port 3 ADC |
-| 7 | GPIO7 | GPIO7 / ADC1_CH6 | Aux Port 4 ADC |
-| 8 | GPIO15 | GPIO15 / LEDC_CH3 | Aux Port 4 PWM |
+| 4 | GPIO4 | GPIO4 / ADC1_CH3 | Aux Port 4 ADC |
+| 5 | GPIO5 | GPIO5 / ADC1_CH4 | Aux Port 3 ADC |
+| 6 | GPIO6 | GPIO6 / ADC1_CH5 | Aux Port 8 ADC |
+| 7 | GPIO7 | GPIO7 / ADC1_CH6 | Aux Port 7 ADC |
+| 8 | GPIO15 | GPIO15 / LEDC_CH3 | Aux Port 8 PWM |
 | 9 | GPIO16 | GPIO16 / LEDC_CH4 | Aux Port 5 PWM |
 | 10 | GPIO17 | GPIO17 | LAN8720A MDC (Ethernet management clock) |
 | 11 | GPIO18 | GPIO18 | LAN8720A MDIO (Ethernet management data) |
 | 12 | GPIO8 | GPIO8 / ADC1_CH7 | Aux Port 5 ADC |
 | 13 | GPIO3 | GPIO3 | General purpose I/O (also EN function on pin 3) |
 | 14 | GPIO46 | GPIO46 | General purpose I/O (E-Stop interrupt capable) |
-| 15 | GPIO9 | GPIO9 / ADC1_CH8 | Aux Port 6 ADC |
-| 16 | GPIO10 | GPIO10 / ADC1_CH9 | Aux Port 7 ADC |
-| 17 | GPIO11 | GPIO11 / ADC2_CH0 | Aux Port 8 ADC |
-| 18 | GPIO12 | GPIO12 / LEDC_CH0 | Aux Port 1 PWM |
+| 15 | GPIO9 | GPIO9 / ADC1_CH8 | Aux Port 2 ADC |
+| 16 | GPIO10 | GPIO10 / ADC1_CH9 | Aux Port 1 ADC |
+| 17 | GPIO11 | GPIO11 / LEDC_CH4 | Aux Port 4 PWM |
+| 18 | GPIO12 | GPIO12 / LEDC_CH0 | Aux Port 3 PWM |
 | 19 | GPIO13 | GPIO13 / LEDC_CH1 | Aux Port 2 PWM |
-| 20 | GPIO14 | GPIO14 / LEDC_CH2 | Aux Port 3 PWM |
+| 20 | GPIO14 | GPIO14 / LEDC_CH2 | Aux Port 1 PWM |
 | 21 | - | VIN | 5V power input (to onboard regulator) |
 | 22 | - | GND | Ground |
 | 23 | - | GND | Ground |
 | 24 | GPIO43 | U0TXD | UART0 TX (GPIO43) |
 | 25 | - | NC | No Connect |
-| 26 | GPIO1 | GPIO1 / LEDC_CH5 | Aux Port 6 PWM |
+| 26 | GPIO1 | GPIO1 / ADC1_CH0 | Aux Port 6 ADC |
 | 27 | GPIO2 | GPIO2 / LEDC_CH6 | Aux Port 7 PWM |
 | 28 | GPIO42 | GPIO42 / Pad 26 | General purpose I/O (reserved for FAN_CTRL per README) |
 | 29 | GPIO41 | GPIO41 / Pad 29 | CAN RXD (ADM3057E) |
@@ -257,30 +437,30 @@ Buck Converter (LM2576: 12V/24V → 5V, 60V max input)
 | 1 | - | Power output | 3.3V_OUT (power source) |
 | 2 | - | Power output | 3.3V_OUT (power source) |
 | 3 | GPIO3 | Input | EN (enable/reset input) |
-| 4 | GPIO4 | Input | ADC pin (analog input) - Aux Port 3 ADC |
-| 5 | GPIO5 | Input | ADC pin (analog input) |
-| 6 | GPIO6 | Input | ADC pin (analog input) |
-| 7 | GPIO7 | Input | ADC pin (analog input) |
-| 8 | GPIO15 | Output | PWM output (LEDC_CH3) |
-| 9 | GPIO16 | Output | PWM output (LEDC_CH4) |
+| 4 | GPIO4 | Input | ADC pin (analog input) - Aux Port 4 ADC |
+| 5 | GPIO5 | Input | ADC pin (analog input) - Aux Port 3 ADC |
+| 6 | GPIO6 | Input | ADC pin (analog input) - Aux Port 8 ADC |
+| 7 | GPIO7 | Input | ADC pin (analog input) - Aux Port 7 ADC |
+| 8 | GPIO15 | Output | PWM output (LEDC_CH3) - Aux Port 8 PWM |
+| 9 | GPIO16 | Output | PWM output (LEDC_CH4) - Aux Port 5 PWM |
 | 10 | GPIO17 | Bidirectional | MDC (I2C-like, bidirectional) |
 | 11 | GPIO18 | Bidirectional | MDIO (I2C-like, bidirectional) |
-| 12 | GPIO8 | Input | ADC pin (analog input) |
+| 12 | GPIO8 | Input | ADC pin (analog input) - Aux Port 5 ADC |
 | 13 | GPIO3 | Bidirectional | General purpose I/O (also EN function) |
 | 14 | GPIO46 | Bidirectional | General purpose I/O (E-Stop interrupt capable) |
-| 15 | GPIO9 | Input | ADC pin (analog input) |
-| 16 | GPIO10 | Input | ADC pin (analog input) |
-| 17 | GPIO11 | Input | ADC pin (analog input) |
-| 18 | GPIO12 | Output | PWM output (LEDC_CH0) |
-| 19 | GPIO13 | Output | PWM output (LEDC_CH1) |
-| 20 | GPIO14 | Output | PWM output (LEDC_CH2) |
+| 15 | GPIO9 | Input | ADC pin (analog input) - Aux Port 2 ADC |
+| 16 | GPIO10 | Input | ADC pin (analog input) - Aux Port 1 ADC |
+| 17 | GPIO11 | Output | PWM output (LEDC_CH4) - Aux Port 4 PWM |
+| 18 | GPIO12 | Output | PWM output (LEDC_CH0) - Aux Port 3 PWM |
+| 19 | GPIO13 | Output | PWM output (LEDC_CH1) - Aux Port 2 PWM |
+| 20 | GPIO14 | Output | PWM output (LEDC_CH2) - Aux Port 1 PWM |
 | 21 | - | Power input | VIN (5V power input) |
 | 22 | - | Power input | GND (ground) |
 | 23 | - | Power input | GND (ground) |
 | 24 | GPIO43 | Output | UART0 TX (serial transmit) |
 | 25 | - | Unspecified | NC (No Connect) |
-| 26 | GPIO1 | Input | ADC pin (analog input) - Aux Port 8 ADC (J8 pin 7) |
-| 27 | GPIO2 | Output | PWM output (LEDC_CH6) |
+| 26 | GPIO1 | Input | ADC pin (analog input) - Aux Port 6 ADC |
+| 27 | GPIO2 | Output | PWM output (LEDC_CH6) - Aux Port 7 PWM |
 | 28 | GPIO42 | Bidirectional | General purpose I/O (reserved for FAN_CTRL) |
 | 29 | GPIO41 | Bidirectional | CAN RXD (bidirectional CAN receive) |
 | 30 | GPIO40 | Bidirectional | CAN TXD (bidirectional CAN transmit) |
@@ -293,7 +473,7 @@ Buck Converter (LM2576: 12V/24V → 5V, 60V max input)
 | 37 | GPIO45 | Bidirectional | General purpose I/O (E-Stop interrupt capable) |
 | 38 | GPIO46 | Bidirectional | General purpose I/O (E-Stop interrupt capable) |
 | 39 | GPIO47 | Bidirectional | General purpose I/O (E-Stop interrupt capable) |
-| 40 | GPIO21 | Output | PWM output (LEDC_CH7) - Aux Port 8 PWM (J8 pin 8) |
+| 40 | GPIO21 | Output | PWM output (LEDC_CH7) - Aux Port 6 PWM |
 | 41 | GPIO20 | Bidirectional | General purpose I/O |
 | 42 | GPIO44 | Input | UART0 RX (serial receive) |
 | 43 | - | Power input | GND (ground) |
@@ -312,14 +492,14 @@ Buck Converter (LM2576: 12V/24V → 5V, 60V max input)
 
 | Aux Port | ADC GPIO | ADC Pin | ADC Channel | PWM GPIO | PWM Pin | PWM LEDC Channel |
 |----------|----------|---------|-------------|----------|---------|------------------|
-| J1 | GPIO11 | Pin 17 | ADC2_CH0 | GPIO9 | Pin 15 | LEDC_CH4 |
-| J2 | GPIO10 | Pin 16 | ADC1_CH9 | GPIO2 | Pin 27 | LEDC_CH6 |
-| J3 | GPIO4 | Pin 4 | ADC1_CH3 | GPIO12 | Pin 18 | LEDC_CH0 |
-| J4 | GPIO5 | Pin 5 | ADC1_CH4 | GPIO13 | Pin 19 | LEDC_CH1 |
-| J5 | GPIO6 | Pin 6 | ADC1_CH5 | GPIO14 | Pin 20 | LEDC_CH2 |
-| J6 | GPIO7 | Pin 7 | ADC1_CH6 | GPIO15 | Pin 8 | LEDC_CH3 |
-| J7 | GPIO8 | Pin 12 | ADC1_CH7 | GPIO16 | Pin 9 | LEDC_CH4 |
-| J8 | GPIO1 | Pin 26 | ADC1_CH0 | GPIO21 | Pin 40 | LEDC_CH7 |
+| J1 | GPIO10 | Pin 16 | ADC1_CH9 | GPIO14 | Pin 20 | LEDC_CH2 |
+| J2 | GPIO9 | Pin 15 | ADC1_CH8 | GPIO13 | Pin 19 | LEDC_CH1 |
+| J3 | GPIO5 | Pin 5 | ADC1_CH4 | GPIO12 | Pin 18 | LEDC_CH0 |
+| J4 | GPIO4 | Pin 4 | ADC1_CH3 | GPIO11 | Pin 17 | LEDC_CH4 |
+| J5 | GPIO8 | Pin 12 | ADC1_CH7 | GPIO16 | Pin 9 | LEDC_CH4 |
+| J6 | GPIO1 | Pin 26 | ADC1_CH0 | GPIO21 | Pin 40 | LEDC_CH7 |
+| J7 | GPIO7 | Pin 7 | ADC1_CH6 | GPIO2 | Pin 27 | LEDC_CH6 |
+| J8 | GPIO6 | Pin 6 | ADC1_CH5 | GPIO15 | Pin 8 | LEDC_CH3 |
 
 **Note:** GPIO0 (boot strap pin) was previously used for J8 ADC but has been freed to avoid boot mode conflicts. J8 now uses GPIO1 for ADC and GPIO21 for PWM.
 
@@ -393,7 +573,14 @@ Buck Converter (LM2576: 12V/24V → 5V, 60V max input)
 
 **Note:** GPIO4/5 are used for aux port ADCs, so CAN uses GPIO40/41.
 
-## Aux Port Pinout (CAT5 T568B)
+</div>
+
+</details>
+
+<details>
+<summary><strong>Aux Port Pinout (CAT5 T568B)</strong></summary>
+
+<div style="margin-left: 20px;">
 
 | RJ45 Pin | T568B Color | Signal | Connection |
 |----------|-------------|--------|------------|
@@ -408,14 +595,52 @@ Buck Converter (LM2576: 12V/24V → 5V, 60V max input)
 
 **Cable Requirements:**
 - Standard straight-through Cat5e/Cat6 (T568B both ends)
+- **All 8 wires required** - Do not use 4-wire cables (some budget/flat Ethernet cables only include wires for pins 1-2, 3-6)
+- Pins 4-5 are required for power (5V and GND) when connecting powered child devices
+- Pins 7-8 are required for ADC/PWM functionality
 - 24-26 AWG, UTP or STP
 - Tested up to 50m (100m for light loads)
+- **Note:** While 100 Mbps Ethernet only requires 4 wires (pins 1-3, 6), LBUS aux ports use all 8 wires for power and I/O functionality
 
 **Usage:**
 - **Child ECUs (Pi/Jetson):** Connect via Ethernet (pins 1-3, 6). Use device's native ADC/PWM. Communication via UDP binary protocol.
 - **Parent ECU I/O:** Access ADC/PWM on pins 7-8 for direct hardware control (ESP32/STM32/Arduino native).
 
-## Bill of Materials
+<details>
+<summary><strong>Power Safety</strong></summary>
+
+<div style="margin-left: 20px;">
+
+**Overcurrent Protection:**
+- Universal Shield v1.0 includes a **4A fuse** on the aux power bus (5V rail to all 8 aux ports)
+- Fuse protects against excessive current draw from misbehaving devices or short circuits
+- Fuse rating matches maximum design capacity (4A total across 8 ports)
+
+**Power over Ethernet (PoE) Compatibility:**
+- **Standard PoE devices (IEEE 802.3af/at/bt) are NOT compatible** with aux port power
+- Standard PoE requires 48V and handshake protocol (not provided by Universal Shield)
+- **Standard Raspberry Pi and Jetson Nano (without PoE HATs) are safe** - pins 4&5 are not connected internally, so 5V power is safely ignored
+- **PoE HATs/add-on boards are NOT supported** - PoE controllers expect 48V and may be damaged by 5V
+- **Do not use PoE-enabled devices or PoE HATs on aux ports**
+
+**Power Safety Considerations:**
+- Maximum current per port: 0.5A (4A total ÷ 8 ports)
+- Devices drawing excessive current will trip the 4A fuse
+- Always verify device power requirements before connecting to aux ports
+- For detailed power safety information, see [E-Stop & Safety Considerations](../../ESTOP_&_Safety_Considerations.md#pcb-power-trace-design-universal-shield)
+
+</div>
+
+</details>
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>Bill of Materials</strong></summary>
+
+<div style="margin-left: 20px;">
 
 ### Universal Shield (≈ $21-23 @ 1k pcs)
 
@@ -442,7 +667,14 @@ Buck Converter (LM2576: 12V/24V → 5V, 60V max input)
 
 **Note:** Raspberry Pi and Jetson Nano are **child ECUs** (connect via Ethernet aux ports), not adapters.
 
-## Platform Support
+</div>
+
+</details>
+
+<details>
+<summary><strong>Platform Support</strong></summary>
+
+<div style="margin-left: 20px;">
 
 **Parent ECU (via adapters):**
 - ESP32-S3 (socket/through-hole) - Native ADC/PWM
@@ -455,7 +687,14 @@ Buck Converter (LM2576: 12V/24V → 5V, 60V max input)
 - Jetson Nano/Xavier NX - Native GPIO/ADC/PWM, UDP communication
 - Any Ethernet-capable device - Device-dependent I/O, UDP communication
 
-## Design Specifications
+</div>
+
+</details>
+
+<details>
+<summary><strong>Design Specifications</strong></summary>
+
+<div style="margin-left: 20px;">
 
 - **Aux Ports:** 8× CAT5 RJ45 (Ethernet + 5V power + 1× ADC + 1× PWM per port)
 - **Ethernet:** 100 Mbps full-duplex (LAN8720A)
@@ -465,7 +704,14 @@ Buck Converter (LM2576: 12V/24V → 5V, 60V max input)
 - **CAN Bus:** Isolated CAN-FD (ADM3057E, 3kV isolation)
 - **Connectors:** All vertical mount with tall shells (16.38mm) for potting
 
-## External Systems
+</div>
+
+</details>
+
+<details>
+<summary><strong>External Systems</strong></summary>
+
+<div style="margin-left: 20px;">
 
 ### E-Stop Systems
 
@@ -473,7 +719,105 @@ Buck Converter (LM2576: 12V/24V → 5V, 60V max input)
 
 For complete E-Stop system design, sizing, compliance, and testing guidance, see: **[E-Stop & Safety Considerations](../ESTOP_&_Safety_Considerations.md)**
 
-## Research Folder
+</div>
+
+</details>
+
+<details>
+<summary><strong>KiCAD Workflow Notes</strong></summary>
+
+<div style="margin-left: 20px;">
+
+### ESP32 Module Placement for Net Assignment
+
+**Important:** If a component in the schematic is planned to be replaced with headers/vias on the PCB (like the ESP32-S3 module), it **must still be placed on the PCB first** before deletion to ensure correct net assignments.
+
+**Problem:**
+- Components marked as `(power)` symbols or with `#` prefix in their Reference (e.g., `"#U02"`) are treated as "virtual" components
+- Virtual components are **not placed on the PCB** when using "Update PCB from Schematic"
+- This causes all nets connected to that component's pins to be incorrectly assigned or missing
+
+**Solution Workflow:**
+1. **Remove virtual component markers** from the schematic:
+   - Remove `(power)` attribute from the symbol definition in the schematic
+   - Remove `#` prefix from the Reference property (e.g., change `"#U02"` to `"U02"`)
+2. **Update PCB from Schematic** (Tools → Update PCB from Schematic, or F8)
+   - The component will now appear in the PCB with correct net assignments
+3. **Delete the component from the PCB** after nets are assigned
+   - Replace with headers, vias, or other footprints as needed
+   - The net connections will remain correct
+
+**Why This Matters:**
+- KiCAD uses the component's footprint and pin assignments to create the netlist
+- Without the component on the PCB, nets connected to its pins cannot be properly assigned
+- This causes cascading net assignment errors throughout the board
+
+**Example:** The ESP32-S3 module (U2) was initially marked as virtual (`#U02` + `(power)` attribute) because it was planned to be replaced with headers. However, this prevented proper net assignment for all ESP32-connected signals (GPIO pins, power, ground, etc.). The component must be placed first, then deleted after net assignment is complete.
+
+**Current Component Reference Assignments:**
+- **U1** - LM2576HVS-5 (Buck converter)
+- **U2** - ESP32-S3 (MCU interface)
+- **U3** - LAN8720A (Ethernet PHY)
+- **U4** - ADM3057E (CAN transceiver)
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>Next Steps (v2.0 Features)</strong></summary>
+
+<div style="margin-left: 20px;">
+
+The following features are planned for Universal Shield v2.0:
+
+### UART Debug Breakout (4-pin header)
+- **Purpose:** Serial debug interface for low-level debugging, firmware programming, and module interfacing
+- **Pinout:**
+  - Pin 1: GND (Ground)
+  - Pin 2: +3.3V (Power supply for debug modules)
+  - Pin 3: U0TXD (GPIO43, UART0 TX - serial transmit)
+  - Pin 4: U0RXD (GPIO44, UART0 RX - serial receive)
+- **Implementation:** Add 4-pin header (2.54mm pitch) with proper labeling
+- **Use cases:** Serial debug console, firmware programming, UART-based module interfacing (Bluetooth, WiFi, GPS, LoRa, RFID, barcode scanners, etc.)
+
+### DIP Switch Child Power Toggling
+- **Purpose:** Manual control of 5V power output on each aux port to enable/disable power to child devices
+- **Implementation:** Add one DIP switch per aux port (8 total) in series with the 5V trace to pin 4
+- **Benefits:**
+  - Prevents parallel power supply issues when connecting LBUS-to-LBUS (turn off 5V on child LBUS)
+  - Power management: Only power child devices that need it
+  - Troubleshooting: Isolate power issues per port
+  - Flexible installations: Mix powered and unpowered child devices
+- **Cost impact:** ~$0.10-0.50 per switch (8 switches total)
+- **Labeling:** Each switch labeled (e.g., "J1 5V", "J2 5V", etc.)
+
+### Personality Adapters (ESP32 WROOM, Arduino, STM32)
+- **Purpose:** Enable Universal Shield to support multiple MCU platforms beyond the native ESP32-S3
+- **Required adapters:**
+  - **ESP32-WROOM-32** - Direct pin mapping (native ADC/PWM, no level shifters needed)
+  - **Arduino Uno/Mega** - Requires 5V→3.3V regulator (AMS1117-3.3) and 6× TXS0108E level shifters for GPIO compatibility
+  - **STM32 (Black Pill, Nucleo, etc.)** - Direct pin mapping (native ADC/PWM, no level shifters needed)
+- **Implementation:** Design adapter PCBs that plug into the parent ECU socket, mapping each MCU's pinout to the Universal Shield's standard interface
+- **Benefits:**
+  - Platform flexibility: Choose the MCU that best fits your application
+  - Cost optimization: Use lower-cost MCUs when full ESP32-S3 capabilities aren't needed
+  - Developer familiarity: Use existing toolchains and libraries for each platform
+  - Future-proofing: Upgrade individual components without replacing entire systems
+- **Design considerations:**
+  - Power regulation (Arduino needs 5V→3.3V conversion)
+  - Level shifting (Arduino operates at 5V, shield expects 3.3V logic)
+  - Pin mapping: Match MCU GPIO to shield's ADC/PWM/Ethernet/CAN interfaces
+  - Form factor: Adapter must fit within enclosure constraints
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>Research Folder</strong></summary>
+
+<div style="margin-left: 20px;">
 
 PCB R&D, analysis documents, and troubleshooting guides are in the `Research/` subfolder:
 - Power architecture analysis and options
@@ -481,3 +825,7 @@ PCB R&D, analysis documents, and troubleshooting guides are in the `Research/` s
 - KiCAD setup and troubleshooting
 - CAN bus wiring and connector research
 - Connector selection guides
+
+</div>
+
+</details>

@@ -85,12 +85,26 @@ All examples support multiple platforms. The main examples work on all platforms
 |----------|----------|--------------|-------|
 | **ESP32** | ✅ Built-in | All examples | Full support, recommended |
 | **ESP8266** | ✅ Built-in | All examples | Limited GPIO pins, adjust pin assignments |
+| **ESP32-C3 (Pico-Click)** | ✅ Built-in | All examples | **v2.0:** Will replace ESP8266 as default for wireless buttons in clothing/props |
 | **Arduino + WiFi Shield** | ✅ Via shield | All examples | Adjust GPIO pins, use shield library |
 | **STM32 + WiFi Module** | ✅ Via module | All examples | Adjust GPIO pins, use module library |
 | **Raspberry Pi** | ✅ Built-in | All examples | Adjust GPIO pins, use Linux sockets |
 | **Jetson Nano** | ✅ Built-in | All examples | Adjust GPIO pins, use Linux sockets |
 
 **Note:** All examples are platform-agnostic. Adjust GPIO pin assignments in the Configuration section to match your hardware. See comments in each example for platform-specific pin recommendations.
+
+### **v2.0 Platform Migration: Pico-Click C3**
+
+**Planned for v2.0:** The open-source [Pico-Click C3](https://github.com/pico-click) project (ESP32-C3 based) will be integrated as the default platform for hidden embedded wireless buttons in clothing and props, replacing the current ESP8266-based implementation.
+
+**Advantages of ESP32-C3 over ESP8266:**
+- **Performance:** 160 MHz RISC-V processor (vs. 80 MHz on ESP8266)
+- **Connectivity:** Dual WiFi + Bluetooth 5.0 (vs. WiFi-only on ESP8266)
+- **Power Efficiency:** 5 µA deep sleep (vs. 20 µA on ESP8266) - critical for battery-powered costume buttons
+- **Memory:** 400 KB SRAM (vs. limited SRAM on ESP8266)
+- **Form Factor:** Pico-Click C3 provides optimized form factor for embedding in clothing and props
+
+Current ESP8266 examples will be migrated to Pico-Click C3 in v2.0. See main roadmap for details.
 
 ---
 

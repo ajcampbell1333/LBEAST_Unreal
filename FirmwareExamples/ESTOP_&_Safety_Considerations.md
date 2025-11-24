@@ -250,6 +250,11 @@ A contactor is an electrically-controlled switch designed to handle high current
 
 ## Standards Compliance
 
+**⚠️ Important Note on Regulatory Readiness:**
+This safety document is **by no means a comprehensive reference on regulatory readiness**. Local officials and regulatory bodies may require any number of additional standards beyond those listed here, in addition to IPC standards. Always consult with qualified electrical engineers, safety consultants, and local regulatory authorities to ensure full compliance with all applicable standards in your jurisdiction.
+
+**Referenced Standards:**
+- **IPC-2221** (Generic Standard on Printed Board Design): Defines PCB design requirements including trace width, conductor spacing, thermal management, and material selection. For detailed IPC-2221 trace width and clearance calculators, see: [Using an IPC-2221 Calculator for High Voltage Design](https://resources.altium.com/p/using-an-ipc-2221-calculator-for-high-voltage-design)
 - **IEC 60204-1** (Safety of machinery - Electrical equipment): Requires E-Stop systems to be Category 0 (immediate removal of power) or Category 1 (controlled stop then power removal). High-side switching is mandatory.
 - **NFPA 79** (Electrical Standard for Industrial Machinery): Requires E-Stop circuits to be "fail-safe" (any single fault does not prevent E-Stop function). High-side switching with positive-opening contacts required.
 - **OSHA 29 CFR 1910** (General Industry): Requires emergency stop devices on machinery where employee exposure to hazards exists.
@@ -318,7 +323,151 @@ A contactor is an electrically-controlled switch designed to handle high current
 - **E-Stop switch doesn't latch:** Replace switch (mechanical failure)
 - **Excessive voltage drop:** Check contactor contacts for pitting/corrosion, verify proper sizing
 
+## PCB Power Trace Design (Universal Shield)
+
+### 5V Power Rail to Aux Ports
+
+**Configuration:**
+- **Total capacity:** 4A across 8 aux ports (≥0.5A per port)
+- **Distribution:** Single trace to all 8 aux ports
+- **Trace width:** 1.2mm (1oz copper, 20°C temperature rise)
+- **Copper weight:** 1oz (35µm) standard
+- **Temperature rise:** 20°C (acceptable for this application)
+
+**Design Rationale:**
+
+1. **Single Trace Configuration:**
+   - Simplified routing (single trace along board edge)
+   - 4A capacity only reached in worst-case scenario (all 8 aux ports with ESP32-S3 at 100% duty cycle)
+   - Realistic installations operate well below maximum capacity
+   - Single trace is sufficient given actual load expectations
+
+2. **Trace Width Selection:**
+   - **1.2mm width:** Handles 4A with ~20°C rise (1oz copper, IPC-2221 standards)
+   - Based on worst-case scenario (all 8 ports at maximum load)
+   - Provides adequate margin for typical operation
+
+3. **Temperature Rise Acceptance (20°C):**
+   - 20°C rise is warm but not dangerous for PCB operation
+   - 4A load only occurs if all 8 aux ports have ESP32-S3 pulling 100% duty cycle simultaneously
+   - Realistic load expectations: extremely unlikely that any installation will operate at maximum capacity
+   - Typical installations will operate at 20-50% of maximum capacity, resulting in <10°C rise
+   - Integrated fan (optional MCU cooling fan) will provide airflow across entire board, wicking away heat
+
+4. **Routing Strategy:**
+   - 5V power trace routed along board edge
+   - Takes priority over data I/O traces (power is critical path)
+   - No vias required (single-layer routing)
+   - Edge routing provides better heat dissipation (exposed to air/airflow)
+
+**Current Capacity Verification:**
+- **Maximum theoretical load:** 8× ESP32-S3 at full WiFi (200mA each) = 1.6A
+- **Worst-case design load:** 8× ESP32-S3 at 100% duty cycle (500mA each) = 4A
+- **Typical installation load:** 8× ESP32-S3 typical (80-120mA each) = 0.64-0.96A
+- **Design capacity:** 4A (worst-case scenario, 4-6× safety margin over typical load)
+- **Actual temperature rise at typical load:** <5°C (well within acceptable range)
+
+**Fan Cooling Consideration:**
+- Optional MCU cooling fan (40mm, 12/24V PWM) provides airflow across entire board
+- Fan airflow will significantly reduce temperature rise of power traces
+- Even at maximum load (4A), fan cooling should keep temperature rise well below 20°C
+
+**Future Expansion:**
+- If higher current capacity needed, can increase trace width to 1.2mm or upgrade to 2oz copper
+- 2oz copper would allow 0.4-0.6mm trace width for same current capacity
+- Current design provides significant headroom for future expansion
+
+### Overcurrent Protection
+
+**Fuse Protection (v1.0):**
+- **4A fuse** installed on 5V aux power bus (protects all 8 aux ports)
+- Fuse rating matches maximum design capacity (4A total)
+- Protects against:
+  - Excessive current draw from misbehaving devices
+  - Short circuits in cables or connectors
+  - Reverse current from miswired devices
+- Fuse will trip if total current exceeds 4A, protecting PCB traces and buck converter
+
+**Fuse Selection:**
+- Fast-blow or slow-blow fuse acceptable (fast-blow provides better protection)
+- Fuse should be rated for 5V DC operation
+- Consider resettable fuse (polyfuse) for easier maintenance in field installations
+
+### Power over Ethernet (PoE) Compatibility
+
+**Standard PoE Devices:**
+- **Standard PoE (IEEE 802.3af/at/bt) devices are NOT compatible** with Universal Shield aux ports
+- Standard PoE requires:
+  - 48V power (Universal Shield provides 5V)
+  - PoE handshake/negotiation protocol (not implemented)
+  - PoE controller chip (not present on Universal Shield)
+- Standard PoE devices will not activate on 5V supply (safe, but won't work)
+
+**Raspberry Pi and Jetson Nano:**
+- **Standard devices (without PoE HATs) are SAFE** to connect
+- Pins 4&5 are not connected internally on standard Ethernet jacks
+- 5V power on pins 4&5 is safely ignored (no current flow, no damage)
+- Standard devices will function normally via Ethernet (pins 1-3, 6)
+
+**PoE HATs/Add-on Boards:**
+- **PoE HATs are NOT supported and may be damaged**
+- PoE HATs connect pins 4&5 to PoE controller chips
+- PoE controllers expect 48V, not 5V
+- Applying 5V to PoE controller may cause damage or malfunction
+- **Do not use Raspberry Pi PoE HATs or Jetson PoE add-on boards on aux ports**
+
+**Recommendations:**
+- Document clearly that pins 4&5 provide 5V power, not PoE
+- Label aux ports as "5V Power" not "PoE"
+- Verify devices before connecting (check for PoE HATs/add-ons)
+- Use standard Raspberry Pi/Jetson devices without PoE modifications
+
+### Power Capacity and Copper Weight Selection
+
+**Standard Universal Shield (1oz Copper):**
+- **Safe for:** 4 or fewer powered Child ECUs drawing current from aux ports
+- **Maximum safe load:** ~2A total (0.5A per port × 4 ports)
+- **Temperature rise:** <10°C at typical loads, <20°C at maximum safe load
+- **IPC-2221 compliance:** Meets standard for 2A @ 20°C with 1.2mm trace width
+
+**High-Power Universal Shield (2oz Copper):**
+- **Required for:** More than 4 powered Child ECUs drawing current from aux ports
+- **Maximum capacity:** 4A total (0.5A per port × 8 ports)
+- **Temperature rise:** <15-18°C at 4A load with 1.2mm trace width
+- **IPC-2221 compliance:** Exceeds standard for 4A @ 20°C with 1.2mm trace width
+- **Ordering:** Specify "high-power version" or "2oz copper" when ordering PCBs
+
+**Fan Operation Requirements:**
+- **Standard Shield (≤4 powered Child ECUs):** Fan operation optional but recommended
+- **High-Power Shield (>4 powered Child ECUs):** **Fan operation REQUIRED** during operation
+- Fan provides airflow across entire board, significantly reducing temperature rise
+- Fan should be operational whenever more than 4 Child ECUs are drawing power simultaneously
+- Fan failure should be treated as a maintenance issue requiring immediate attention
+
+**Heat Testing Requirements:**
+- **Before deployment:** Test Universal Shield under continuous maximum load with heat mapping sensors
+- **Test conditions:**
+  - All powered aux ports at maximum rated current (0.5A per port)
+  - Continuous operation for minimum 30 minutes
+  - Measure temperature rise at power traces using thermal imaging or thermocouples
+  - Verify temperature rise stays within acceptable limits (<20°C for 1oz, <18°C for 2oz)
+- **Documentation:** Record test results (ambient temperature, measured temperature rise, duration, number of powered ports)
+- **Periodic testing:** Repeat heat testing annually or after any hardware modifications
+
+**Installation Guidelines:**
+- Count total number of Child ECUs that will draw power from aux ports
+- If 4 or fewer: Standard Universal Shield (1oz copper) is sufficient
+- If more than 4: Order High-Power Universal Shield (2oz copper)
+- Ensure MCU cooling fan is installed and operational for High-Power installations
+- Verify fan operation before deploying systems with >4 powered Child ECUs
+
 ## Additional Safety Considerations
+
+- **QTY2 Up-to-code Fire Emergency Fire Extinguishers:** One at the Ops Tech Console and another near any hydraulic equipment.
+- **Movable stairs:** Any system that causes players to be lifted into the air must have a physical means of egress in an e-stop emergency.
+- **Hydraulically-actuated equipment should have multiple manual and auto e-stops** located at console and on device.
+- **Theme park safety regulations vary by state** - take steps to abide by the same rules that apply to carnival equipment in your state.
+- **The author of LBEAST disclaims any liability resulting in the use of this free software.**
 
 - **QTY2 Up-to-code Fire Emergency Fire Extinguishers:** One at the Ops Tech Console and another near any hydraulic equipment.
 - **Movable stairs:** Any system that causes players to be lifted into the air must have a physical means of egress in an e-stop emergency.
