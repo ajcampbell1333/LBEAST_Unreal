@@ -4,7 +4,7 @@
 
 ## Overview
 
-<img src="../../../../../../Visual Reference/LBUS.png" width="100%">
+<img src="../../../Source/images/LBUS.png" width="100%">
 
 **Plug-n-Play Embedded Systems - an Absolute Necessity for Next-Level LBE:**
 
@@ -319,7 +319,8 @@ Buck Converter (LM2576: 12V/24V → 5V, 60V max input)
 **MCU Interface:**
 - **44-pin 2×22 stacking female header** - ESP32-S3 socket/through-hole footprint
 
-**UART Debug Breakout (4-pin header):**
+**UART Debug Breakout (4-pin header):** ✅ **AVAILABLE (v0.1.3)**
+- **Status:** Implemented and available on Universal Shield
 - **Purpose:** Serial debug interface for low-level debugging, firmware programming, and module interfacing
 - **Pinout:**
   - Pin 1: GND (Ground)
@@ -616,6 +617,17 @@ Buck Converter (LM2576: 12V/24V → 5V, 60V max input)
 - Fuse protects against excessive current draw from misbehaving devices or short circuits
 - Fuse rating matches maximum design capacity (4A total across 8 ports)
 
+**Per-Port Power Control (v0.1.3):** ✅ **AVAILABLE**
+- **DIP Switches:** One DIP switch per aux port (8 total) allows manual enable/disable of 5V power output on each port
+- **Backfeed Protection:** Schottky diodes (MBR745) on each aux port's 5V output prevent reverse current flow
+- **Power Path:** Buck converter → DIP switch → Schottky diode → Connector pin 4
+- **Benefits:**
+  - Prevents parallel power supply issues when connecting LBUS-to-LBUS (turn off 5V on child LBUS)
+  - Power management: Only power child devices that need it
+  - Troubleshooting: Isolate power issues per port
+  - Flexible installations: Mix powered and unpowered child devices
+- **Switch Labeling:** Each switch labeled (e.g., "J1 5V", "J2 5V", etc.)
+
 **Power over Ethernet (PoE) Compatibility:**
 - **Standard PoE devices (IEEE 802.3af/at/bt) are NOT compatible** with aux port power
 - Standard PoE requires 48V and handshake protocol (not provided by Universal Shield)
@@ -770,27 +782,6 @@ For complete E-Stop system design, sizing, compliance, and testing guidance, see
 <div style="margin-left: 20px;">
 
 The following features are planned for Universal Shield v2.0:
-
-### UART Debug Breakout (4-pin header)
-- **Purpose:** Serial debug interface for low-level debugging, firmware programming, and module interfacing
-- **Pinout:**
-  - Pin 1: GND (Ground)
-  - Pin 2: +3.3V (Power supply for debug modules)
-  - Pin 3: U0TXD (GPIO43, UART0 TX - serial transmit)
-  - Pin 4: U0RXD (GPIO44, UART0 RX - serial receive)
-- **Implementation:** Add 4-pin header (2.54mm pitch) with proper labeling
-- **Use cases:** Serial debug console, firmware programming, UART-based module interfacing (Bluetooth, WiFi, GPS, LoRa, RFID, barcode scanners, etc.)
-
-### DIP Switch Child Power Toggling
-- **Purpose:** Manual control of 5V power output on each aux port to enable/disable power to child devices
-- **Implementation:** Add one DIP switch per aux port (8 total) in series with the 5V trace to pin 4
-- **Benefits:**
-  - Prevents parallel power supply issues when connecting LBUS-to-LBUS (turn off 5V on child LBUS)
-  - Power management: Only power child devices that need it
-  - Troubleshooting: Isolate power issues per port
-  - Flexible installations: Mix powered and unpowered child devices
-- **Cost impact:** ~$0.10-0.50 per switch (8 switches total)
-- **Labeling:** Each switch labeled (e.g., "J1 5V", "J2 5V", etc.)
 
 ### Personality Adapters (ESP32 WROOM, Arduino, STM32)
 - **Purpose:** Enable Universal Shield to support multiple MCU platforms beyond the native ESP32-S3
