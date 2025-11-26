@@ -28,6 +28,14 @@
  * - Raspberry Pi (built-in WiFi/Ethernet) - GPIO via WiringPi or pigpio
  * - Jetson Nano (built-in WiFi/Ethernet) - GPIO via Jetson GPIO library
  * 
+ * **Recommended Hardware: LBEAST Child Shield (LBCS)**
+ * This firmware is configured for the LBEAST Child Shield (LBCS) by default:
+ * - Ethernet PHY: LAN8720A with MDC=GPIO17, MDIO=GPIO18
+ * - Solenoid PWM pins: GPIO5, 27, 19, 21, 22, 23, 25, 26 (GPIO18 replaced with GPIO27)
+ * - Temperature ADC pins: GPIO32 (driver), GPIO33, 34, 1, 6, 7, 8, 9, 14 (GPIO35-39 replaced)
+ * - Button pins: GPIO2, GPIO4 (available on Child Shield breakout)
+ * For other ESP32-Ethernet boards, adjust pin definitions in the configuration section below.
+ * 
  * Communication Modes:
  * - Wired Ethernet (recommended): Lower latency, more reliable for child ECU → parent ECU
  *   * Set COMMUNICATION_MODE = COMM_MODE_ETHERNET
@@ -99,17 +107,21 @@ const char* password = "your_password_here";
 // Pin configuration (adjust for your board/PHY module):
 #if defined(ESP32) && COMMUNICATION_MODE == COMM_MODE_ETHERNET
   #include <ETH.h>
-  // LAN8720 PHY configuration (most common)
-  // Adjust these pins based on your board layout:
+  // LAN8720 PHY configuration for LBEAST Child Shield
+  // Child Shield uses: MDC=GPIO17, MDIO=GPIO18, no PHY power pin
   #define ETH_PHY_ADDR 0        // PHY address (usually 0 or 1)
-  #define ETH_PHY_POWER 16       // Power pin (if your board has one, else -1)
-  #define ETH_PHY_MDC 23         // MDC pin (Management Data Clock)
-  #define ETH_PHY_MDIO 18        // MDIO pin (Management Data I/O)
+  #define ETH_PHY_POWER -1       // No PHY power pin on Child Shield (was GPIO16 on generic boards)
+  #define ETH_PHY_MDC 17         // MDC pin (Management Data Clock) - Child Shield uses GPIO17 (was GPIO23)
+  #define ETH_PHY_MDIO 18        // MDIO pin (Management Data I/O) - Child Shield uses GPIO18
   #define ETH_PHY_TYPE ETH_PHY_LAN8720  // PHY chip type
   #define ETH_CLK_MODE ETH_CLOCK_GPIO17_OUT  // Clock mode (GPIO17 for LAN8720)
   
   // For other PHY modules, adjust ETH_PHY_TYPE:
   // ETH_PHY_TLK110, ETH_PHY_DP83848, ETH_PHY_RTL8201
+  //
+  // NOTE: For generic ESP32-Ethernet boards (not Child Shield), you may need:
+  // #define ETH_PHY_MDC 23
+  // #define ETH_PHY_POWER 16
 #endif
 
   // Parent ECU (GunshipExperience_ECU) IP address (for reporting telemetry)
@@ -122,10 +134,19 @@ const uint8_t STATION_ID = 0;  // Change this: 0, 1, 2, or 3 for each gun statio
 // =====================================
 // Hardware Pin Configuration
 // =====================================
+//
+// **LBEAST Child Shield (LBCS) Pin Mapping:**
+// This firmware is configured for the LBEAST Child Shield by default.
+// All pins are available on the Child Shield's breakout headers except:
+// - Ethernet pins: GPIO17 (MDC), GPIO18 (MDIO), GPIO20 (TXEN), GPIO35-39 (RMII data)
+// - UART pins: GPIO43 (U0TXD), GPIO44 (U0RXD)
+// - Power/EN pins: GPIO3 (EN), VIN, GND
+//
+// For other ESP32-Ethernet boards, adjust pin definitions below.
 
 // Dual thumb buttons
-const uint8_t BUTTON_0_PIN = 2;  // Left thumb button (GPIO with INPUT_PULLUP)
-const uint8_t BUTTON_1_PIN = 4;  // Right thumb button (GPIO with INPUT_PULLUP)
+const uint8_t BUTTON_0_PIN = 2;  // Left thumb button (GPIO with INPUT_PULLUP) - Available on Child Shield breakout
+const uint8_t BUTTON_1_PIN = 4;  // Right thumb button (GPIO with INPUT_PULLUP) - Available on Child Shield breakout
 
 // Solenoid configuration (N solenoids, configurable)
 const uint8_t MAX_SOLENOIDS = 8;  // Maximum supported solenoids (limited by GPIO)
@@ -133,12 +154,16 @@ uint8_t numSolenoids = 2;  // Default: 2 solenoids (dual redundancy)
 
 // Solenoid driver pins (one GPIO enable per solenoid if using separate drivers)
 // For shared driver with relay/multiplexer, use different pin mapping
-uint8_t solenoidEnablePins[MAX_SOLENOIDS] = {5, 18, 19, 21, 22, 23, 25, 26};  // ESP32 GPIO pins
-uint8_t solenoidPWMPins[MAX_SOLENOIDS] = {5, 18, 19, 21, 22, 23, 25, 26};     // PWM-capable pins
+// NOTE: GPIO18 is used for Ethernet MDIO on Child Shield, so it's replaced with GPIO27
+// Child Shield breakout available pins: GPIO5, 19, 21, 22, 23, 25, 26, 27, 40, 41, 42, etc.
+uint8_t solenoidEnablePins[MAX_SOLENOIDS] = {5, 27, 19, 21, 22, 23, 25, 26};  // ESP32 GPIO pins (GPIO18→GPIO27 for Child Shield)
+uint8_t solenoidPWMPins[MAX_SOLENOIDS] = {5, 27, 19, 21, 22, 23, 25, 26};     // PWM-capable pins (GPIO18→GPIO27 for Child Shield)
 
 // NTC thermistor pins (one per solenoid + one for driver module)
+// NOTE: GPIO35-39 are used for Ethernet on Child Shield (RXD0, RXD1, TXD1, CRS_DV, TXD0)
+// Child Shield breakout available ADC pins: GPIO1, 4, 5, 6, 7, 8, 9, 10, 14, 32, 33, 34
 const uint8_t DRIVER_TEMP_PIN = 32;  // ADC pin for driver module temperature
-uint8_t solenoidTempPins[MAX_SOLENOIDS] = {33, 34, 35, 36, 37, 38, 39, 14};  // ADC pins for solenoid temperatures
+uint8_t solenoidTempPins[MAX_SOLENOIDS] = {33, 34, 1, 6, 7, 8, 9, 14};  // ADC pins (GPIO35-39→GPIO1,6,7,8,9 for Child Shield)
 
 // PWM configuration
 const uint16_t PWM_FREQUENCY = 1000;  // 1 kHz PWM frequency

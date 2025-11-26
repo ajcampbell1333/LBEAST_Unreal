@@ -6,6 +6,53 @@ These examples demonstrate how to control a complete 4DOF motion platform system
 - **Scissor Lift:** Electric lift for vertical translation (TranslationZ) and forward/reverse (TranslationY)
 - **Actuator System:** 4-gang hydraulic actuators for pitch and roll only (yaw restricted)
 
+**Gunship Rig Chassis:** The "Gunship Rig chassis" referenced throughout this document is a **modified scissor lift** with the railed ground removed and replaced by a **custom actuating tilt frame** with 4 seats attached at its corners. The scissor lift provides vertical translation and forward/reverse movement, while the custom tilt frame (driven by 4 hydraulic actuators) provides pitch and roll motion for the seated players.
+
+---
+
+## 🎯 Recommended Default Hardware Configuration
+
+**The recommended default hardware deployment for GunshipExperience is:**
+
+- **1× LBUS (LBEAST Universal Shield)** - Parent ECU mounted on the motion platform chassis
+  - Hosts ESP32-S3 motherboard ECU
+  - Controls scissor lift and actuator system directly
+  - Aggregates telemetry from 4× child ECUs
+  - Connects to game server via wireless network adapter
+  
+- **4× Child Shields (LBCS)** - One per player station, embedded in each player's gun
+  - Each hosts its own ESP32-S3 child ECU
+  - Controls dual thumb buttons and N× solenoid kickers
+  - Monitors solenoid temperatures and thermal management
+  - Reports telemetry to parent ECU at 10-30 Hz
+  
+- **Network Architecture:**
+  - **Wired Ethernet (PoE):** 4× Child Shields connect to LBUS via Ethernet cables routed through the Gunship Rig chassis
+  - LBUS provides 5V power to all 4× Child Shields via PoE (pins 4&5) with DIP switch control per port
+  - **Wireless:** LBUS connects to game server's router via wireless network adapter (USB WiFi dongle or built-in ESP32 WiFi)
+  
+- **Power Architecture:**
+  - **DC Power:** All 5 units (1× LBUS + 4× Child Shields) powered by the Rig's onboard 24V LiFePO4 battery pack
+  - LBUS receives 24V via barrel jack, converts to 5V for aux ports and 3.3V for logic
+  - Child Shields receive 5V via PoE from LBUS (no local power required)
+  - Solenoid drivers on each gun receive 24V from Rig's battery pack (separate from shield power)
+  - **⚠️ Safety Requirement:** Power cable from battery to LBUS must be a **coiled stretch cable** to support the 3-5ft. max height limit of the scissor lift
+  - **⚠️ Safety Requirement:** A **rip cord** must be calibrated shorter than the full extension of the power cable and wired into the E-STOP circuit. If software attempts to send the lift too high, the rip cord will activate E-STOP before the cable reaches full extension, preventing damage to the power connection
+
+**Benefits of this configuration:**
+- ✅ **Single power source:** All ECUs powered from Rig's battery pack
+- ✅ **Wired reliability:** Low-latency Ethernet communication (< 1 ms) between parent and child ECUs
+- ✅ **Modular design:** Each gun is a self-contained unit with embedded ECU
+- ✅ **Power management:** DIP switches allow per-port power control for troubleshooting
+- ✅ **Cost-effective:** Standard Ethernet cables and connectors, no custom harnesses
+- ✅ **Scalable:** Easy to add/remove gun stations by connecting/disconnecting Ethernet cables
+
+**Firmware Compatibility:**
+- `GunshipExperience_ECU.ino` → Flashes to LBUS (parent ECU)
+- `Gun_ECU.ino` → Flashes to each Child Shield (child ECU, 4× instances with different STATION_ID)
+
+**Note:** Firmware pin mappings must be configured for Child Shield's Ethernet PHY pins (see firmware configuration section below).
+
 ---
 
 ## 📁 Examples
@@ -106,15 +153,116 @@ If you only need one subsystem:
 
 ---
 
+## ✅ Installation Checklist
+
+**Use this checklist to ensure all critical configuration steps are completed before deployment:**
+
+### **Parent ECU (LBUS - GunshipExperience_ECU)**
+
+- [ ] **WiFi Credentials:** Configure `ssid` and `password` in `GunshipExperience_ECU.ino` to match your network
+- [ ] **Game Server IP:** Set `unrealIP` (or Unity server IP) to the correct address
+- [ ] **Hardware Pins:** Verify all GPIO pin assignments match your LBUS configuration (scissor lift, actuators)
+- [ ] **Power Supply:** Connect 24V LiFePO4 battery pack via barrel jack
+- [ ] **Coiled Power Cable:** Ensure power cable from battery to LBUS is a coiled stretch cable for lift extension
+- [ ] **Rip Cord:** Install and calibrate rip cord shorter than full cable extension, wired into E-STOP circuit
+- [ ] **Ethernet Ports:** Verify all 4 aux ports are ready for Child Shield connections
+- [ ] **DIP Switches:** Configure per-port power control (enable 5V on ports connected to Child Shields)
+- [ ] **Upload Firmware:** Flash `GunshipExperience_ECU.ino` to LBUS ESP32-S3
+
+### **Child ECUs (4× Child Shields - Gun_ECU)**
+
+- [ ] **Station ID Configuration (CRITICAL):** Each Child Shield must have a unique `STATION_ID`:
+  - [ ] Station 0: Set `const uint8_t STATION_ID = 0;` in `Gun_ECU.ino` → Flash to first Child Shield
+  - [ ] Station 1: Set `const uint8_t STATION_ID = 1;` in `Gun_ECU.ino` → Flash to second Child Shield
+  - [ ] Station 2: Set `const uint8_t STATION_ID = 2;` in `Gun_ECU.ino` → Flash to third Child Shield
+  - [ ] Station 3: Set `const uint8_t STATION_ID = 3;` in `Gun_ECU.ino` → Flash to fourth Child Shield
+  - ⚠️ **Warning:** Duplicate station IDs will cause telemetry conflicts and incorrect button/fire command routing
+- [ ] **Parent ECU IP:** Set `parentECU_IP` in `Gun_ECU.ino` to match LBUS's IP address (or use DHCP discovery)
+- [ ] **Communication Mode:** Verify `COMMUNICATION_MODE = COMM_MODE_ETHERNET` (not WiFi)
+- [ ] **Ethernet Pin Configuration:** Confirm Ethernet pins match Child Shield (MDC=GPIO17, MDIO=GPIO18, POWER=-1)
+- [ ] **Solenoid Pin Mapping:** Verify solenoid PWM pins are correct for Child Shield breakout (GPIO5, 27, 19, 21, 22, 23, 25, 26)
+- [ ] **Temperature Sensor Pins:** Verify ADC pins are correct for Child Shield breakout (GPIO32, 33, 34, 1, 6, 7, 8, 9, 14)
+- [ ] **Button Pins:** Verify button pins (GPIO2, GPIO4) are connected to physical buttons
+- [ ] **Ethernet Cables:** Route Ethernet cables from each Child Shield to LBUS aux ports (J1-J4) through Rig chassis
+- [ ] **Power via PoE:** Verify 5V power is enabled on corresponding LBUS aux port DIP switches
+- [ ] **24V Solenoid Power:** Connect 24V power to solenoid drivers (separate from Child Shield 5V power)
+- [ ] **Upload Firmware:** Flash `Gun_ECU.ino` to each Child Shield ESP32-S3 with correct `STATION_ID`
+
+### **Network Configuration**
+
+- [ ] **LBUS WiFi Connection:** Verify LBUS connects to game server's router via wireless adapter
+- [ ] **Ethernet Star Topology:** Verify all 4 Child Shields connect to LBUS via Ethernet (not daisy-chained)
+- [ ] **IP Address Assignment:** Configure static IPs or verify DHCP assignment for all ECUs
+- [ ] **Port Configuration:** Verify UDP ports match firmware defaults:
+  - Parent ECU RX: Port 8888 (from game engine)
+  - Parent ECU TX: Port 8892 (receives from child ECUs)
+  - Child ECU TX: Ports 8888-8891 (one per station, sends to parent)
+  - Child ECU RX: Port 8892 (receives from parent)
+
+### **Hardware Integration**
+
+- [ ] **Scissor Lift:** Connect motor control, position sensors, and limit switches to LBUS
+- [ ] **Actuator System:** Connect 4× hydraulic actuator valve drivers and position sensors to LBUS
+- [ ] **Gun Buttons:** Connect dual thumb buttons to each Child Shield (GPIO2, GPIO4)
+- [ ] **Solenoid Drivers:** Connect Pololu G2 drivers to Child Shield PWM pins and 24V power
+- [ ] **Temperature Sensors:** Connect NTC thermistors to Child Shield ADC pins (one per solenoid + driver module)
+- [ ] **SteamVR Trackers:** Mount and configure trackers on each gun (or relay pose from parent ECU)
+
+### **Safety & Testing**
+
+- [ ] **E-STOP Circuit:** Verify E-STOP is wired correctly and tested
+- [ ] **Rip Cord:** Test rip cord activation at maximum safe lift height
+- [ ] **Power Limits:** Verify 4A fuse on LBUS aux power bus is installed
+- [ ] **Thermal Management:** Verify temperature sensors are reading correctly (check Serial output)
+- [ ] **Network Connectivity:** Test Ethernet connection between each Child Shield and LBUS
+- [ ] **Telemetry Flow:** Verify child ECUs are sending telemetry to parent ECU (check Serial output)
+- [ ] **Button Response:** Test button presses on each gun and verify they appear in parent ECU telemetry
+- [ ] **Fire Commands:** Test fire commands from game engine and verify solenoids activate
+- [ ] **Motion Platform:** Test scissor lift and actuator system independently before full integration
+
+### **Post-Installation Verification**
+
+- [ ] **Serial Monitor:** Monitor Serial output from all 5 ECUs to verify communication
+- [ ] **Game Engine Connection:** Verify LBUS receives motion commands from game engine
+- [ ] **Button Events:** Verify button presses from all 4 guns appear in game engine
+- [ ] **Fire Commands:** Verify fire commands from game engine activate correct solenoids
+- [ ] **Telemetry Display:** Verify gun telemetry (temperatures, fire state) appears in game engine console
+- [ ] **Motion Response:** Verify motion platform responds correctly to game engine commands
+
+**Common Oversights:**
+- ❌ Forgetting to set unique `STATION_ID` for each Child Shield (causes telemetry conflicts)
+- ❌ Not enabling 5V power on LBUS aux port DIP switches (Child Shields won't power on)
+- ❌ Incorrect parent ECU IP address in Child Shield firmware (no telemetry flow)
+- ❌ Ethernet cables not using all 8 wires (PoE won't work with 4-wire cables)
+- ❌ Not calibrating rip cord length (safety risk if lift extends too high)
+
+---
+
 ## 🔌 Hardware Setup
 
-### **Scissor Lift**
+### **Vertical Lift Platform Options**
 
-The scissor lift controller supports **two modes**:
+**⚠️ Warranty & Liability Warning:**
+- **Using industrial equipment (scissor lifts, pallet stackers, etc.) for VR motion platforms voids all manufacturer warranties.**
+- **Manufacturers do not support or endorse using their equipment in this manner.**
+- **Modifications (removing forks, adding tilt chassis, bypassing safety interlocks) are done at your own risk.**
+- **You are solely responsible for safety, regulatory compliance, and liability.**
+- **Always consult qualified engineers and follow local regulations for amusement ride/theme park equipment.**
 
-#### **CAN Bus Mode (Recommended for Genie/Skyjack Lifts)**
+**Platform Options:**
+- **Scissor Lifts** (Genie, Skyjack, etc.) - $8K+ used, 10-15ft lift height, designed for personnel platforms
+- **Electric Pallet Stackers** - $2-5K new, 6-10ft lift height, 2500lb+ capacity, built-in forward/reverse drive
+- Both require CAN bus reverse-engineering or direct GPIO control
+- Both require structural modifications (removing forks/rails, adding tilt chassis)
+- Both have safety interlocks that may need to be satisfied or bypassed
 
-For manufacturer ECUs with CAN bus interfaces (e.g., Genie, Skyjack):
+### **Scissor Lift / Pallet Stacker Control**
+
+The lift controller supports **two modes**:
+
+#### **CAN Bus Mode (Recommended for Manufacturer ECUs)**
+
+For manufacturer ECUs with CAN bus interfaces (e.g., Genie/Skyjack scissor lifts, Crown/Raymond pallet stackers):
 
 ```
 ESP32 CAN TX (GPIO 4) ──[CAN Transceiver]── Lift ECU CAN High
@@ -133,7 +281,14 @@ config.canIdControl = 0x200;              // E-stop and control commands
 config.canIdFeedback = 0x280;             // Position feedback (if available)
 ```
 
-**Important:** Configure CAN IDs to match your manufacturer's ECU protocol. Refer to your lift's CAN bus documentation for correct CAN IDs and message formats.
+**Important:** Configure CAN IDs to match your manufacturer's ECU protocol. Refer to your lift/stacker's CAN bus documentation for correct CAN IDs and message formats.
+
+**⚠️ Pallet Stacker Considerations:**
+- **Safety Interlocks:** Most pallet stackers require operator presence detection (weight sensor, handle grip, seat switch). These may need to be satisfied or bypassed for automated control.
+- **Speed:** Pallet stackers are typically slower than scissor lifts (0.1-0.2 m/s vs. 0.3-0.5 m/s lift speed). Verify this meets your motion platform requirements.
+- **Form Factor:** Pallet stackers are narrower (24-30" vs. 36-48" for scissor lifts). Ensure tilt chassis and 4-seat mounting is structurally sound after fork removal.
+- **Height Range:** Verify lift height (typically 6-10ft) meets your vertical travel requirements.
+- **Forward/Reverse:** Built-in drive motors eliminate need for separate forward/reverse motor, but speeds are typically slower (2-4 mph vs. 5-8 mph for scissor lifts).
 
 #### **Direct GPIO Mode (Custom Builds)**
 
@@ -384,6 +539,7 @@ All examples include:
 - ✅ **Safety Checks:** Continuous monitoring of limits during motion
 - ✅ **E-Stop Smoothing:** Gradual deceleration when emergency stop is activated
 - ✅ **Auto-Calibrate Mode:** Automatic return to neutral after timeout (configurable)
+- ⚠️ **Rip Cord Safety:** Power cable from battery to LBUS must use a coiled stretch cable to support lift extension. A rip cord must be calibrated shorter than the full cable extension and wired into the E-STOP circuit. If software attempts to send the lift too high, the rip cord activates E-STOP before the cable reaches full extension, preventing damage to the power connection.
 
 ---
 

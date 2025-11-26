@@ -1,106 +1,151 @@
-# LBEAST Universal Shield
+# LBEAST Child Shield
 
-**Also known as:** LBUS, Uni-Shield
+**Also known as:** LBCS
 
 ## Overview
 
-<img src="../../../Source/images/LBUS.png" width="100%">
+<img src="../../../Source/images/child-shield.png" width="100%">
 
-**Plug-n-Play Embedded Systems - an Absolute Necessity for Next-Level LBE:**
+The Child Shield is a simplified derivative of the Universal Shield (LBUS). It keeps the same ESP32-S3 parent ECU pin map and Ethernet PHY but reduces the aux bus to **one** RJ45 port and drops CAN entirely. The goal is to provide a tiny, inexpensive parent/child hybrid board for installations that only need a single downstream device or a dedicated “mini LBUS” inside a prop or remote enclosure.
 
-The LBEAST Universal Shield ("LBUS" or "Uni-Shield") is a multi-platform ECU that provides unified connectivity and control for all LBEAST firmware applications. But what is it for? What does it do? ECU? What the heck is even that?
+**Current design goals:**
+- 1× RJ45 (Ethernet only). No CAN, no extra ADC/PWM breakouts.
+- Powered either from the parent LBUS via the PoE/DIP/diode rail **or** from a local USB‑C Li‑ion pack (5 V input only).
+- No onboard buck converter, reverse-polarity MOSFET, or fan header—the board expects regulated 5 V and relies on passive cooling.
+- Keep the ESP32-S3 personality-adapter footprint for firmware parity with LBUS.
+- Target the smallest possible PCB outline for costume props, handheld gadgets, and wireless sensor clusters.
+
+> Until this document is fleshed out, refer to the [Universal Shield README](../LBEAST_Universal_Shield/README.md) for fully documented schematics, BOM, and power notes. The Child Shield uses that design as its baseline.
+
+---
+
+## Documentation Template (to be completed)
+
+The sections below intentionally keep the same structure as the Universal Shield README. Each section contains a short note describing what still needs to be written for the Child Shield variant.
 
 <details>
 <summary><strong>Electronic Control Unit (ECU)</strong></summary>
 
 <div style="margin-left: 20px;">
-
-It's sort of like the little computer hidden behind the dashboard in your car. It's not a supercomputer... quite the opposite. It costs a few dollars to buy a few dev boards on Amazon and deploy them as ECUs by flashing programs onto them. If you've done IoT with Arduino, ESP32, or STM32... congrats! You're an ECU programmer!
-
-ECUs are nowhere near as powerful or expensive as a smartphone, but they can be MUCH smaller and lighter, so they're great for speciatly tasks hidden in tight spaces. Custom-built processors with dedicated task lists... hardware AND firmware are built to do that task list and nothing more. You don't run a program from a list of programs. The whole ECU's operating system IS the program. It's a one-program device. That's why we say "firmware." To update or replace the latest build, you flash A.K.A. replace all the code running on the device.
-
+Provide a summarized ECU primer tailored to the Child Shield. Emphasize that this board is meant for ultra-lightweight, Ethernet-only nodes (wearables, handheld props, remote sensors) that either sip power from LBUS or carry their own USB‑C battery.
 </div>
 
 </details>
 
 <details>
-<summary><strong>LBUS is an ECU Network</strong></summary>
+<summary><strong>Child Shield Role in the LBUS Ecosystem</strong></summary>
 
 <div style="margin-left: 20px;">
-
-LBUS is the ECU you should start with for LBEAST-ready installations, and it can netowrk with copies of itself or any other custom ECU that communicates over ethernet, bluetooth, 433MHz RF, and/oror Wifi. It's powered by your choice of ESP32, Arduino, or STM32. LBUS serves as Union Station for all the data in any system you build from scratch. It enables you to deploy hydraulics, haptics, big servo motors that can spin customers upside down, etc. It let's you hide Child ECUs inside the chassis of a ride, in the clothing of immersive actors, in props, and/or in the decorated walls of an AR experience.
-
+Explain how the Child Shield can operate as:
+- A “micro parent” when only one Ethernet child device is required.
+- A pre-wired breakout that ships with finished props or costume pieces (power via USB‑C).
+- A remote Ethernet-only repeater that backhauls data to a full LBUS when PoE is toggled on.
+Document the rules for when to toggle PoE off (battery-powered mode) vs on (LBUS-powered mode), and reiterate that no CAN bus is present on this variant.
 </div>
 
 </details>
 
 <details>
-<summary><strong>Doesn't the LBE Industry already do things like this?</strong></summary>
+<summary><strong>Motivation / Modularity Advantage</strong></summary>
 
 <div style="margin-left: 20px;">
-
-Most VR and AR experiences are driven by local multiplayer servers built via game engines so that co-located players can see a shared experience while an employee monitors the state of the game loop. Occasionally, these LBE events have advanced integration with a variety of other systems, including lights, pro audio, communication with smartphones and tablets for extra control.
-
-However, it is rare to see a VR experience that includes theme-park attraction technology like large hydraulic actuators or embedded ECUs in costumes worn by immersive actors, in props, and in scenery. This is because the full palette of immersive technologies is complex and expensive. VR budgets in the 2020s generally prohibit us from "next-level"-ing VR experiences in most cases. It's not that we can't integrate the tech. It has just been TOO EXPENSIVE.
-
+Describe the cost/space savings of a single-port shield vs. an 8-port backplane. Document the target BOM (<$15 at scale) and the intended use cases (wearables, props, distributed IoT nodes).
 </div>
 
 </details>
 
 <details>
-<summary><strong>The LBUS Fixes That!</strong></summary>
+<summary><strong>Key Features (Child Shield)</strong></summary>
 
 <div style="margin-left: 20px;">
-
-LBUS is open-source. It's near free! And it's already fully built and running, ready for you to take and use and skin it with new assets and stand up a new LBE event in a fraction of the time!
-
-LBUS fully integrated with both major game engines (Unity/Unreal) in a ready-to-play local multiplayer server project that has a bunch of LBE templates ready-to-play. A single out-of-the-box LBUS has a bill-of-materials of less than $200 to build 5 copies. LBEAST is not a company. The PCB files are in the git repo, ready for you to send to any PCB manufacturer to order boards at a tiny fraction of the cost of using PLCs. A single LBUS unit supports 8 simultaneous child ECUs via Ethernet while providing galvanically isolated CAN-FD connectivity for high-current device control.
-
+- 1× RJ45 aux port (Ethernet only; same pin map as AUX1 on LBUS)
+- ESP32-S3 socket (same as Universal Shield) for firmware compatibility
+- Power flexibility: accepts 5 V from LBUS PoE rail or from local USB‑C input
+- No CAN transceiver, no LM2576 buck converter, no fan header
+- Reduced board outline sized for small enclosures (exact dimensions TBD)
 </div>
 
 </details>
 
 <details>
-<summary><strong>Just like JAMMA Resurrected the Arcade Industry in 1985</strong></summary>
+<summary><strong>High-Level Block Diagram</strong></summary>
 
 <div style="margin-left: 20px;">
-
-The whole industry was proprietary and in a big recession. Developers and venues needed a leg up. Arcade retailers were struggling with the cost of buying anew arcade box every time a new game came out.
-
-Suddenly, the JAMMA spec let them pop a new game card into the same box they already had. Games started launching 10X as fast as before. New content every day! Developers didn't have to worry about box manufacture anymore. They could just focus on the game.
-
-VR is VERY proprietary today. What if you want to build a hydraulic sim and make it feel like a theme park ride? Where do you even begin? You have to hire mechanical engineers and software engineers, and they'll build a complex sytem that works ONLY at your venue. Good luck getting 10 VR development teams to build something for that.
-
-The industry needs standard specs. If you already built a hydraulic rig to a known spec, and EVERY VR dev team knows that spec already, they can ALL starting building experiences for it. It's a chicken/egg challenge, and neither can happen first until we have a spec. That's why LBUS is critical for VR2.0.
-
-</div>
-
-</details>
-
-
-<details>
-<summary><strong>Modularity Advantage</strong></summary>
-
-<div style="margin-left: 20px;">
-
-Unlike traditional PLCs (Programmable Logic Controllers) that require proprietary hardware and software ecosystems, the Universal Shield embraces modularity through open-source microcontrollers. This approach offers several key advantages: **cost efficiency** (microcontrollers are significantly less expensive than PLCs), **flexibility** (choose the MCU platform that best fits your application), **rapid development** (standard development tools and languages), **scalability** (easily expand with additional child ECUs), and **future-proofing** (upgrade individual components without replacing entire systems). The Universal Shield's personality adapter system allows the same hardware to support multiple MCU platforms, while the 8-port Ethernet architecture enables distributed processing across a network of child ECUs, creating a flexible, scalable control architecture that adapts to project requirements.
-
+Add a simplified ASCII diagram once schematic capture begins. Use the Universal Shield diagram as a starting point, but replace the 8-port block with a single “Aux Port J1” call-out.
 </div>
 
 </details>
 
 <details>
-<summary><strong>Key Features</strong></summary>
+<summary><strong>Project Files</strong></summary>
 
 <div style="margin-left: 20px;">
+Planned filenames (to be created when schematic/PCB are captured):
+- `LBEAST_Child_Shield.kicad_pro`
+- `LBEAST_Child_Shield.kicad_sch`
+- `LBEAST_Child_Shield.kicad_pcb`
+- `LBEAST_Child_Shield.kicad_prl`
+Note: Until those exist, the folder contains a working copy of the Universal Shield project as a springboard.
+</div>
 
-- Multi-platform support: ESP32-S3 (native) &  STM32/Arduino (via personality adapters)
-- 8× CAT5 aux ports for child ECUs (Raspberry Pi, Jetson, ESP32, STM32, Arduino)
-- Isolated CAN-FD transceiver for high-current device control
-- 100 Mbps Ethernet connectivity
-- 12V/24V input with 5V power distribution (≥5A total capacity)
-- Designed for potting and long-term installations
+</details>
 
+<details>
+<summary><strong>Power Architecture</strong></summary>
+
+<div style="margin-left: 20px;">
+Document the simplified power path:
+- 5 V PoE from LBUS → DIP switch → diode → RJ45 pin 4
+- Optional USB‑C 5 V input (with reverse-current blocking so it doesn’t backfeed LBUS)
+- ESP32-S3 VIN receives 5 V directly (no onboard buck). Note USB‑C current limit assumptions.
+Clarify fuse strategy (likely deferred to parent LBUS) and diode usage.
+</div>
+
+</details>
+
+<details>
+<summary><strong>Component Set / BOM</strong></summary>
+
+<div style="margin-left: 20px;">
+Create a slimmed-down BOM once the schematic is finalized. Expected parts:
+- ESP32-S3 headers + UART debug header
+- LAN8720A PHY + 25 MHz crystal + magnetics
+- Single RJ45 (MTJ-883X1 or similar)
+- USB‑C connector (5 V only, no PD)
+- DIP switch + Schottky diode for PoE gating
+- Bypass caps, status LEDs, optional ESD protection
+</div>
+
+</details>
+
+<details>
+<summary><strong>Aux Port Pinout (Single-Port)</strong></summary>
+
+<div style="margin-left: 20px;">
+Reuse the T568B table from the Universal Shield but annotate that only J1 exists. Clarify how ADC/PWM mapping changes (likely reusing AUX1 nets).
+</div>
+
+</details>
+
+<details>
+<summary><strong>Enclosure / Mechanical Notes</strong></summary>
+
+<div style="margin-left: 20px;">
+- Planned enclosure: **Polycase TerraForm TF-1741TX** (ABS, tool-less lid) – [Product page](https://www.polycase.com/tf-1741tx). Fits a single RJ45, USB-C, and low-profile ESP32 module. Document mounting-hole pattern once the PCB outline is finalized.
+- Add measurements for the smaller board, recommended potting volumes, and any mounting-hole changes once the layout exists. Capture whether standoffs align with the TF-1741TX bosses or require adhesive-backed posts.
+</div>
+
+</details>
+
+<details>
+<summary><strong>Future Work</strong></summary>
+
+<div style="margin-left: 20px;">
+- Finalize schematic/layout
+- Generate dedicated 3D models and assembly drawings
+- Produce a minimal BOM + fabrication notes
+- Write firmware notes for "single-port parent" mode
+- **TP4056 Battery Integration** - Integrate TP4056 USB-C lithium battery charging module directly onto the Child Shield PCB with exposed battery connection pads (B+/B-). Enables portable, battery-powered operation for wearable props, handheld gadgets, and remote sensor clusters. Includes power path management (USB-C charging + battery power), boost converter for 5V output (ESP32 dev board compatibility), and battery protection circuitry. See v2.0 roadmap for implementation details.
 </div>
 
 </details>
@@ -429,6 +474,11 @@ Buck Converter (LM2576: 12V/24V → 5V, 60V max input)
 
 **Note:** This pinout is based on standard ESP32-S3-WROOM-1 dev board layouts. Verify against your specific board's datasheet. GPIO assignments for Aux Ports, Ethernet, and CAN match the mappings documented below.
 
+**Child Shield Breakout Policy:**  
+- Pins actively used by the Child Shield (EN, RMII/Ethernet set, UART0 TX/RX, power pins) are *not* routed to the breakout headers.  
+- Every other ESP32-S3 pad—including boot strap pins—is passed straight through 1:1 via dual 22-pin headers. Developers can reuse these GPIOs at their own discretion; add series resistors/pull-ups if you change the boot configuration.  
+- Currently used pins (consumed on-board): `GPIO3 (EN)`, `GPIO17`, `GPIO18`, `GPIO20`, `GPIO35`, `GPIO36`, `GPIO37`, `GPIO38`, `GPIO39`, `GPIO43`, `GPIO44`, plus power pins. All other GPIOs remain available on the breakout headers.
+
 ### ESP32-S3 Electrical Type Map (KiCad Pin Properties)
 
 **Use this map to set the "Electrical type" property for each pin in your ESP32-S3 symbol:**
@@ -613,9 +663,9 @@ Buck Converter (LM2576: 12V/24V → 5V, 60V max input)
 <div style="margin-left: 20px;">
 
 **Overcurrent Protection:**
-- ⚠️ **PENDING:** Universal Shield requires a **4A fuse** on the aux power bus (5V rail to all 8 aux ports) - See Next Steps (v2.0 Features)
-- Fuse will protect against excessive current draw from misbehaving devices or short circuits
-- Fuse rating should match maximum design capacity (4A total across 8 ports)
+- Universal Shield v1.0 includes a **4A fuse** on the aux power bus (5V rail to all 8 aux ports)
+- Fuse protects against excessive current draw from misbehaving devices or short circuits
+- Fuse rating matches maximum design capacity (4A total across 8 ports)
 
 **Per-Port Power Control (v0.1.3):** ✅ **AVAILABLE**
 - **DIP Switches:** One DIP switch per aux port (8 total) allows manual enable/disable of 5V power output on each port
@@ -835,21 +885,6 @@ The following features are planned for Universal Shield v2.0:
   - Compact installations with space constraints
   - Distributed systems where each parent ECU only needs to connect to one child device
 - **Naming:** "LBCS" (LBEAST Child Shield) - short name for documentation and references
-
-### 4A Fuse for Aux Power Bus
-- **Purpose:** Add overcurrent protection to the 5V aux power bus (protects all 8 aux ports)
-- **Specification:**
-  - **Fuse rating:** 4A (matches maximum design capacity: 8 ports × 0.5A per port)
-  - **Location:** On 5V rail between buck converter output and aux port distribution
-  - **Type:** Fast-blow or slow-blow fuse acceptable (fast-blow provides better protection)
-  - **Voltage rating:** 5V DC operation
-  - **Consideration:** Resettable fuse (polyfuse) recommended for easier maintenance in field installations
-- **Protection:** Prevents damage from:
-  - Excessive current draw from misbehaving devices
-  - Short circuits on aux port connections
-  - Overcurrent conditions that could damage PCB traces or buck converter
-- **Implementation:** Add fuse holder footprint to PCB layout, place fuse in series with 5V aux power bus
-- **Safety:** Fuse will trip if total current exceeds 4A, protecting PCB traces and buck converter from damage
 
 </div>
 

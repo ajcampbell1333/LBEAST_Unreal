@@ -7,6 +7,37 @@
 This plugin provides code and advice that may or may not run on systems your local and state officials may classify as  "amusement rides" or "theme park rides" which may fall under ASTM standards or other local regulations. LBEAST's author disclaims any and all liability for any use of this code, including for safety of guests or patrons, regulatory readiness, etc. Please review the local regulations in your area prior to executing this code in any public venue. You are responsible for compliance in your state.
 </div>
 
+</details>
+
+<details>
+<summary><strong>⚠️Industrial Equipment Modification Warning:</strong></summary>
+
+<div style="margin-left: 20px;">
+
+**Warranty Voiding:**
+- Using industrial equipment (scissor lifts, pallet stackers, forklifts, etc.) for VR motion platforms or entertainment applications **voids all manufacturer warranties**.
+- Manufacturers (Genie, Skyjack, Crown, Raymond, etc.) do not support or endorse using their equipment in this manner.
+- Modifications such as removing forks/rails, adding tilt chassis, bypassing safety interlocks, or integrating custom control systems are done **entirely at your own risk**.
+
+**Liability:**
+- You are solely responsible for:
+  - Safety of all operators and participants
+  - Structural integrity of all modifications
+  - Regulatory compliance (amusement ride/theme park standards)
+  - Insurance and liability coverage
+  - Proper installation, testing, and maintenance
+- Always consult qualified structural engineers, electrical engineers, and safety professionals before modifying industrial equipment.
+- Follow all local regulations for amusement ride/theme park equipment in your jurisdiction.
+
+**Safety Interlocks:**
+- Industrial equipment includes safety interlocks (operator presence, deadman switches, weight sensors, etc.) that may need to be satisfied or bypassed for automated control.
+- Bypassing safety interlocks creates significant safety risks and may violate regulations.
+- Always maintain redundant safety systems (E-Stop, limit switches, software limits) when modifying industrial equipment.
+
+**The author of LBEAST disclaims any and all liability for modifications to industrial equipment, warranty voiding, safety incidents, regulatory violations, or any other consequences of using industrial equipment in unintended applications.**
+
+</div>
+
 </details><br>
 
 ## Overview

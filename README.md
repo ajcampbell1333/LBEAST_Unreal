@@ -3152,7 +3152,7 @@ LBEAST requires reliable network communication between game engine servers, ECUs
 
 <div style="margin-left: 20px;">
 
-It is the LBEAST author's opinion that microcontrollers are generally a fine alternative to PLCs in most cases for XR LBE. It may be that an extremely permanent attraction (a roller coaster or other large-scale ride) may benefit from PLCs ahead of microcontrollers as PLCs typically come with certified 100%-uptime guaranteed by reliable and well-regulated corporate entities. However, LBEAST does not integrate PLCs since each PLC provider typically operates in its own closed-hardware ecosystem. That said, any team that requires PLC design can still integrate with LBEAST templates. They'll just need to code their own embedded system interface rather than using LBEAST's provided Embedded Systems API.
+Microcontrollers are generally a fine alternative to PLCs in most cases for XR LBE. An extremely permanent attraction (a roller coaster or other large-scale ride) may benefit from PLCs ahead of microcontrollers since PLCs typically come with certified 100%-uptime guaranteed by reliable and well-regulated corporate entities. However, LBEAST does not integrate PLCs since each PLC provider typically operates in its own closed-hardware ecosystem. That said, any team that requires PLC design can still integrate with LBEAST templates. They'll just need to code their own embedded system interface rather than using LBEAST's provided Embedded Systems API.
 
 </div>
 
@@ -3174,7 +3174,9 @@ The open-source community has been ascendant for decades in software, but is on 
 
 <div style="margin-left: 20px;">
 
-Locking into a given PLC provider's brand generally means adopting all the associated hardware and wiring infrastructure that comes part-and-parcel. PLC choice ossifies infrastructure from Day-1, making updates to a given attraction in the fast-paced landscape of XR LBE quite difficult. LBEAST targets rapid pop-up capability for experiences in new and changing spaces. PLCs discourage modularity and flexibility. They're perfect for factories where the same, simple ops must occur uninterrupted 24-7 for decades. Microcontrollers, on the other hand (ESP32, STM32, Pi, Jetson, etc.) can be extremely reliable (though not quite as much-so as PLCs) as long as embedded systems are well-designed with care to protect against EMF and heat, and they offer excellent flexibility to deploy similar hardware for both prototyping and production.
+Locking into a given PLC provider's brand generally means adopting all the associated hardware and wiring infrastructure that comes part-and-parcel. PLC choice ossifies infrastructure from Day-1, creating show-stoppers for certain attractions in the fast-paced landscape of XR LBE. 
+
+LBEAST targets rapid pop-up capability for experiences in new and changing spaces. PLCs discourage modularity and flexibility. They're intended as permanent fixtures connected to grid infrastructure, perfect for factories where the same ops must execute uninterrupted 24-7 for decades. Microcontrollers, on the other hand (ESP32, STM32, Pi, Jetson, etc.) can be extremely reliable on smaller timescales (1-36 months) as long as embedded systems are well-designed with care to protect against EMI and heat. They offer excellent flexibility to deploy nearly identical hardware for both prototyping and production.
 
 </div>
 
@@ -3185,7 +3187,9 @@ Locking into a given PLC provider's brand generally means adopting all the assoc
 
 <div style="margin-left: 20px;">
 
-For trade show experiences running for a few days at most, prototype PCB shields tend to satisfy all requirements as long as glue or heat-safe tape is applied to show-approved socket connectors that might shake loose under vibration. When using Kapton tape, multiple full wraps are ideal. For longer production runs (semi-permanent installations showing the same experience for weeks or months), LBEAST provides example firmware PCBs in both socket-mount and through-hole mount form. For long-term production, LBEAST's author recommends developers produce several redundant copies of show-ready through-hole mounted versions of final boards. Off-the-shelf microcontroller modules can be reliably soldered to shields with confidence the system will last for years if well-tested for heat dissipation and interference protection.
+For trade show experiences running for a few days at most, prototype PCB shields tend to satisfy all requirements as long as glue or heat-safe tape is applied to show-approved socket connectors that might shake loose under vibration. When using Kapton tape, multiple full wraps are ideal. To serve a variety of production lengths (pop-ups to semi-permanent installations showing the same experience for weeks or months), LBEAST provides example firmware PCBs in both socket-mount and through-hole mount form. 
+
+For long-term production, LBEAST's author recommends developers produce several redundant copies of show-ready through-hole mounted versions of final boards. Off-the-shelf microcontroller modules can be reliably soldered to shields with confidence the system will last for years if well-tested for heat dissipation and interference protection. Each shield must meet FCC compliance, but LBEAST has identified just two open-source shield designs that should cover more than 90% of custom PCB production already.
 
 </div>
 
@@ -3196,7 +3200,7 @@ For trade show experiences running for a few days at most, prototype PCB shields
 
 <div style="margin-left: 20px;">
 
-Given enough time and vibration, socket-mount shields are likely to shake loose even when glued. Full wraps of Kapton tape are more reliable, but still not considered "safe" for long runs. Solder-mounted equivalents give a small-batch run of custom PCBs a much longer shelf life, arguably similar to final PCB design, just slightly bulkier. As soon as a firmware build is locked for show, a handful of copies should be solder-mounted.
+Given enough time and vibration, socket-mount shields are likely to shake loose even when glued. Full wraps of Kapton tape are more reliable, but still not considered "safe" for long runs. Solder-mounted equivalents give a small-batch run of custom PCBs a much longer shelf life, arguably similar to final PCB design, just slightly bulkier. As soon as a firmware build is locked for show, a handful of copies per deployment should be solder-mounted.
 
 </div>
 
@@ -3210,10 +3214,10 @@ Given enough time and vibration, socket-mount shields are likely to shake loose 
 Even with long-term shows, LBEAST expects developers and venues will need to coordinate regularly for occasional OTA firmware flashing, board replacements, etc. Some developers may desire to upgrade from shields to fully custom PCBs simply because that is the gold standard practice in PCB product design. Firmware engineering staff may want to upgrade simply because it seems more professional. LBEAST's author cautions against this, though it may seem counterintuitive.
 
 <ol>
-<li>PCB product manufacturers typically encourage firmware engineers to miniaturize all designs as much as possible due to the smartphone era proving immense cost savings at mass-production scale, but this does not apply to XR LBE.
+<li>PCB product manufacturers typically encourage firmware engineers to miniaturize all designs as much as possible due to the smartphone era proving immense cost savings at mass-production scale, but this usually does not apply to XR LBE.
     <ol type="a">
-    <li>LBE venues generally have an abundances of space in which to stow an embedded PCB that is a little bit more bulky than it could be with millions more spent on R&D.</li>
-    <li>XR LBE will generally always be extremely small-batch (dozens or hundreds of PCB copies, rarely 1000s). Without mass-unit scale, the cost savings from shrinking circuit boards is non-existent while potentially costing a production team hundreds of hours of unnecessary extra R&D.</li>
+    <li>LBE venues have an abundance of space in which to stow an embedded PCB that is a little bit more bulky than it could be with millions more spent on R&D. Since LBEAST Embedded Systems API adopts Espressif SoCs as default, all development teams will be hard-pressed to shrink a useful custom board smaller than the already open-source Pico-Click C3T project under typical LBE deadlines. The author of LBEAST recommends you stand on the shoulders of incredible devs in the open-source community to deploy faster.</li>
+    <li>XR LBE will generally always be extremely small-batch (dozens or hundreds of PCB copies, rarely 1000s). Without mass-unit scale, the cost savings from shrinking circuit boards is non-existent while potentially costing a production team hundreds of hours of extra R&D per board.</li>
     </ol>
 </li>
 <li>Regular maintenance, upgrade-flashing, and emergency replacements become complex and costly if developers upgrade from shields to fully custom PCBs.</li>
@@ -3228,7 +3232,47 @@ Even with long-term shows, LBEAST expects developers and venues will need to coo
 
 <div style="margin-left: 20px;">
 
-In most cases, fully custom PCBs may be unnecessary for just about any XR LBE installation. In fact, conforming to default LBEAST shield design could mean venues with multiple play-spaces can keep white-label LBEAST shields and module copies on-hand as ultimate venue-wide backup-for-all-the-backups. Shield interop guarantees unlimited hot-swap capability. If all developer-provided backups run out, the venue can always flash more because they'll have spare LBEAST shields on-hand. Supporting common LBEAST default shields as delivery targets means greater flexibility for on-site Operations Technicians, which yields higher likelihood of customers never needing to wait for technical difficulties. Ops Techs don't necessarily need to know how to solder either. Since the LBEAST specs are open-source, service providers can pre-solder targeted ready-to-flash microcontroller modules to default shields and stock venues up as needed. On top of that, old hardware from last year's experience may be pulled from a closet and reused as backup for a new experience if both are built on the same shields. It's very similar to arcade venues that locked into the practice of stocking spare JAMMA-spec parts to interop with almost any arcade cabinet.
+In most cases, fully custom PCBs may be unnecessary for just about any XR LBE installation. In fact, conforming to default LBEAST shield design could mean venues with multiple play-spaces can keep white-label LBEAST shields and module copies on-hand as ultimate venue-wide backup-for-all-the-backups. 
+
+Shield interop guarantees unlimited hot-swap capability. If backups delivered by the developer run out, the venue can always flash more. They'll have spare LBEAST shields on-hand.
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>Right to Sell LBEAST Parts Online</strong></summary>
+
+<div style="margin-left: 20px;">
+
+An open-source manufacturer (or several) will eventually make default LBEAST shields available for purchase on Amazon and other retailers. The author of LBEAST has no intent to become the first (or second or third) manufacturer. He is likely very busy under contract building an LBEAST-ready project for a big brand or studio as you're reading this.
+
+In the meantime, you are free to directly manufacture LBEAST shields via typical prototype PCB delivery companies (JLCPCB, PCBWay, etc.). Doing so in any venue where you charge a product/service fee to customers likely requires extra FCC compliance since the LBEAST shield (LBUS) becomes a product which you've manufactured for public consumption in that context. That burden goes away once a first manufacturer goes through that compliance process and begins reselling the boards online. You are allowed to purchase and use boards provided by an FCC-compliant retailer. This gives the first manufacturer of LBEAST a healthy lion's share of the advantage on demand for LBEAST-ready PCBs.
+
+If you're a venue or development team, you may be able to show off an LBEAST project at trade shows if there is no paywall to try the LBE, but you must review regulations in your locale to confirm this. As soon as customers are paying you for either the LBEAST Shield PCBs or for an experience in which the PCBs are used in the background, the FCC assumes YOU are the manufacturer of the PCBs unless you bought them from a retailer who complies with FCC's EMC requirements.
+
+LBEAST's author is not an expert on FCC compliance. He disclaims any liability from your failure to comply with any regulatory body during use of LBEAST. However, his best research on local U.S. regulatory requirements suggests compliance via the FCC's SDoC process would cost a given company $5-10K through a few weeks of prototyping and testing, a one-time compliance process that lasts 5 years once approved. 
+
+**What FCC compliance looks like for a given venue/dev team:** 
+
+An LBE venue or dev team would hire a firmware engineer on contract to run their LBEAST shield prototypes from JLCPCB or PCBWay or any other OEM supplier through pre-compliance testing, then bring the tested boards to a local certified FCC testing facility. Once the board passes, the FCC would grant the company the right to file a Supplier's Declaration of Compliance (SDoC) for that version of that PCB.
+
+Thereafter, that company would theoretically have legal right to re-use their SDoC filing for all their LBE installations for all their locations in the United States for the next five years. They would also theoretically have right to resell their compliance-tested LBEAST shields online. If an LBE dev studio/VFX studio/game studio is the one who files for compliance, they could achieve the ability to offload this compliance responsibility for all of their venue partners, a huge competitive advantage if several venues want to try LBEAST early on.
+
+Regulators in other countries may have differing processes. Each party interested in LBEAST should research what compliance means locally for you. A venue in the U.S. who achieves SDoC could resell spare LBEAST shields to recoup the cost of compliance R&D and also turn profit. There are no royalties involved when manufacturing LBEAST parts. All profit is yours if you achieve legal right to resell.
+
+The first few venues/developers to use LBEAST will have the option to become manufacturers for all others since they'll need to leap the compliance hurdle anyway. EVERY venue and developer will have option to resell, but the earliest participants are likely to absorb a majority of the demand on Amazon, since they will be first to achieve compliance and earn right to resell.
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>The Value of Hardware Interoperability</strong></summary>
+
+<div style="margin-left: 20px;">
+
+Supporting common LBEAST default shields as delivery targets means greater flexibility for on-site Operations Technicians, which yields higher likelihood of customers never needing to wait for technical difficulties. Ops Techs don't necessarily need to know how to solder. Manufacturers can varieties of ready-to-flash modules with shields and microcontrollers pre-soldered. Old hardware from last year's experience may be pulled from a closet and reused as backup for a new experience when both are built on the same shields. It's very similar to arcade venues in the mid-80s. They sped up the industry's productivity by multiple factors by stocking spare JAMMA-spec parts to interop with almost any arcade cabinet. We could do the same in the VR Arcade Era of the 21st Century!
 
 </div>
 
@@ -3262,7 +3306,7 @@ For any experience running one year or longer, LBEAST's author recommends consid
 
 <img src="Source/images/LBUS_case.png" width="100%">
 
-LBUS (the LBEAST Universal Shield) is the suggested motherboard for all small, hidden wireless systems in an LBEAST project. It can host ESP32, STM32, or Arduino as its core driver. It supports CAN for driving high-current devices (hydraulics, big servo motors, etc.), and Ethernet (with optional power). 
+LBUS (the LBEAST Universal Shield) is the suggested motherboard for all small, hidden wireless systems in an LBEAST project. It can host ESP32, STM32, or Arduino as its core driver. It supports CAN for driving high-current devices (hydraulics, big servo motors, etc.) and Ethernet (with optional power). 
 
 <img src="Source/images/LBUS-alpha-schematic.png" width="100%">
 
@@ -3327,7 +3371,7 @@ For this and  many other reasons, LBEAST favors ESP32 by default. It is not as s
 * Bluetooth and WiFi plug-n-play onboard with no extra attention needed
 * stupidly large numbers of ADCs and PWMs available for custom module breakout
 
-Espressif is the clear Goldilocks pick, but LBEAST also seeks not to lock anyone into an unfamiliar platform. ESP is easy because "if it runs on Arduino, it probably runs on ESP also." But the shield is "universal" because it is built for ESP first jsut becuase we had to start somewhere. With personality adapters, we aim to provide access to any platform of choice.  That includes rare situations where it makes sense to bring in the big guns like Pi or Nano. Since LBUS is stacked with ethernet ports, it can take a back seat at will to any of the SBCs, though its primary purpose is to act as the motherboard of all the embedded hardware in a given installation in most cases. LBUS can even network with multiple copies of itself.
+Espressif is the clear Goldilocks MVP, but LBEAST also seeks not to lock anyone into an unfamiliar platform. ESP is easy because "if it runs on Arduino, it probably runs on ESP also." But the shield is "universal" because it is built for ESP first just becuase we had to start somewhere. With personality adapters, we aim to provide access to any platform of choice.  That includes rare situations where it makes sense to bring in the big guns like Pi or Nano. Since LBUS is stacked with ethernet ports, it can take a back seat at will to any of the SBCs, though its primary purpose is to act as the motherboard of all the embedded hardware in a given installation in most cases. LBUS can even network with multiple copies of itself.
 </div>
 </details>
 
@@ -3336,8 +3380,7 @@ Espressif is the clear Goldilocks pick, but LBEAST also seeks not to lock anyone
 
 <div style="margin-left: 20px;">
 
-
-There may be rare scenarios for which you need the big guns. For instance, if you need an OS or interface onboard a tiny device for quick debugging/config inside the chassis of a hydraulic system, but maybe you don't want a full-blown PC/smartphone/tablet dedicated to such a small task, Raspberry Pi is a great pick. Pi can plug into any aux port on the Universal Shield and act as a child to LBUS, or the other way around. Likewise, if you need high-end graphics or AI model training/inference in a tiny custom mobile package, Jetson Nano can use the aux port on the Universal Shield and become a child to LBUS just as easily.
+There may be rare scenarios for which you need the big guns. For instance, if you need an OS or interface onboard a tiny device for quick debugging/config inside the chassis of a hydraulic system, but maybe you don't want a full-blown PC/smartphone/tablet dedicated to such a small task, Raspberry Pi is a great pick. Pi can plug into any aux port on the Universal Shield and act as a child to LBUS, or the other way around. Likewise, if you need high-end graphics or AI model training/inference in a tiny custom mobile package, Jetson Nano can use an LBUS aux port and become a child to LBUS (or vice versa) just as easily. The goal for LBEAST is to make ALL development platforms compatible if possible.
 
 </div>
 
@@ -3365,12 +3408,17 @@ LBUS has togglable power output capability on every one of its 8 ports individua
    - Toggle PoE off for these devices to minimize RF interference
 
 4. **LBUS Aux Port J1 connects to another LBUS**
-   - If one LBUS powers the other, keep the total powered devices across both under eight
+   - LBUS units have protective circuitry that allow them to send power, not receive it. This means each networked LBUS must have its own dedicated power supply.
+   - LBUS is rated to deliver 500mA per port over PoE, 4A max total. All 8 ports can support simultaneous power-hungry ESP32s at full-boar in a WLAN at peak IO. LBUS may get warm in this maxed-out configuration. The optional cooling fan is recommended any time two or more ports are in continuous use.
    - If more than eight devices are plugged in and using PoE, each LBUS should have a dedicated power supply
 
-Since LBUS has no control over whether a given device conforms to PoE at 5 volts on pin 4, any connected device should toggle PoE off by default and supply its own power unless you have verified its compatibility. LBUS confirms only ESP, STM, and Arduino as PoE-compatible out-of-the-box via the Child Shield. Note that LBUS generally cannot be powered by its child ports unless they are also an LBUS or a Child Shield. There may be exceptions if the device is known to output power on pin 4. 
+Since LBUS has no control over whether a given device conforms to PoE at 5 volts on pin 4, any connected device should toggle PoE off by default and supply its own power unless you have verified its compatibility. LBUS confirms only ESP, STM, and Arduino as PoE-compatible out-of-the-box via the Child Shield. 
 
-If you choose to deploy acustom microcontroller in your network alongside LBUS, you can start with and modify any PCB template in LBEAST to deploy a PoE-compatible device that also includes your custom functionality.
+**NOTE:** LBUS cannot be powered by its child ports.
+
+If you choose to deploy any custom microcontroller in your LBE network alongside LBUS, it is highly recommended that you consider modifying the Child Shield template if you want rapid deployment of a PoE-compatible device that can also include your custom functionality.
+
+**NOTE:** Each mod you make to a PCB requires a separate compliance process. You are responsible for regulatory compliance for all customization.
 
 
 </div>
@@ -3419,9 +3467,9 @@ For any given manufacturer, achieving compliance typically costs $5-10k before t
 
 Currently, no one.
 
-The author of LBEAST has no plans to become a primary manufacturer of LBUS. He is a Tech Lead with a decade of experience deploying LBE to major trade shows. If he isn't booked on a contract deploying an LBEAST project for someone else, he may be available to help you with yours. He will do his best to help any community member navigate the murky compliance waters in the early days of LBEAST as time allows.
+The author of LBEAST has no plans to become a primary manufacturer of LBUS. He is a Tech Lead with a decade of experience deploying LBE to major trade shows. If he isn't booked on a contract deploying an LBEAST project for someone else, he may be available to help you with yours. He will do his best to help any community member navigate the murky compliance waters in the early days of LBEAST as time allows, though he disclaims any liability due to non-compliance.
 
-Since LBUS is an open-source design, any community member or company can jump in and profit by providing FCC-compliant hardware for sale to the community. In lieu of a manufacturer doing so, each venue would be responsible for compliance individually. If you're showing an LBE at a trade show and not offering it for sale, you may be exempt from being considered a manufacturer. Consult the FCC. If you are selling the experience (including LBUS PCBs you manufactured directly) at a trade show or in any B2B or B2C capacity, you are required to comply via SDoc. The first seller into U.S. commerce must be certified to ensure the board does not emit harmful radio frequencies.
+Since LBUS is an open-source design, any community member or company can jump in and profit by providing FCC-compliant hardware for sale to the community. In lieu of a manufacturer doing so, each venue would be responsible for compliance individually. If you're showing an LBE at a trade show and not offering it for sale, you may be exempt from being considered a manufacturer. Consult the FCC. If you are selling the experience (including LBUS PCBs you manufactured directly) at a trade show or in any B2B or B2C capacity, you are required to comply via SDoC. The first seller into U.S. commerce must be certified to ensure the board does not emit harmful radio frequencies.
 
 Note that, so far, LBUS has been through zero pre-compliance testing, and the author of LBEAST is not a trained firmware engineer. He is a senior software engineer who has extensive hobbyist experience in firmware design. He is not personally qualified to complete pre-compliance checks. If a senior firmware engineer in the community can provide assistance on this front, it is greatly appreciated.
 
@@ -3446,7 +3494,9 @@ If you prefer, you can offload ICs or sensors or anything from the motherboard t
 
 <div style="margin-left: 20px;">
 
-If you need a non-smart peripheral to expand its functions beyond a simple sensor or interface, you can design any embedded PCB and connect it to the motherboard wirelessly or over ethernet. LBEAST module templates can get you started. They have ethernet already mapped for data, power, parent PWM, and parent ADC. Your smart signals will automatically map to the parent according to the CAT-5 Pin Layout.
+<img src="Source/images/child-shield.png" width="100%">
+
+If you need a peripheral to expand its functions beyond a simple sensor or interface, you can design any embedded PCB and connect it to the motherboard wirelessly or over ethernet. LBEAST module templates can get you started. See the Child Shield. It has ethernet already mapped for data, power, parent PWM, and parent ADC. Your smart signals will automatically map to the parent according to the CAT-5 Pin Layout.
 
 </div>
 
@@ -3465,6 +3515,18 @@ Pin 5: +3V3 (if you need the motherboard to power your device)
 Pin 6: Ethernet TX-  
 Pin 7: ADC from the Motherboard  
 Pin 8: PWM from the Motherboard
+
+**Final Pin 7 / Pin 8 Mapping (ESP32-S3 on LBUS)**  
+| Aux Port | Pin 7 (ADC) | Pin 8 (PWM) |
+|----------|-------------|-------------|
+| J1 | GPIO10 (Pin 16) | GPIO14 (Pin 20) |
+| J2 | GPIO9 (Pin 15) | GPIO13 (Pin 19) |
+| J3 | GPIO5 (Pin 5) | GPIO12 (Pin 18) |
+| J4 | GPIO4 (Pin 4) | GPIO11 (Pin 17) |
+| J5 | GPIO8 (Pin 12) | GPIO16 (Pin 9) |
+| J6 | GPIO1 (Pin 26) | GPIO21 (Pin 40) |
+| J7 | GPIO7 (Pin 7) | GPIO2 (Pin 27) |
+| J8 | GPIO6 (Pin 6) | GPIO15 (Pin 8) |
 
 </div>
 
@@ -3582,16 +3644,13 @@ Some experiences may require best-in-class latency between the Universal Shield 
 
 > **📋 Hardware Specifications:** See **[FirmwareExamples/GunshipExperience/Gunship_Hardware_Specs.md](Packages/com.ajcampbell.lbeast/FirmwareExamples/GunshipExperience/Gunship_Hardware_Specs.md)** for complete hardware specifications including solenoid selection, PWM driver modules, thermal management, redundancy, and communication architecture.
 
-- [ ] **ESP32 Shield Design (Hardware)**
+- [x] **ESP32 Shield Design (Hardware)**
   - **Example Shield Designs**: Design example shields/breakout boards for ESP32 plus needed modules for both ECU types:
     - **GunshipExperience_ECU**: ESP32 + Ethernet PHY (LAN8720A) + actuator control interfaces + scissor lift control interfaces
     - **Gun_ECU**: ESP32 + Ethernet PHY (LAN8720A) + dual thumb button inputs + N× solenoid PWM driver interfaces + NTC thermistor ADC inputs
   - **Source Files**: Include PCB design source files in KiCAD format (`.kicad_pcb`, `.kicad_sch`) for maximum extensibility
     - **Note**: EasyEDA projects can be exported to KiCAD format for cross-tool compatibility
     - **Alternative**: Include source files in EasyEDA format if preferred, but provide KiCAD export
-  - **Manufacturing Files**: Include GERBER files (industry standard) for direct PCB manufacturing
-    - GERBER files are tool-agnostic and can be used with any PCB manufacturer (JLCPCB, PCBWay, OSH Park, etc.)
-    - Include drill files, pick-and-place files, and assembly drawings
   - **Documentation**: Include schematics (PDF), PCB layouts (PDF), BOM (CSV/Excel), and assembly instructions
   - **Purpose**: Provide reference designs for developers building custom hardware or adapting existing ESP32 boards
   - **File Structure**: Organize in `Hardware/Shields/` directory with subdirectories for each shield type
@@ -3663,20 +3722,6 @@ Some experiences may require best-in-class latency between the Universal Shield 
 </details>
 
 <details>
-<summary><strong>v1.1 (Future)</strong></summary>
-
-<div style="margin-left: 20px;">
-
-### 🔄 In Progress (v1.1)
-- [ ] Meta Quest 3 native integration
-- [ ] Sample Arduino/ESP32 firmware
-- [ ] WebSocket alternative for live actor streaming
-
-</div>
-
-</details>
-
-<details>
 <summary><strong>v2.0 (Future)</strong></summary>
 
 <div style="margin-left: 20px;">
@@ -3689,7 +3734,9 @@ Some experiences may require best-in-class latency between the Universal Shield 
 - [x] **Universal Shield DIP Switch Power Toggling** - ✅ **COMPLETE (v0.1.3)** - DIP switches (one per aux port) to manually enable/disable 5V power output on each aux port, plus Schottky diodes (MBR745) for backfeed protection. Prevents parallel power supply issues when connecting LBUS-to-LBUS and enables flexible power management. Now available on Universal Shield. See `FirmwareExamples/PCBs/LBEAST_Universal_Shield/README.md` for implementation details.
 - [ ] **Universal Shield Personality Adapters** - Design and manufacture adapter PCBs to enable Universal Shield support for ESP32-WROOM-32, Arduino Uno/Mega, and STM32 (Black Pill, Nucleo, etc.) MCU platforms. Adapters handle pin mapping, power regulation (Arduino), and level shifting (Arduino) to provide platform flexibility and cost optimization. See `FirmwareExamples/PCBs/LBEAST_Universal_Shield/README.md` for design specifications.
 - [ ] **Universal Shield Variants (Via vs. Header Mounting)** - Create three mounting variants of the Universal Shield: 1) Current via-mounted design (ESP32-S3 soldered directly), 2) 22-pin male headers variant (removable module), 3) 22-pin female headers variant (stackable configuration). Each variant maintains identical functionality but supports different installation requirements (permanent, removable, or stackable). See `FirmwareExamples/PCBs/LBEAST_Universal_Shield/README.md` for variant specifications.
+- [ ] **Universal Shield 4A Fuse for Aux Power Bus** - Add overcurrent protection (4A fuse) to the 5V aux power bus on Universal Shield. Fuse protects all 8 aux ports from excessive current draw, short circuits, and overcurrent conditions. Fuse rating matches maximum design capacity (4A total across 8 ports). Consider resettable fuse (polyfuse) for easier field maintenance. See `FirmwareExamples/PCBs/LBEAST_Universal_Shield/README.md` for implementation details.
 - [ ] **LBEAST Child Shield (LBCS)** - Create a simplified, cost-optimized variant of the Universal Shield (LBUS) with only 1 aux port instead of 8. Maintains full parent ECU functionality (ESP32-S3, Ethernet, CAN, ADC/PWM) but with reduced connector count, smaller PCB footprint, and lower BOM cost. Ideal for single child ECU installations, cost-sensitive projects, and compact installations. See `FirmwareExamples/PCBs/LBEAST_Universal_Shield/README.md` for design specifications.
+- [ ] **Child Shield TP4056 Battery Integration** - Integrate TP4056 USB-C lithium battery charging module directly onto the Child Shield PCB with exposed battery connection pads (B+/B-). Enables portable, battery-powered operation for wearable props, handheld gadgets, and remote sensor clusters. Includes power path management (USB-C charging + battery power), boost converter for 5V output (ESP32 dev board compatibility), battery protection circuitry, and charging status LEDs. See `FirmwareExamples/PCBs/LBEAST_Child_Shield/README.md` for implementation details.
 - [ ] **Pico-Click C3 Integration** - Integrate the open-source Pico-Click C3 project (ESP32-C3 based) as the default platform for hidden embedded wireless buttons in clothing and props. Replaces current ESP8266-based implementation with improved performance (160 MHz RISC-V), dual connectivity (WiFi + Bluetooth 5.0), lower power consumption (5 µA deep sleep), and enhanced memory (400 KB SRAM). See `FirmwareExamples/README.md` for current ESP8266 examples that will be migrated.
 - [ ] **GunshipExperience HOTAS Pilot Support** - Add optional 5th player (pilot) support to GunshipExperience with HOTAS controller integration. Enables pilot-controlled flight while 4 gunners operate weapons, expanding gameplay possibilities for multi-crew vehicle experiences.
 - [ ] **Multiplayer FPS Laser Tag/Gun Battle Experience** - Networked arena FPS template with wireless PoE blasters, impact-solenoid haptics, and scoreboard synchronization for team-based laser combat.
