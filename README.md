@@ -590,11 +590,22 @@ This includes:
 
 <blockquote>
 
-<img src="Source/images/lbeast_standard_layout_framing.png" alt="LBEAST Standard Layout Framing CAD Model" width="100%">
+<table>
+<tr>
+<td width="30%">
 
-The modular wall frame shown above is a procedurally generated CAD model created using OnShape FeatureScript. This model demonstrates the structural steel framing system used in the standard LBEAST pop-up layout, with configurable dimensions for rapid customization. The complete CAD models and FeatureScript source code are available in the [LBEAST OnShape repository](https://github.com/scifiuiguy/LBEAST_OnShape).
+The modular wall frame shown here is a procedurally generated CAD model created using OnShape FeatureScript. This model demonstrates the structural steel framing system used in the standard LBEAST pop-up layout, with configurable dimensions for rapid customization. The complete CAD models and FeatureScript source code are available in the [LBEAST OnShape repository](https://github.com/scifiuiguy/LBEAST_OnShape).
 
 The standard installation uses a **modular wall facade system** for rapid setup and teardown:
+
+</td>
+<td width="70%">
+
+<img src="Source/images/lbeast_standard_layout_framing.png" alt="LBEAST Standard Layout Framing CAD Model" width="100%">
+
+</td>
+</tr>
+</table>
 
 #### Wall Components
 - **Panel Size:** 4' × 8' lightweight composite panels (e.g. ACM)
