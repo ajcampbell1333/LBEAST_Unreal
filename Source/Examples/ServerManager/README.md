@@ -284,5 +284,5 @@ Copyright (c) 2025 AJ Campbell. Licensed under the MIT License.
 
 ---
 
-**Need Help?** Open an issue at [github.com/ajcampbell1333/LBEAST_Unreal/issues](https://github.com/ajcampbell1333/LBEAST_Unreal/issues)
+**Need Help?** Open an issue at [github.com/scifiuiguy/LBEAST_Unreal/issues](https://github.com/scifiuiguy/LBEAST_Unreal/issues)
 
