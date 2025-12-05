@@ -586,6 +586,69 @@ This includes:
 </details>
 
 <details>
+<summary><strong>Author's Framing Recommendations</strong></summary>
+
+<blockquote>
+
+<table>
+<tr>
+<td width="30%">
+
+The author of LBEAST is a hobbyist TIG welder who has built many aluminum chassis frames. You can use the provided LBEAST OnShape procedural templates to quickly generate framing designs at dimensions you prefer, but LBEAST's author recommends you consider the following:
+
+- **LBEAST's author is not a certified mechanical engineer** (he's a software engineer)
+  - Author disclaims any liability in regard to use of any included CAD designs
+  - Included designs are only a starting point
+- **Minimum 1" square tube**
+  - Mild steel - best price
+  - Stainless steel - best strength and good corrosion resistance (most premium)
+  - 5051 aluminum w/ clear coat - best balance of strength, weldability, corrosion resistance, and price
+- **Use stainless steel hardware** for minimum galvanic corrosion
+  - LBEAST CAD templates default to rivnut joints configuration for rapid assembly/teardown
+  - LBEAST CAD templates contain teardown animation rigs
+    - Too many welds = hard to box and ship
+    - Too many bolts = time lost during assembly/teardown
+    - OnShape teardown animation rigs aim to provide a Goldilocks balance between the two
+  - Male/female rivnut pair config with flanged 1/4-20 Imperial or M6x1.0 Metric hex recommended
+    - Pairing rivnuts opens option to run a bolt through one frame piece or the other or both
+  - Rivnuts yield fastest assembly teardown with only 1 impact gun & 1 Imperial bit/1 Metric bit
+  - Rivnuts avoid need for washers, nuts, and other loose parts - 1 bolt per rivnut - nothing more
+  - **OPTIONAL:** eliminate loose bolts
+    - Cut an access port ortho to each bolt hole (opposite side of display face)
+    - Install double-capture nuts inside tube w/ an amount of play equal to drill depth
+    - Bolts become semi-permanently attached to the frame - no more loose parts
+  - Choose bolt shank length at 1.5X tube width e.g. 2 1" square tubes join flush w/ 1 1.5" flanged hex bolt
+  - **NOTE:** rivnut collar mates w/ a .375" or 10mm hole but opposing bolt flange needs a 0.26" or 6.6mm hole
+- **Minimum 0.625" wall thickness**
+  - Widely available and perfectly reliable @ 10ft high with no heavy loads on top
+  - Hire a qualified engineer to confirm loaded designs (marquees, jumbotrons, etc.)
+- **Minimum 6" wall depth**
+  - 1" tube x2 inner/outer
+  - 1" tube x2 inner/outer pocket door guide
+  - 2" pocket door
+- **Weld type recommendation** in order of high-to-low quality-for-price:
+  - Laser
+  - TIG
+  - MIG
+- **Welder should grind all welds clean** to ensure flush-mount at all joints
+- **Ground welds are more likely to fail** - torture test random pieces for proper penetration
+- **LBEAST OnShape CAD templates + hired welders** = MUCH cheaper than off-the-shelf branded solutions
+- **Framing is often outsourced** to live event companies who may prefer proprietary framing designs
+- **LBEAST CAD templates offer a leg-up** for any venue looking for a more integrated in-house solution
+- **Consult local officials** regarding regulatory compliance when using custom framing
+
+</td>
+<td width="70%">
+
+<img src="Source/images/lbeast_standard_layout_pocket_door_frame.png" alt="LBEAST Standard Layout Pocket Door Frame CAD Model" width="100%">
+
+</td>
+</tr>
+</table>
+
+</details>
+
+<details>
 <summary><strong>Modular Wall System</strong></summary>
 
 <blockquote>
